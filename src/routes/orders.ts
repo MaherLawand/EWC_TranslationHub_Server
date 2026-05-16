@@ -621,13 +621,11 @@ router.patch(
           ?.game
       ) {
         const assignedUsers =
-          updatedOrder.broadcast.game.assignedUsers.map(
-            (a) => a.user
-          )
+          updatedOrder.broadcast.game.assignedUsers.map((a: any) => a.user)
 
         const notifyUsers =
           assignedUsers.filter(
-            (u) =>
+            (u: any) =>
               u.position ===
                 "PRODUCER" ||
               u.position ===
@@ -637,8 +635,7 @@ router.patch(
         if (notifyUsers.length > 0) {
           await prisma.notification.createMany(
             {
-              data: notifyUsers.map(
-                (notifyUser) => ({
+              data: notifyUsers.map((notifyUser: any) => ({
                   title:
                     "Order Completed",
 
