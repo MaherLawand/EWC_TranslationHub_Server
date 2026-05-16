@@ -81,12 +81,6 @@ model Notification {
 
   createdAt DateTime @default(now())
 }
-enum NotificationType {
-  ORDER_COMPLETED
-  USER_CREATED
-  USER_UPDATED
-  GAME_ASSIGNED
-}
 
 /**
  * =========================
