@@ -5,7 +5,7 @@ import {
   UserPosition,
 } from "@prisma/client"
 
-import crypto from "crypto"
+import * as crypto from "node:crypto"
 import readline from "readline"
 
 const prisma = new PrismaClient()
