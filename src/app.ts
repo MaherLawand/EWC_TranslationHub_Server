@@ -2,6 +2,7 @@ import express from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser"
 import path from "path"
+
 import authRoutes from "./routes/auth.routes.js"
 import userRoutes from "./routes/user.routes.js"
 import orderRoutes from "./routes/orders.js"
@@ -28,9 +29,14 @@ app.use("/orders", orderRoutes)
 
 app.use("/games", gameRoutes)
 
-
-
-app.use("/game-logos", express.static(path.join(process.cwd(), "src/uploads/games")))
+app.use(
+  "/game-logos",
+  express.static(
+    path.resolve(
+      "src/uploads/games"
+    )
+  )
+)
 
 app.get("/", (_, res) => {
   res.send("API WORKING")
