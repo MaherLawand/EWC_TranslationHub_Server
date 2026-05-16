@@ -8,7 +8,7 @@ const logos = [
   {
     name: "Valorant",
     logo:
-      `${BASE_URL}/game-logos/Valorant.png`,
+      `${BASE_URL}/game-logos/ValorantNEW.png`,
   },
 
   {
