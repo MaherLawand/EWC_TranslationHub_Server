@@ -1,0 +1,266 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/**
+ * =========================
+ * USER SYSTEM
+ * =========================
+ */
+
+enum UserRole {
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+enum UserDepartment {
+  BROADCAST
+  MARKETING
+}
+
+enum UserPosition {
+  PRODUCER
+  POST_PRODUCTION_MANAGER
+  TRANSLATOR
+}
+
+/**
+ * =========================
+ * ORDERS
+ * =========================
+ */
+
+enum OrderType {
+  BROADCAST
+  MARKETING
+}
+
+enum OrderStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum DeliveryFormat {
+  TEXT
+  SRT
+  BURNED_IN
+}
+
+enum OrderPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum NotificationType {
+  ORDER_COMPLETED
+}
+
+model Notification {
+  id String @id @default(cuid())
+
+  title String
+  message String
+
+  type NotificationType
+
+  isRead Boolean @default(false)
+
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  orderId String?
+  order TranslationOrder? @relation(fields: [orderId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+enum NotificationType {
+  ORDER_COMPLETED
+  USER_CREATED
+  USER_UPDATED
+  GAME_ASSIGNED
+}
+
+/**
+ * =========================
+ * USER
+ * =========================
+ */
+
+model User {
+  id String @id @default(cuid())
+
+  name  String
+  email String @unique
+
+  password String?
+
+  role UserRole @default(VIEWER)
+
+  department UserDepartment?
+
+  position UserPosition?
+
+  assignedGames GameAssignment[]
+
+  isActive Boolean @default(true)
+
+  inviteToken  String?
+  inviteExpiry DateTime?
+
+  notifications Notification[]
+
+  completedOrders TranslationOrder[] @relation("CompletedOrders")
+
+  createdAt DateTime @default(now())
+
+  createdOrders TranslationOrder[] @relation("CreatedOrders")
+}
+
+/**
+ * =========================
+ * GAMES
+ * =========================
+ */
+
+model Game {
+  id String @id @default(cuid())
+
+  name String @unique
+
+  logo String?
+  
+  broadcasts BroadcastDetails[]
+
+  assignedUsers GameAssignment[]
+}
+
+model GameAssignment {
+  id String @id @default(cuid())
+
+  userId String
+  gameId String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  assignedAt DateTime @default(now())
+
+  @@unique([userId, gameId])
+}
+
+/**
+ * =========================
+ * TRANSLATION ORDER
+ * =========================
+ */
+
+model TranslationOrder {
+  id String @id @default(cuid())
+
+  type OrderType
+
+  title       String
+  description String?
+
+  status OrderStatus @default(PENDING)
+
+  priority OrderPriority @default(MEDIUM)
+
+  createdById String
+
+  createdBy User @relation("CreatedOrders", fields: [createdById], references: [id])
+
+  dateAdded DateTime @default(now())
+
+completedById String?
+
+completedBy User? @relation("CompletedOrders",fields: [completedById],references: [id])
+
+completedAt DateTime?
+
+notifications Notification[]
+  broadcast BroadcastDetails?
+
+  marketing MarketingDetails?
+}
+
+/**
+ * =========================
+ * BROADCAST DETAILS
+ * =========================
+ */
+
+model BroadcastDetails {
+  id String @id @default(cuid())
+
+  gameId String?
+
+  game Game? @relation(fields: [gameId], references: [id])
+
+  estimatedMinutes Int
+
+  sourceLanguage String[]
+
+  targetLanguages String[]
+
+  deliveryFormat DeliveryFormat
+
+  sourceFileLink String
+
+  deliveryDate DateTime
+
+  deadlineDate DateTime
+
+  orderId String @unique
+
+  order TranslationOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  deliveries TranslationDelivery[]
+}
+
+/**
+ * =========================
+ * MARKETING DETAILS
+ * =========================
+ */
+
+model MarketingDetails {
+  id String @id @default(cuid())
+
+  sourceFileLink String
+
+  deliveredLink String?
+
+  deliveryFormat DeliveryFormat
+
+  orderId String @unique
+
+  order TranslationOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+/**
+ * =========================
+ * DELIVERY LINKS
+ * =========================
+ */
+
+model TranslationDelivery {
+  id String @id @default(cuid())
+
+  language String
+
+  deliveryLink String?
+
+  broadcastId String
+
+  broadcast BroadcastDetails @relation(fields: [broadcastId], references: [id], onDelete: Cascade)
+}

@@ -1,0 +1,13 @@
+node_modules
+
+.env
+
+dist
+
+coverage
+
+/generated/prisma
+
+*.log
+
+.DS_Store
