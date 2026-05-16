@@ -13,8 +13,12 @@ export async function sendInviteEmail(
   email: string,
   token: string
 ) {
-  const inviteUrl =
-  `http://localhost:5173/setup-password?token=${token}`
+  const CLIENT_URL =
+  process.env.CLIENT_URL ||
+  "https://ewc-translation-hub.vercel.app"
+
+const inviteUrl =
+  `${CLIENT_URL}/setup-password?token=${token}`
 console.log(process.env.EMAIL_USER)
 console.log(process.env.EMAIL_PASS)
   await transporter.sendMail({

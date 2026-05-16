@@ -15,6 +15,11 @@ import { Resend } from "resend"
 const resend = new Resend(
   process.env.RESEND_API_KEY
 )
+const CLIENT_URL =
+
+  process.env.CLIENT_URL ||
+
+  "https://ewc-translation-hub.vercel.app"
 
 export async function setPassword(
   req: Request,
@@ -405,7 +410,8 @@ export async function createUser(
           1000 * 60 * 60 * 24
       )
 
-    const inviteLink = `http://localhost:5173/setup-password?token=${inviteToken}`
+   const inviteLink =
+  `${CLIENT_URL}/setup-password?token=${inviteToken}`
 
     console.log(
       "Invite link:",
@@ -657,7 +663,8 @@ export async function updateUser(
               24
         )
 
-      const inviteLink = `http://localhost:5173/setup-password?token=${inviteToken}`
+      const inviteLink =
+  `${CLIENT_URL}/setup-password?token=${inviteToken}`
 
       const emailResponse =
         await resend.emails.send({

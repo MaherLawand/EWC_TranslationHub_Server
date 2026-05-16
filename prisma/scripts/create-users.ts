@@ -69,9 +69,9 @@ async function main() {
     "\nUser created successfully\n"
   )
 
-  console.log(
-    `Setup link:\nhttp://localhost:5173/setup-password?token=${inviteToken}`
-  )
+ console.log(
+  `Setup link:\nhttps://ewc-translation-hub.vercel.app/setup-password?token=${inviteToken}`
+)
 
   console.log("\nCreated user:")
 

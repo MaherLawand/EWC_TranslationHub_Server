@@ -1,137 +1,159 @@
 import { prisma } from "../../src/lib/prisma.js"
 
+const BASE_URL =
+  process.env.API_URL ||
+  "https://ewc-translation-hub-server-production.up.railway.app"
+
 const logos = [
   {
     name: "Valorant",
     logo:
-      "http://localhost:4000/game-logos/Valorant.png",
+      `${BASE_URL}/game-logos/Valorant.png`,
   },
 
   {
     name: "Counter-Strike 2",
     logo:
-      "http://localhost:4000/game-logos/Cs2.png",
+      `${BASE_URL}/game-logos/Cs2.png`,
   },
 
   {
     name: "Dota 2",
     logo:
-      "http://localhost:4000/game-logos/Dota2.png",
+      `${BASE_URL}/game-logos/Dota2.png`,
   },
 
   {
     name: "League of Legends",
     logo:
-      "http://localhost:4000/game-logos/LeagueOfLegends.png",
+      `${BASE_URL}/game-logos/LeagueOfLegends.png`,
   },
 
   {
     name: "EA Sports FC 26",
     logo:
-      "http://localhost:4000/game-logos/EAFC26.png",
+      `${BASE_URL}/game-logos/EAFC26.png`,
   },
+
   {
     name: "Apex Legends",
     logo:
-      "http://localhost:4000/game-logos/ApexLegends.png",
+      `${BASE_URL}/game-logos/ApexLegends.png`,
   },
+
   {
     name: "Chess",
     logo:
-      "http://localhost:4000/game-logos/Chess.png",
+      `${BASE_URL}/game-logos/Chess.png`,
   },
+
   {
     name: "Call of Duty: Warzone Resurgence",
     logo:
-      "http://localhost:4000/game-logos/CodWarzone.png",
+      `${BASE_URL}/game-logos/CodWarzone.png`,
   },
+
   {
     name: "Call of Duty: Black Ops 7",
     logo:
-      "http://localhost:4000/game-logos/CodBlackOps7.png",
+      `${BASE_URL}/game-logos/CodBlackOps7.png`,
   },
+
   {
     name: "Crossfire",
     logo:
-      "http://localhost:4000/game-logos/CrossFire.jpg",
+      `${BASE_URL}/game-logos/CrossFire.png`,
   },
+
   {
     name: "Fatal Fury",
     logo:
-      "http://localhost:4000/game-logos/FatalFury.png",
+      `${BASE_URL}/game-logos/FatalFury.png`,
   },
+
   {
     name: "Fortnite",
     logo:
-      "http://localhost:4000/game-logos/Fortnite.png",
+      `${BASE_URL}/game-logos/Fortnite.png`,
   },
+
   {
     name: "Free Fire",
     logo:
-      "http://localhost:4000/game-logos/FreeFire.png",
+      `${BASE_URL}/game-logos/FreeFire.png`,
   },
+
   {
     name: "Honor of Kings",
     logo:
-      "http://localhost:4000/game-logos/HonorOfKings.png",
+      `${BASE_URL}/game-logos/HonorOfKings.png`,
   },
+
   {
     name: "Mobile Legends: Bang Bang",
     logo:
-      "http://localhost:4000/game-logos/MobileLegends.png",
+      `${BASE_URL}/game-logos/MobileLegends.png`,
   },
+
   {
     name: "Overwatch 2",
     logo:
-      "http://localhost:4000/game-logos/OverWatch2.png",
+      `${BASE_URL}/game-logos/OverWatch2.png`,
   },
+
   {
     name: "Pubg Battlegrounds",
     logo:
-      "http://localhost:4000/game-logos/Pubg.png",
+      `${BASE_URL}/game-logos/Pubg.png`,
   },
+
   {
     name: "Pubg Mobile",
     logo:
-      "http://localhost:4000/game-logos/PubgMobile.png",
+      `${BASE_URL}/game-logos/PubgMobile.png`,
   },
+
   {
     name: "R6 Siege",
     logo:
-      "http://localhost:4000/game-logos/R6SX.png",
+      `${BASE_URL}/game-logos/R6SX.png`,
   },
+
   {
     name: "Rocket League",
     logo:
-      "http://localhost:4000/game-logos/RocketLeague.jpg",
+      `${BASE_URL}/game-logos/RocketLeague.png`,
   },
+
   {
     name: "Street Fighter 6",
     logo:
-      "http://localhost:4000/game-logos/StreetFighter6.png",
+      `${BASE_URL}/game-logos/StreetFighter6.png`,
   },
+
   {
     name: "Teamfight Tactics",
     logo:
-      "http://localhost:4000/game-logos/TFT.png",
+      `${BASE_URL}/game-logos/TFT.png`,
   },
+
   {
     name: "Trackmania",
     logo:
-      "http://localhost:4000/game-logos/TrackMania.png",
+      `${BASE_URL}/game-logos/TrackMania.png`,
   },
+
   {
     name: "Tekken 8",
     logo:
-      "http://localhost:4000/game-logos/Tekken8.png",
+      `${BASE_URL}/game-logos/Tekken8.png`,
   },
+
   {
     name: "Mobile Legends Women's International",
     logo:
-      "http://localhost:4000/game-logos/MobileLegendsWomen.png",
+      `${BASE_URL}/game-logos/MobileLegendsWomen.png`,
   },
-
-  // continue all games...
 ]
 
 async function main() {
