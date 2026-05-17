@@ -232,7 +232,7 @@ model BroadcastDetails {
 model MarketingDetails {
   id String @id @default(cuid())
 
-  contentTitle String
+  contentTitle String?
 
   sourceLanguage String[]
 
