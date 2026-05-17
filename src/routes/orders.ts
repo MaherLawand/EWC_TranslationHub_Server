@@ -30,7 +30,11 @@ router.get("/", async (_, res) => {
             },
           },
 
-          marketing: true,
+          marketing: {
+  include: {
+    deliveries: true,
+  },
+},
         },
       })
 
@@ -62,6 +66,7 @@ router.post(
         estimatedMinutes,
         sourceLanguage,
         targetLanguages,
+        contentTitle,
         format,
         sourceFileLink,
         deliveryDate,
@@ -183,13 +188,32 @@ if (!canCreate) {
                   }
                 : {
                     marketing: {
-                      create: {
-                        sourceFileLink,
+  create: {
+    contentTitle,
+    sourceLanguage,
 
-                        deliveryFormat:
-                          format,
-                      },
-                    },
+    targetLanguages,
+
+    sourceFileLink,
+
+    deliveryFormat:
+      format,
+
+    deliveries: {
+      create:
+        targetLanguages.map(
+          (
+            language: string
+          ) => ({
+            language,
+
+            deliveryLink:
+              "",
+          })
+        ),
+    },
+  },
+},
                   }),
             },
 
@@ -204,7 +228,11 @@ if (!canCreate) {
                 },
               },
 
-              marketing: true,
+                        marketing: {
+  include: {
+    deliveries: true,
+  },
+},
             },
           }
         )
@@ -236,12 +264,11 @@ router.patch(
         estimatedMinutes,
         sourceLanguage,
         targetLanguages,
+        contentTitle,
         format,
         sourceFileLink,
         deliveryDate,
         deadline,
-
-        deliveredLink,
 
         deliveries,
       } = req.body
@@ -354,16 +381,19 @@ if (!canUpdate) {
                   },
                 }
               : {
-                  marketing: {
-                    update: {
-                      sourceFileLink,
+marketing: {
+  update: {
+    contentTitle,
+    sourceLanguage,
 
-                      deliveredLink,
+    targetLanguages,
 
-                      deliveryFormat:
-                        format,
-                    },
-                  },
+    sourceFileLink,
+
+    deliveryFormat:
+      format,
+  },
+},
                 }),
           },
         }
@@ -375,60 +405,118 @@ if (
   Array.isArray(deliveries)
 ) {
 
-  const broadcast =
-    await prisma.broadcastDetails.findFirst(
-      {
-        where: {
-          orderId: String(
-            req.params.id
-          ),
-        },
-      }
-    )
+  if (orderType === "BROADCAST") {
 
-  if (broadcast) {
+    const broadcast =
+      await prisma.broadcastDetails.findFirst(
+        {
+          where: {
+            orderId: String(
+              req.params.id
+            ),
+          },
+        }
+      )
 
-    await Promise.all(
-      deliveries.map(
-        (delivery: any) => {
+    if (broadcast) {
 
-          // UPDATE EXISTING
-          if (delivery.id) {
-            return prisma.translationDelivery.update(
+      await Promise.all(
+        deliveries.map(
+          (delivery: any) => {
+
+            if (delivery.id) {
+              return prisma.translationDelivery.update(
+                {
+                  where: {
+                    id: delivery.id,
+                  },
+
+                  data: {
+                    language:
+                      delivery.language,
+
+                    deliveryLink:
+                      delivery.deliveryLink,
+                  },
+                }
+              )
+            }
+
+            return prisma.translationDelivery.create(
               {
-                where: {
-                  id: delivery.id,
-                },
-
                 data: {
                   language:
                     delivery.language,
 
                   deliveryLink:
                     delivery.deliveryLink,
+
+                  broadcastId:
+                    broadcast.id,
                 },
               }
             )
           }
+        )
+      )
+    }
+  }
 
-          // CREATE NEW
-          return prisma.translationDelivery.create(
-            {
-              data: {
-                language:
-                  delivery.language,
+  if (orderType === "MARKETING") {
 
-                deliveryLink:
-                  delivery.deliveryLink,
-
-                broadcastId:
-                  broadcast.id,
-              },
-            }
-          )
+    const marketing =
+      await prisma.marketingDetails.findFirst(
+        {
+          where: {
+            orderId: String(
+              req.params.id
+            ),
+          },
         }
       )
-    )
+
+    if (marketing) {
+
+      await Promise.all(
+        deliveries.map(
+          (delivery: any) => {
+
+            if (delivery.id) {
+              return prisma.marketingDelivery.update(
+                {
+                  where: {
+                    id: delivery.id,
+                  },
+
+                  data: {
+                    language:
+                      delivery.language,
+
+                    deliveryLink:
+                      delivery.deliveryLink,
+                  },
+                }
+              )
+            }
+
+            return prisma.marketingDelivery.create(
+              {
+                data: {
+                  language:
+                    delivery.language,
+
+                  deliveryLink:
+                    delivery.deliveryLink,
+
+                  marketingId:
+                    marketing.id,
+                },
+              }
+            )
+          }
+        )
+      )
+    }
   }
 }
 
@@ -450,7 +538,11 @@ if (
                 },
               },
 
-              marketing: true,
+                       marketing: {
+  include: {
+    deliveries: true,
+  },
+},
             },
           }
         )
@@ -496,7 +588,9 @@ router.patch(
         user.position ===
           "PRODUCER" ||
         user.position ===
-          "POST_PRODUCTION_MANAGER"
+          "POST_PRODUCTION_MANAGER" ||
+        user.position ===
+          "TRANSLATOR"
 
       if (!canUpdate) {
         return res.status(403).json({
@@ -542,6 +636,12 @@ router.patch(
                       },
                     },
                   },
+                },
+              },
+
+              marketing: {
+                include: {
+                  deliveries: true,
                 },
               },
             },
@@ -609,33 +709,103 @@ router.patch(
                 },
               },
 
-              marketing: true,
+              marketing: {
+                include: {
+                  deliveries: true,
+                },
+              },
             },
           }
         )
 
       // CREATE NOTIFICATIONS
-      if (
-        status === "COMPLETED" &&
-        updatedOrder.broadcast
-          ?.game
-      ) {
-        const assignedUsers =
-          updatedOrder.broadcast.game.assignedUsers.map((a: any) => a.user)
+      if (status === "COMPLETED") {
 
-        const notifyUsers =
-          assignedUsers.filter(
-            (u: any) =>
-              u.position ===
-                "PRODUCER" ||
-              u.position ===
-                "POST_PRODUCTION_MANAGER"
+        let notifyUsers: any[] =
+          []
+
+        // BROADCAST
+        if (
+          updatedOrder.broadcast
+            ?.game
+        ) {
+
+          const assignedUsers =
+            updatedOrder.broadcast.game.assignedUsers.map(
+              (
+                a: any
+              ) => a.user
+            )
+
+          notifyUsers =
+            assignedUsers.filter(
+              (u: any) =>
+                u.position ===
+                  "PRODUCER" ||
+                u.position ===
+                  "POST_PRODUCTION_MANAGER"
+            )
+        }
+
+        // MARKETING
+        if (
+          updatedOrder.type ===
+          "MARKETING"
+        ) {
+
+          const admins =
+            await prisma.user.findMany(
+              {
+                where: {
+                  OR: [
+                    {
+                      role:
+                        "ADMIN",
+                    },
+
+                    {
+                      position:
+                        "PRODUCER",
+                    },
+
+                    {
+                      position:
+                        "POST_PRODUCTION_MANAGER",
+                    },
+                  ],
+                },
+              }
+            )
+
+          notifyUsers = admins
+        }
+
+        // REMOVE DUPLICATES
+        const uniqueUsers =
+          notifyUsers.filter(
+            (
+              notifyUser,
+              index,
+              self
+            ) =>
+              index ===
+              self.findIndex(
+                (u) =>
+                  u.id ===
+                  notifyUser.id
+              )
           )
 
-        if (notifyUsers.length > 0) {
+        if (
+          uniqueUsers.length > 0
+        ) {
+
           await prisma.notification.createMany(
             {
-              data: notifyUsers.map((notifyUser: any) => ({
+              data: uniqueUsers.map(
+                (
+                  notifyUser: any
+                ) => ({
                   title:
                     "Order Completed",
 

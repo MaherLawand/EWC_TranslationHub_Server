@@ -28,6 +28,8 @@ enum UserPosition {
   PRODUCER
   POST_PRODUCTION_MANAGER
   TRANSLATOR
+  VIEWER
+  EDITOR
 }
 
 /**
@@ -230,15 +232,21 @@ model BroadcastDetails {
 model MarketingDetails {
   id String @id @default(cuid())
 
-  sourceFileLink String
+  contentTitle String
 
-  deliveredLink String?
+  sourceLanguage String[]
+
+  targetLanguages String[]
+
+  sourceFileLink String
 
   deliveryFormat DeliveryFormat
 
   orderId String @unique
 
   order TranslationOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  deliveries MarketingDelivery[]
 }
 
 /**
@@ -257,4 +265,16 @@ model TranslationDelivery {
   broadcastId String
 
   broadcast BroadcastDetails @relation(fields: [broadcastId], references: [id], onDelete: Cascade)
+}
+
+model MarketingDelivery {
+  id String @id @default(cuid())
+
+  language String
+
+  deliveryLink String?
+
+  marketingId String
+
+  marketing MarketingDetails @relation(fields: [marketingId], references: [id], onDelete: Cascade)
 }
