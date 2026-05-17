@@ -70,7 +70,7 @@ async function main() {
   )
 
  console.log(
-  `Setup link:\nhttps://ewc-translation-hub.vercel.app/setup-password?token=${inviteToken}`
+  `Setup link:\nhttp://ewctranslations.org/setup-password?token=${inviteToken}`
 )
 
   console.log("\nCreated user:")

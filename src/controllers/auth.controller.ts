@@ -19,7 +19,7 @@ const CLIENT_URL =
 
   process.env.CLIENT_URL ||
 
-  "https://ewc-translation-hub.vercel.app"
+  "http://ewctranslations.org"
 
 export async function setPassword(
   req: Request,

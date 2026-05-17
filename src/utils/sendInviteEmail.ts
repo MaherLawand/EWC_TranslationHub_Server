@@ -15,7 +15,7 @@ export async function sendInviteEmail(
 ) {
   const CLIENT_URL =
   process.env.CLIENT_URL ||
-  "https://ewc-translation-hub.vercel.app"
+  "http://ewctranslations.org/"
 
 const inviteUrl =
   `${CLIENT_URL}/setup-password?token=${token}`

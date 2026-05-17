@@ -22,7 +22,7 @@ async function main() {
       // ADMINS (Mostly PPMs)
 
       {
-        name: "Maher Admin",
+        name: "Rouba Admin",
         email: "admin1@ewc.com",
         password: hashedPassword,
         role: UserRole.ADMIN,
@@ -34,7 +34,7 @@ async function main() {
       },
 
       {
-        name: "Sarah Admin",
+        name: "Maher Admin",
         email: "admin2@ewc.com",
         password: hashedPassword,
         role: UserRole.ADMIN,
@@ -48,7 +48,7 @@ async function main() {
       // EDITORS (Mostly Producers)
 
       {
-        name: "Omar Producer",
+        name: "Producer",
         email: "producer1@ewc.com",
         password: hashedPassword,
         role: UserRole.EDITOR,
@@ -60,45 +60,7 @@ async function main() {
       },
 
       {
-        name: "Layla Producer",
-        email: "producer2@ewc.com",
-        password: hashedPassword,
-        role: UserRole.EDITOR,
-        department:
-          UserDepartment.MARKETING,
-        position:
-          UserPosition.PRODUCER,
-        isActive: true,
-      },
-
-      {
-        name: "Elias Producer",
-        email: "producer3@ewc.com",
-        password: hashedPassword,
-        role: UserRole.EDITOR,
-        department:
-          UserDepartment.BROADCAST,
-        position:
-          UserPosition.PRODUCER,
-        isActive: true,
-      },
-
-      {
-        name: "Maya Producer",
-        email: "producer4@ewc.com",
-        password: hashedPassword,
-        role: UserRole.EDITOR,
-        department:
-          UserDepartment.MARKETING,
-        position:
-          UserPosition.PRODUCER,
-        isActive: true,
-      },
-
-      // VIEWERS (Mostly Translators)
-
-      {
-        name: "Ali Translator",
+        name: "Translator",
         email: "translator1@ewc.com",
         password: hashedPassword,
         role: UserRole.VIEWER,
@@ -108,34 +70,9 @@ async function main() {
           UserPosition.TRANSLATOR,
         isActive: true,
       },
-
       {
-        name: "Rita Translator",
+        name: "Translator",
         email: "translator2@ewc.com",
-        password: hashedPassword,
-        role: UserRole.VIEWER,
-        department:
-          UserDepartment.MARKETING,
-        position:
-          UserPosition.TRANSLATOR,
-        isActive: true,
-      },
-
-      {
-        name: "Karim Translator",
-        email: "translator3@ewc.com",
-        password: hashedPassword,
-        role: UserRole.VIEWER,
-        department:
-          UserDepartment.BROADCAST,
-        position:
-          UserPosition.TRANSLATOR,
-        isActive: true,
-      },
-
-      {
-        name: "Nadine Translator",
-        email: "translator4@ewc.com",
         password: hashedPassword,
         role: UserRole.VIEWER,
         department:
