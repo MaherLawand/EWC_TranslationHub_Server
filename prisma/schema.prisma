@@ -63,6 +63,7 @@ enum OrderPriority {
 
 enum NotificationType {
   ORDER_COMPLETED
+  STATUS_ADDED
 }
 
 model Notification {

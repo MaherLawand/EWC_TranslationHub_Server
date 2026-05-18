@@ -443,65 +443,167 @@ export async function createUser(
       "Sending email..."
     )
 
-   const emailResponse =
+const emailResponse =
   await resend.emails.send({
     from:
-  "EWC Translations <noreply@ewctranslations.org>",
+      "EWC Translations <noreply@ewctranslations.org>",
 
     to: email,
 
     subject:
-      "Set up your EWC account",
+      "Complete Your EWC Account Setup",
 
-   html: `
-  <div
+    html: `
+<div
+  style="
+    margin:0;
+    padding:0;
+    background:#0a0a0a;
+    font-family:Arial,sans-serif;
+  "
+>
+  <table
+    width="100%"
+    cellpadding="0"
+    cellspacing="0"
     style="
-      font-family: Arial, sans-serif;
-      padding: 40px;
-      background: #111;
-      color: white;
+      background:#0a0a0a;
+      padding:40px 20px;
     "
   >
-    <h1>
-      Welcome to EWC
-    </h1>
+    <tr>
+      <td align="center">
 
-    <p>
-      Your account has been created.
-    </p>
+        <table
+          width="100%"
+          cellpadding="0"
+          cellspacing="0"
+          style="
+            max-width:600px;
+            background:#111111;
+            border:1px solid #242424;
+            border-radius:24px;
+            overflow:hidden;
+          "
+        >
 
-    <p>
-      Click below to set your password:
-    </p>
+          <!-- HEADER -->
+          <tr>
+            <td
+              style="
+                padding:40px 40px 24px;
+                text-align:center;
+                border-bottom:1px solid #1f1f1f;
+              "
+            >
 
-    <a
-      href="${inviteLink}"
-      target="_blank"
-      style="
-        display: inline-block;
-        margin-top: 16px;
-        padding: 14px 24px;
-        background: white;
-        color: black;
-        text-decoration: none;
-        border-radius: 12px;
-        font-weight: bold;
-      "
-    >
-      Set Up Password
-    </a>
+              <p
+                style="
+                  margin:0;
+                  color:#D6B36A;
+                  font-size:12px;
+                  letter-spacing:4px;
+                  font-weight:700;
+                  text-transform:uppercase;
+                "
+              >
+                EWC TRANSLATIONS
+              </p>
 
-    <p
-      style="
-        margin-top: 24px;
-        color: #999;
-        font-size: 14px;
-      "
-    >
-      This invite expires in 24 hours.
-    </p>
-  </div>
-`
+              <h1
+                style="
+                  margin:18px 0 0;
+                  color:white;
+                  font-size:32px;
+                  line-height:1.1;
+                "
+              >
+                Welcome to EWC Translation Hub
+              </h1>
+
+            </td>
+          </tr>
+
+          <!-- BODY -->
+          <tr>
+            <td
+              style="
+                padding:40px;
+                color:#d4d4d4;
+                font-size:15px;
+                line-height:1.7;
+              "
+            >
+
+              <p style="margin-top:0;">
+                Your EWC Translations account has been successfully created.
+              </p>
+
+              <p>
+                To activate your account and create your password,
+                please click the button below.
+              </p>
+
+              <div
+                style="
+                  text-align:center;
+                  margin:40px 0;
+                "
+              >
+
+                <a
+                  href="${inviteLink}"
+                  target="_blank"
+                  style="
+                    display:inline-block;
+                    background:#D6B36A;
+                    color:#000000;
+                    text-decoration:none;
+                    padding:16px 28px;
+                    border-radius:14px;
+                    font-size:15px;
+                    font-weight:700;
+                  "
+                >
+                  Set Up Account
+                </a>
+
+              </div>
+
+              <p>
+                For security reasons, this invitation link will expire in 24 hours.
+              </p>
+
+              <p style="margin-bottom:0;">
+                If you did not expect this invitation,
+                you can safely ignore this email.
+              </p>
+
+            </td>
+          </tr>
+
+          <!-- FOOTER -->
+          <tr>
+            <td
+              style="
+                padding:24px 40px;
+                border-top:1px solid #1f1f1f;
+                color:#777777;
+                font-size:13px;
+                text-align:center;
+              "
+            >
+              © 2026 EWC Translations. All rights reserved.
+            </td>
+          </tr>
+
+        </table>
+
+      </td>
+    </tr>
+  </table>
+</div>
+`,
   })
 
 console.log(emailResponse)
@@ -690,44 +792,168 @@ export async function updateUser(
       const inviteLink =
   `${CLIENT_URL}/setup-password?token=${inviteToken}`
 
-      const emailResponse =
-        await resend.emails.send({
-          from:
-  "EWC Translations <noreply@ewctranslations.org>",
+     const emailResponse =
+  await resend.emails.send({
+    from:
+      "EWC Translations <noreply@ewctranslations.org>",
 
-          to: email,
+    to: email,
 
-          subject:
-            "Set up your EWC account",
+    subject:
+      "Complete Your EWC Account Setup",
 
-          html: `
-            <div style="font-family:sans-serif">
-              <h2>Welcome to EWC</h2>
+    html: `
+<div
+  style="
+    margin:0;
+    padding:0;
+    background:#0a0a0a;
+    font-family:Arial,sans-serif;
+  "
+>
+  <table
+    width="100%"
+    cellpadding="0"
+    cellspacing="0"
+    style="
+      background:#0a0a0a;
+      padding:40px 20px;
+    "
+  >
+    <tr>
+      <td align="center">
 
-              <p>
-                Click below to set your password:
-              </p>
+        <table
+          width="100%"
+          cellpadding="0"
+          cellspacing="0"
+          style="
+            max-width:600px;
+            background:#111111;
+            border:1px solid #242424;
+            border-radius:24px;
+            overflow:hidden;
+          "
+        >
 
-              <a
-                href="${inviteLink}"
+          <!-- HEADER -->
+          <tr>
+            <td
+              style="
+                padding:40px 40px 24px;
+                text-align:center;
+                border-bottom:1px solid #1f1f1f;
+              "
+            >
+
+              <p
                 style="
-                  display:inline-block;
-                  padding:12px 20px;
-                  background:black;
-                  color:white;
-                  text-decoration:none;
-                  border-radius:10px;
+                  margin:0;
+                  color:#D6B36A;
+                  font-size:12px;
+                  letter-spacing:4px;
+                  font-weight:700;
+                  text-transform:uppercase;
                 "
               >
-                Set Up Password
-              </a>
-
-              <p style="margin-top:20px">
-                This invite expires in 24 hours.
+                EWC TRANSLATIONS
               </p>
-            </div>
-          `,
-        })
+
+              <h1
+                style="
+                  margin:18px 0 0;
+                  color:white;
+                  font-size:32px;
+                  line-height:1.1;
+                "
+              >
+                Welcome to the Platform
+              </h1>
+
+            </td>
+          </tr>
+
+          <!-- BODY -->
+          <tr>
+            <td
+              style="
+                padding:40px;
+                color:#d4d4d4;
+                font-size:15px;
+                line-height:1.7;
+              "
+            >
+
+              <p style="margin-top:0;">
+                Your EWC Translations account has been successfully created.
+              </p>
+
+              <p>
+                To activate your account and create your password,
+                please click the button below.
+              </p>
+
+              <div
+                style="
+                  text-align:center;
+                  margin:40px 0;
+                "
+              >
+
+                <a
+                  href="${inviteLink}"
+                  target="_blank"
+                  style="
+                    display:inline-block;
+                    background:#D6B36A;
+                    color:#000000;
+                    text-decoration:none;
+                    padding:16px 28px;
+                    border-radius:14px;
+                    font-size:15px;
+                    font-weight:700;
+                  "
+                >
+                  Set Up Account
+                </a>
+
+              </div>
+
+              <p>
+                For security reasons, this invitation link will expire in 24 hours.
+              </p>
+
+              <p style="margin-bottom:0;">
+                If you did not expect this invitation,
+                you can safely ignore this email.
+              </p>
+
+            </td>
+          </tr>
+
+          <!-- FOOTER -->
+          <tr>
+            <td
+              style="
+                padding:24px 40px;
+                border-top:1px solid #1f1f1f;
+                color:#777777;
+                font-size:13px;
+                text-align:center;
+              "
+            >
+              © 2026 EWC Translations. All rights reserved.
+            </td>
+          </tr>
+
+        </table>
+
+      </td>
+    </tr>
+  </table>
+</div>
+`,
+  })
 
       if (
         emailResponse.error

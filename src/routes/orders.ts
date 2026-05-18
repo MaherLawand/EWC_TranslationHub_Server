@@ -9,6 +9,7 @@ import {
 import { requireProducer } from "../middleware/producer.middleware.js"
 import { requirePPM } from "../middleware/PPM.middleware.js"
 import { requireAdmin } from "../middleware/admin.middleware.js"
+import { notifyTranslatorsSourceReady } from "../controllers/notification.controller.js"
 
 const router = express.Router()
 
@@ -90,6 +91,7 @@ router.post(
         targetLanguages,
         contentTitle,
         format,
+        deliveries,
         sourceFileLink,
         deliveryDate,
         deadline,
@@ -155,18 +157,17 @@ if (!canCreate) {
                         targetLanguages,
 
                         deliveries: {
-                          create:
-                            targetLanguages.map(
-                              (
-                                language: string
-                              ) => ({
-                                language,
+  create:
+    deliveries?.map(
+      (delivery: any) => ({
+        language:
+          delivery.language,
 
-                                deliveryLink:
-                                  "",
-                              })
-                            ),
-                        },
+        deliveryLink:
+          delivery.deliveryLink || "",
+      })
+    ) || [],
+},
 
                         deliveryFormat:
                           format,
@@ -221,19 +222,18 @@ if (!canCreate) {
     deliveryFormat:
       format,
 
-    deliveries: {
-      create:
-        targetLanguages.map(
-          (
-            language: string
-          ) => ({
-            language,
+deliveries: {
+  create:
+    deliveries?.map(
+      (delivery: any) => ({
+        language:
+          delivery.language,
 
-            deliveryLink:
-              "",
-          })
-        ),
-    },
+        deliveryLink:
+          delivery.deliveryLink || "",
+      })
+    ) || [],
+},
   },
 },
                   }),
@@ -266,6 +266,13 @@ if (!canCreate) {
             },
           }
         )
+if (sourceFileLink) {
+
+  await notifyTranslatorsSourceReady(
+    order.id
+  )
+}
+
 
       res.json(order)
     } catch (error) {
@@ -341,6 +348,17 @@ if (!canUpdate) {
         type === "Marketing"
           ? "MARKETING"
           : "BROADCAST"
+
+const existingOrder =
+  await prisma.translationOrder.findUnique({
+    where: {
+      id: String(req.params.id),
+    },
+
+    include: {
+      broadcast: true,
+    },
+  })
 
       await prisma.translationOrder.update(
         {
@@ -438,6 +456,17 @@ marketing: {
           },
         }
       )
+
+      const sourceWasAdded =
+  !existingOrder?.broadcast?.sourceFileLink &&
+  sourceFileLink
+
+if (sourceWasAdded) {
+
+  await notifyTranslatorsSourceReady(
+    String(req.params.id)
+  )
+}
 
 /* UPDATE + CREATE DELIVERY LINKS */
 if (
