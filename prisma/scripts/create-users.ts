@@ -47,7 +47,8 @@ async function main() {
 
   const user = await prisma.user.create({
     data: {
-      name,
+      firstName: name.split(" ")[0] || "",
+      lastName: name.split(" ").slice(1).join(" ") || "",
       email,
 
       role: roleInput as UserRole,

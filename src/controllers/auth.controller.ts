@@ -144,12 +144,22 @@ console.log(user)
       message: "Login successful",
 
       user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        department: user.department,
-      },
+  id: user.id,
+
+  firstName: user.firstName,
+
+  lastName: user.lastName,
+
+  name: `${user.firstName} ${user.lastName}`,
+
+  email: user.email,
+
+  role: user.role,
+
+  department: user.department,
+
+  position: user.position,
+},
     })
   } catch (error) {
     console.error(error)
@@ -188,7 +198,8 @@ export async function getCurrentUser(
 
 select: {
   id: true,
-  name: true,
+  firstName: true,
+lastName: true,
   email: true,
   role: true,
   department: true,
@@ -241,7 +252,11 @@ select: {
       })
     }
 
-    return res.json(user)
+    return res.json({
+  ...user,
+
+  name: `${user.firstName} ${user.lastName}`,
+})
   } catch (error) {
     console.error(error)
 
@@ -289,7 +304,9 @@ if (
 
           id: true,
 
-          name: true,
+          firstName: true,
+
+lastName: true,
 
           email: true,
 
@@ -312,7 +329,13 @@ if (
 
       })
 
-    return res.json(users)
+    return res.json(
+  users.map((user) => ({
+    ...user,
+
+    name: `${user.firstName} ${user.lastName}`,
+  }))
+)
 
   } catch (error) {
 
@@ -363,18 +386,20 @@ export async function createUser(
       })
     }
 
-    const {
-      name,
-      email,
-      role,
-      department,
-      position,
-    } = req.body
+   const {
+  firstName,
+  lastName,
+  email,
+  role,
+  department,
+  position,
+} = req.body
 
     console.log(
       "Incoming user:",
       {
-        name,
+        firstName,
+        lastName,
         email,
         role,
         department,
@@ -519,7 +544,8 @@ if (emailResponse.error) {
 const user =
   await prisma.user.create({
     data: {
-      name,
+      firstName,
+lastName,
       email,
       role,
       department,
@@ -531,7 +557,8 @@ const user =
 
     select: {
       id: true,
-      name: true,
+      firstName: true,
+lastName: true,
       email: true,
       role: true,
       department: true,
@@ -551,7 +578,11 @@ const user =
       "========== SUCCESS =========="
     )
 
-    return res.json(user)
+    return res.json({
+  ...user,
+
+  name: `${user.firstName} ${user.lastName}`,
+})
 
   } catch (error) {
     console.error(
@@ -601,7 +632,8 @@ export async function updateUser(
     }
 
     const {
-      name,
+      firstName,
+      lastName,
       email,
       role,
       department,
@@ -734,7 +766,8 @@ export async function updateUser(
         },
 
         data: {
-          name,
+          firstName,
+          lastName,
           email,
           role,
           department,
@@ -745,7 +778,8 @@ export async function updateUser(
 
         select: {
           id: true,
-          name: true,
+          firstName: true,
+lastName: true,
           email: true,
           role: true,
           department: true,
@@ -755,9 +789,11 @@ export async function updateUser(
         },
       })
 
-    return res.json(
-      updatedUser
-    )
+    return res.json({
+  ...updatedUser,
+
+  name: `${updatedUser.firstName} ${updatedUser.lastName}`,
+})
 
   } catch (error) {
     console.error(error)

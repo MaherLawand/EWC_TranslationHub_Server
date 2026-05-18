@@ -68,7 +68,7 @@ enum NotificationType {
 model Notification {
   id String @id @default(cuid())
 
-  title String
+  title   String
   message String
 
   type NotificationType
@@ -76,10 +76,10 @@ model Notification {
   isRead Boolean @default(false)
 
   userId String
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   orderId String?
-  order TranslationOrder? @relation(fields: [orderId], references: [id])
+  order   TranslationOrder? @relation(fields: [orderId], references: [id])
 
   createdAt DateTime @default(now())
 }
@@ -93,7 +93,9 @@ model Notification {
 model User {
   id String @id @default(cuid())
 
-  name  String
+  firstName String
+  lastName  String
+
   email String @unique
 
   password String?
@@ -115,9 +117,13 @@ model User {
 
   completedOrders TranslationOrder[] @relation("CompletedOrders")
 
-  createdAt DateTime @default(now())
-
   createdOrders TranslationOrder[] @relation("CreatedOrders")
+
+  editedOrders TranslationOrderEdit[]
+
+  lastEditedOrders TranslationOrder[] @relation("LastEditedBy")
+
+  createdAt DateTime @default(now())
 }
 
 /**
@@ -132,7 +138,7 @@ model Game {
   name String @unique
 
   logo String?
-  
+
   broadcasts BroadcastDetails[]
 
   assignedUsers GameAssignment[]
@@ -177,23 +183,48 @@ model TranslationOrder {
 
   dateAdded DateTime @default(now())
 
-completedById String?
+  completedById String?
 
-completedBy User? @relation("CompletedOrders",fields: [completedById],references: [id])
+  completedBy User? @relation("CompletedOrders", fields: [completedById], references: [id])
 
-completedAt DateTime?
+  completedAt DateTime?
 
-notifications Notification[]
+  /**
+   * LAST EDIT INFO
+   */
+
+  lastEditedById String?
+
+  lastEditedBy User? @relation("LastEditedBy", fields: [lastEditedById], references: [id])
+
+  lastEditedAt DateTime?
+
+  /**
+   * FULL EDIT HISTORY
+   */
+
+  editHistory TranslationOrderEdit[]
+
+  notifications Notification[]
+
   broadcast BroadcastDetails?
 
   marketing MarketingDetails?
 }
 
-/**
- * =========================
- * BROADCAST DETAILS
- * =========================
- */
+model TranslationOrderEdit {
+  id String @id @default(cuid())
+
+  orderId String
+
+  order TranslationOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  editedById String
+
+  editedBy User @relation(fields: [editedById], references: [id], onDelete: Cascade)
+
+  editedAt DateTime @default(now())
+}
 
 model BroadcastDetails {
   id String @id @default(cuid())
@@ -223,12 +254,6 @@ model BroadcastDetails {
   deliveries TranslationDelivery[]
 }
 
-/**
- * =========================
- * MARKETING DETAILS
- * =========================
- */
-
 model MarketingDetails {
   id String @id @default(cuid())
 
@@ -248,12 +273,6 @@ model MarketingDetails {
 
   deliveries MarketingDelivery[]
 }
-
-/**
- * =========================
- * DELIVERY LINKS
- * =========================
- */
 
 model TranslationDelivery {
   id String @id @default(cuid())

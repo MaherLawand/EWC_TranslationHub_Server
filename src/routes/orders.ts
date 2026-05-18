@@ -812,7 +812,9 @@ router.patch(
                   message: `${
                     updatedOrder.title
                   } has been marked as completed by ${
-                    user.name
+                    user.firstName
+                  } ${
+                    user.lastName
                   }`,
 
                   type:

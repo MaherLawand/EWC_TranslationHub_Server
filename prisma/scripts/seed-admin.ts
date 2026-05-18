@@ -22,7 +22,8 @@ async function main() {
       // ADMINS (Mostly PPMs)
 
       {
-        name: "Rouba Admin",
+        firstName: "Rouba",
+        lastName: "Admin",
         email: "admin1@ewc.com",
         password: hashedPassword,
         role: UserRole.ADMIN,
@@ -34,7 +35,8 @@ async function main() {
       },
 
       {
-        name: "Maher Admin",
+        firstName: "Maher",
+        lastName: "Admin",
         email: "admin2@ewc.com",
         password: hashedPassword,
         role: UserRole.ADMIN,
@@ -48,7 +50,8 @@ async function main() {
       // EDITORS (Mostly Producers)
 
       {
-        name: "Producer",
+        firstName: "Producer",
+        lastName: "User",
         email: "producer1@ewc.com",
         password: hashedPassword,
         role: UserRole.EDITOR,
@@ -60,7 +63,8 @@ async function main() {
       },
 
       {
-        name: "Translator",
+        firstName: "Translator",
+        lastName: "User",
         email: "translator1@ewc.com",
         password: hashedPassword,
         role: UserRole.VIEWER,
@@ -71,7 +75,8 @@ async function main() {
         isActive: true,
       },
       {
-        name: "Translator",
+        firstName: "Translator",
+        lastName: "User",
         email: "translator2@ewc.com",
         password: hashedPassword,
         role: UserRole.VIEWER,
