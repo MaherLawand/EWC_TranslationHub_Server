@@ -832,27 +832,35 @@ router.patch(
           []
 
         // BROADCAST
-        if (
-          updatedOrder.broadcast
-            ?.game
-        ) {
+        // BROADCAST
+if (
+  updatedOrder.broadcast?.game
+) {
 
-          const assignedUsers =
-            updatedOrder.broadcast.game.assignedUsers.map(
-              (
-                a: any
-              ) => a.user
-            )
+  const assignedUsers =
+    updatedOrder.broadcast.game.assignedUsers.map(
+      (a: any) => a.user
+    )
 
-          notifyUsers =
-            assignedUsers.filter(
-              (u: any) =>
-                u.position ===
-                  "PRODUCER" ||
-                u.position ===
-                  "POST_PRODUCTION_MANAGER"
-            )
-        }
+  const admins =
+    await prisma.user.findMany({
+      where: {
+        role: "ADMIN",
+      },
+    })
+
+  notifyUsers = [
+    ...assignedUsers.filter(
+      (u: any) =>
+        u.position ===
+          "PRODUCER" ||
+        u.position ===
+          "POST_PRODUCTION_MANAGER"
+    ),
+
+    ...admins,
+  ]
+}
 
         // MARKETING
         if (
