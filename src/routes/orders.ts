@@ -7,7 +7,6 @@ import {
 import {
   createOrder,
   deleteOrder,
-  getGameAssignedUsers,
   getOrders,
   markNotificationsAsRead,
   updateOrder,
@@ -50,12 +49,6 @@ router.delete(
   "/:id",
   requireAuth,
   deleteOrder
-)
-
-router.get(
-  "/games/:gameId/users",
-    requireAuth,
-  getGameAssignedUsers
 )
 
 export default router
