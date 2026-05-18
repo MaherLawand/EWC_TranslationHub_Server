@@ -457,12 +457,10 @@ marketing: {
         }
       )
 
-      const sourceWasAdded =
-  !existingOrder?.broadcast?.sourceFileLink &&
+    const sourceWasChanged =
+  existingOrder?.broadcast?.sourceFileLink !==
   sourceFileLink
-
-if (sourceWasAdded) {
-
+if (sourceWasChanged) {
   await notifyTranslatorsSourceReady(
     String(req.params.id)
   )

@@ -32,6 +32,12 @@ export async function notifyTranslatorsSourceReady(
               deliveries: true,
             },
           },
+
+          marketing: {
+            include: {
+              deliveries: true,
+            },
+          },
         },
       })
 
@@ -40,10 +46,13 @@ export async function notifyTranslatorsSourceReady(
     }
 
     /*
-      ONLY BROADCAST
+      VALIDATION
     */
 
-    if (!order.broadcast?.game) {
+    if (
+      order.type === "BROADCAST" &&
+      !order.broadcast?.game
+    ) {
       return
     }
 
@@ -51,9 +60,12 @@ export async function notifyTranslatorsSourceReady(
       SOURCE FILE REQUIRED
     */
 
-    if (
-      !order.broadcast.sourceFileLink
-    ) {
+    const sourceFileLink =
+      order.type === "BROADCAST"
+        ? order.broadcast?.sourceFileLink
+        : order.marketing?.sourceFileLink
+
+    if (!sourceFileLink) {
       return
     }
 
@@ -61,26 +73,27 @@ export async function notifyTranslatorsSourceReady(
       GET TRANSLATORS
     */
 
-const translators =
-  await prisma.user.findMany({
-    where: {
-      position: "TRANSLATOR",
+    const translators =
+      await prisma.user.findMany({
+        where: {
+          position: "TRANSLATOR",
 
-      isActive: true,
+          isActive: true,
 
-      department:
-        order.type ===
-        "BROADCAST"
-          ? "BROADCAST"
-          : "MARKETING",
-    },
-  })
+          department:
+            order.type ===
+            "BROADCAST"
+              ? "BROADCAST"
+              : "MARKETING",
+        },
+      })
 
-if (
-  translators.length === 0
-) {
-  return
-}
+    if (
+      translators.length === 0
+    ) {
+      return
+    }
+
     /*
       REMOVE DUPLICATES
     */
@@ -101,7 +114,7 @@ if (
       )
 
     /*
-      CREATE IN-APP NOTIFICATIONS
+      CREATE NOTIFICATIONS
     */
 
     await prisma.notification.createMany(
@@ -247,18 +260,37 @@ if (
                   ${order.title}
                 </p>
 
-                <p style="margin:0 0 10px;">
-                  <strong style="color:white;">
-                    Game:
-                  </strong>
-                  ${order?.broadcast?.game?.name}
-                </p>
+                ${
+                  order.type ===
+                  "BROADCAST"
+                    ? `
+<p style="margin:0 0 10px;">
+  <strong style="color:white;">
+    Game:
+  </strong>
+  ${order.broadcast?.game?.name}
+</p>
+`
+                    : `
+<p style="margin:0 0 10px;">
+  <strong style="color:white;">
+    Content:
+  </strong>
+  ${order.marketing?.contentTitle || "Marketing Content"}
+</p>
+`
+                }
 
                 <p style="margin:0;">
                   <strong style="color:white;">
                     Delivery Format:
                   </strong>
-                  ${order?.broadcast?.deliveryFormat}
+                  ${
+                    order.type ===
+                    "BROADCAST"
+                      ? order.broadcast?.deliveryFormat
+                      : order.marketing?.deliveryFormat
+                  }
                 </p>
 
               </div>
@@ -271,7 +303,7 @@ if (
               >
 
                 <a
-                  href="${order?.broadcast?.sourceFileLink}"
+                  href="${sourceFileLink}"
                   target="_blank"
                   style="
                     display:inline-block;
@@ -290,57 +322,57 @@ if (
               </div>
 
               <div
-  style="
-    margin-top:32px;
-    display:flex;
-    align-items:center;
-    gap:12px;
-  "
->
+                style="
+                  margin-top:32px;
+                  display:flex;
+                  align-items:center;
+                  gap:12px;
+                "
+              >
 
-  <span
-    style="
-      color:#9CA3AF;
-      font-size:14px;
-    "
-  >
-    Priority:
-  </span>
+                <span
+                  style="
+                    color:#9CA3AF;
+                    font-size:14px;
+                  "
+                >
+                  Priority:
+                </span>
 
-  <span
-    style="
-      display:inline-block;
-      padding:8px 14px;
-      border-radius:999px;
-      font-size:13px;
-      font-weight:700;
-      letter-spacing:0.04em;
+                <span
+                  style="
+                    display:inline-block;
+                    padding:8px 14px;
+                    border-radius:999px;
+                    font-size:13px;
+                    font-weight:700;
+                    letter-spacing:0.04em;
 
-      ${
-        order.priority === "HIGH"
-          ? `
-            background:rgba(239,68,68,0.15);
-            color:#F87171;
-            border:1px solid rgba(239,68,68,0.35);
-          `
-          : order.priority === "MEDIUM"
-          ? `
-            background:rgba(250,204,21,0.12);
-            color:#FACC15;
-            border:1px solid rgba(250,204,21,0.30);
-          `
-          : `
-            background:rgba(34,197,94,0.12);
-            color:#4ADE80;
-            border:1px solid rgba(34,197,94,0.30);
-          `
-      }
-    "
-  >
-    ${order.priority}
-  </span>
+                    ${
+                      order.priority === "HIGH"
+                        ? `
+                          background:rgba(239,68,68,0.15);
+                          color:#F87171;
+                          border:1px solid rgba(239,68,68,0.35);
+                        `
+                        : order.priority === "MEDIUM"
+                        ? `
+                          background:rgba(250,204,21,0.12);
+                          color:#FACC15;
+                          border:1px solid rgba(250,204,21,0.30);
+                        `
+                        : `
+                          background:rgba(34,197,94,0.12);
+                          color:#4ADE80;
+                          border:1px solid rgba(34,197,94,0.30);
+                        `
+                    }
+                  "
+                >
+                  ${order.priority}
+                </span>
 
-</div>
+              </div>
 
             </td>
           </tr>
