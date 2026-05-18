@@ -1420,13 +1420,9 @@ export async function updateOrderStatus(
 
         select: {
           id: true,
-
           firstName: true,
-
           lastName: true,
-
           role: true,
-
           position: true,
         },
       })
@@ -1471,9 +1467,7 @@ export async function updateOrderStatus(
 
         select: {
           id: true,
-
           title: true,
-
           type: true,
 
           broadcast: {
@@ -1485,9 +1479,7 @@ export async function updateOrderStatus(
                       user: {
                         select: {
                           id: true,
-
                           role: true,
-
                           position: true,
                         },
                       },
@@ -1557,12 +1549,12 @@ export async function updateOrderStatus(
 
           completedAt: true,
 
+          createdAt: true,
+
           createdBy: {
             select: {
               id: true,
-
               firstName: true,
-
               lastName: true,
             },
           },
@@ -1570,16 +1562,34 @@ export async function updateOrderStatus(
           completedBy: {
             select: {
               id: true,
-
               firstName: true,
-
               lastName: true,
             },
           },
 
+          /*
+            BROADCAST
+          */
+
           broadcast: {
             select: {
               id: true,
+
+              sourceLanguage: true,
+
+              targetLanguages: true,
+
+              deliveryFormat: true,
+
+              estimatedMinutes: true,
+
+              sourceFileLink: true,
+
+              deliveryDate: true,
+
+              deadlineDate: true,
+
+              gameId: true,
 
               game: {
                 select: {
@@ -1594,13 +1604,9 @@ export async function updateOrderStatus(
                       user: {
                         select: {
                           id: true,
-
                           firstName: true,
-
                           lastName: true,
-
                           role: true,
-
                           position: true,
                         },
                       },
@@ -1612,25 +1618,37 @@ export async function updateOrderStatus(
               deliveries: {
                 select: {
                   id: true,
-
                   language: true,
-
                   deliveryLink: true,
                 },
               },
             },
           },
 
+          /*
+            MARKETING
+          */
+
           marketing: {
             select: {
               id: true,
 
+              contentTitle: true,
+
+              sourceFileLink: true,
+
+              deliveryDate: true,
+
+              deadlineDate: true,
+
+              wordCount: true,
+
+              deliveryFormat: true,
+
               deliveries: {
                 select: {
                   id: true,
-
                   language: true,
-
                   deliveryLink: true,
                 },
               },
