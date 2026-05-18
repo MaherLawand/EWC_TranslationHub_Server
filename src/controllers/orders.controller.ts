@@ -1549,8 +1549,6 @@ export async function updateOrderStatus(
 
           completedAt: true,
 
-          createdAt: true,
-
           createdBy: {
             select: {
               id: true,
