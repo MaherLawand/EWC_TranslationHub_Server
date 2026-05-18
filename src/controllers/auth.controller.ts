@@ -268,87 +268,75 @@ lastName: true,
 }
 
 export async function getAllUsers(
-
   req: AuthRequest,
-
   res: Response
-
 ) {
-const currentUser =
-  await prisma.user.findUnique({
-    where: {
-      id: req.userId,
-    },
-  })
-
-if (
-  currentUser?.role !== "ADMIN"
-) {
-  return res.status(403).json({
-    message: "Unauthorized",
-  })
-}
   try {
 
+    const currentUser =
+      await prisma.user.findUnique({
+        where: {
+          id: req.userId,
+        },
+      })
+
+    if (!currentUser) {
+      return res.status(401).json({
+        message: "Unauthorized",
+      })
+    }
+
+    const isAdmin =
+      currentUser.role === "ADMIN"
+
     const users =
-
       await prisma.user.findMany({
-
         orderBy: {
-
           createdAt: "desc",
-
         },
 
         select: {
-
           id: true,
 
           firstName: true,
 
-lastName: true,
+          lastName: true,
 
-          email: true,
+          role: isAdmin,
 
-          role: true,
+          department: isAdmin,
 
-          department: true,
-          isActive: true,
+          isActive: isAdmin,
 
           position: true,
 
-          createdAt: true,
+          createdAt: isAdmin,
 
           assignedGames: {
             select: {
               gameId: true,
             },
-          },  
-
+          },
         },
-
       })
 
     return res.json(
-  users.map((user) => ({
-    ...user,
+      users.map((user) => ({
+        ...user,
 
-    name: `${user.firstName} ${user.lastName}`,
-  }))
-)
+        name:
+          `${user.firstName} ${user.lastName}`,
+      }))
+    )
 
   } catch (error) {
 
     console.error(error)
 
     return res.status(500).json({
-
       error:
-
         "Failed to fetch users",
-
     })
-
   }
 }
 
