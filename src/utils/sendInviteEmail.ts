@@ -10,7 +10,8 @@ export async function sendInviteEmail(
 ) {
   const CLIENT_URL =
     process.env.CLIENT_URL
-
+console.log("USING RESEND")
+console.log(process.env.RESEND_API_KEY)
   const inviteUrl =
     `${CLIENT_URL}/setup-password?token=${token}`
 
