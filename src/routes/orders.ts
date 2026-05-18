@@ -20,22 +20,36 @@ router.get("/", async (_, res) => {
           dateAdded: "desc",
         },
 
-        include: {
-          createdBy: true,
+include: {
+  createdBy: true,
 
-          broadcast: {
-            include: {
-              game: true,
-              deliveries: true,
-            },
-          },
+  completedBy: true,
 
-          marketing: {
-  include: {
-    deliveries: true,
+  lastEditedBy: true,
+
+  editHistory: {
+    orderBy: {
+      editedAt: "desc",
+    },
+
+    include: {
+      editedBy: true,
+    },
+  },
+
+  broadcast: {
+    include: {
+      game: true,
+      deliveries: true,
+    },
+  },
+
+  marketing: {
+    include: {
+      deliveries: true,
+    },
   },
 },
-        },
       })
 
     res.json(orders)
@@ -329,6 +343,16 @@ if (!canUpdate) {
 
             type: orderType,
 
+            lastEditedById: user.id,
+
+lastEditedAt: new Date(),
+
+editHistory: {
+  create: {
+    editedById: user.id,
+  },
+},
+
             ...(orderType ===
             "BROADCAST"
               ? {
@@ -527,23 +551,37 @@ if (
               id: String(req.params.id),
             },
 
-            include: {
-              createdBy: true,
+include: {
+  createdBy: true,
 
-              broadcast: {
-                include: {
-                  game: true,
+  completedBy: true,
 
-                  deliveries: true,
-                },
-              },
+  lastEditedBy: true,
 
-                       marketing: {
-  include: {
-    deliveries: true,
+  editHistory: {
+    orderBy: {
+      editedAt: "desc",
+    },
+
+    include: {
+      editedBy: true,
+    },
+  },
+
+  broadcast: {
+    include: {
+      game: true,
+
+      deliveries: true,
+    },
+  },
+
+  marketing: {
+    include: {
+      deliveries: true,
+    },
   },
 },
-            },
           }
         )
 
@@ -624,27 +662,45 @@ router.patch(
               ),
             },
 
-            include: {
-              broadcast: {
-                include: {
-                  game: {
-                    include: {
-                      assignedUsers: {
-                        include: {
-                          user: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
+          include: {
+  createdBy: true,
 
-              marketing: {
-                include: {
-                  deliveries: true,
-                },
-              },
+  completedBy: true,
+
+  lastEditedBy: true,
+
+  editHistory: {
+    orderBy: {
+      editedAt: "desc",
+    },
+
+    include: {
+      editedBy: true,
+    },
+  },
+
+  broadcast: {
+    include: {
+      game: {
+        include: {
+          assignedUsers: {
+            include: {
+              user: true,
             },
+          },
+        },
+      },
+
+      deliveries: true,
+    },
+  },
+
+  marketing: {
+    include: {
+      deliveries: true,
+    },
+  },
+},
           }
         )
 
