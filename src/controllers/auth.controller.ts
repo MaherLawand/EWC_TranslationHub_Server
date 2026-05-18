@@ -307,6 +307,7 @@ export async function getAllUsers(
           department: isAdmin,
 
           isActive: isAdmin,
+          email: true,
 
           position: true,
 
