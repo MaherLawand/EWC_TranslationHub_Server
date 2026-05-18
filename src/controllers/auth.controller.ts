@@ -272,11 +272,29 @@ export async function getAllUsers(
   res: Response
 ) {
   try {
+    /*
+      AUTH CHECK
+    */
+
+    if (!req.userId) {
+      return res.status(401).json({
+        message: "Unauthorized",
+      })
+    }
+
+    /*
+      FETCH CURRENT USER ROLE ONLY
+      (lighter + faster)
+    */
 
     const currentUser =
       await prisma.user.findUnique({
         where: {
           id: req.userId,
+        },
+
+        select: {
+          role: true,
         },
       })
 
@@ -289,58 +307,113 @@ export async function getAllUsers(
     const isAdmin =
       currentUser.role === "ADMIN"
 
+    /*
+      PAGINATION
+    */
+
+    const page = Number(
+      req.query.page || 1
+    )
+
+    const limit = 50
+
+    const skip =
+      (page - 1) * limit
+
+    /*
+      SELECTS
+    */
+
+    const adminSelect = {
+      id: true,
+
+      firstName: true,
+
+      lastName: true,
+
+      email: true,
+
+      role: true,
+
+      department: true,
+
+      position: true,
+
+      isActive: true,
+
+      createdAt: true,
+
+      assignedGames: {
+        select: {
+          gameId: true,
+        },
+      },
+    }
+
+    const normalSelect = {
+      id: true,
+
+      firstName: true,
+
+      lastName: true,
+
+      email: true,
+
+      position: true,
+
+      assignedGames: {
+        select: {
+          gameId: true,
+        },
+      },
+    }
+
+    /*
+      FETCH USERS
+    */
+
     const users =
       await prisma.user.findMany({
+        skip,
+
+        take: limit,
+
         orderBy: {
           createdAt: "desc",
         },
 
-        select: {
-          id: true,
-
-          firstName: true,
-
-          lastName: true,
-
-          role: isAdmin,
-
-          department: isAdmin,
-
-          isActive: isAdmin,
-          email: true,
-
-          position: true,
-
-          createdAt: isAdmin,
-
-          assignedGames: {
-            select: {
-              gameId: true,
-            },
-          },
-        },
+        select: isAdmin
+          ? adminSelect
+          : normalSelect,
       })
 
-    return res.json(
-      users.map((user) => ({
-        ...user,
+    /*
+      RESPONSE
+    */
 
-        name:
-          `${user.firstName} ${user.lastName}`,
-      }))
-    )
+    return res.json({
+      page,
+
+      limit,
+
+      total: users.length,
+
+      users: users
+    })
 
   } catch (error) {
 
-    console.error(error)
+    console.error(
+      "GET USERS ERROR:",
+      error
+    )
 
     return res.status(500).json({
-      error:
+      message:
         "Failed to fetch users",
     })
   }
 }
-
 export async function createUser(
   req: AuthRequest,
   res: Response
