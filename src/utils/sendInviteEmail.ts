@@ -21,8 +21,37 @@ console.log(process.env.RESEND_API_KEY)
 
     to: email,
 
-    subject:
-      "EWC Translation Hub Invitation",
+     replyTo:
+
+    "translations@ewctranslations.org",
+
+  subject:
+
+    "EWC Translation Hub Invitation",
+
+  text: `
+
+EWC Translation Hub Invitation
+
+You have been invited to join the EWC Translation Hub platform.
+
+Your account has been created successfully.
+
+To create your password and access your dashboard, open the link below:
+
+${inviteUrl}
+
+Security Notice:
+
+EWC Translation Hub will never ask for your password by email.
+
+Official domain:
+
+ewctranslations.org
+
+© 2026 EWC Translation Hub
+
+`,
 
    html: `
   <div

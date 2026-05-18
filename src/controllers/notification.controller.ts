@@ -154,6 +154,39 @@ export async function notifyTranslatorsSourceReady(
 
             to: translator.email,
 
+            replyTo:
+  "translations@ewctranslations.org",
+
+text: `
+Translation Source Ready
+
+A new source file is available for translation.
+
+Order:
+${order.title}
+
+${
+  order.type === "BROADCAST"
+    ? `Game: ${order.broadcast?.game?.name}`
+    : `Content: ${order.marketing?.contentTitle || "Marketing Content"}`
+}
+
+Delivery Format:
+${
+  order.type === "BROADCAST"
+    ? order.broadcast?.deliveryFormat
+    : order.marketing?.deliveryFormat
+}
+
+Priority:
+${order.priority}
+
+Open Source File:
+${sourceFileLink}
+
+© 2026 EWC Translations
+`,
+
             subject:
               `New Translation Source Available — ${order.title}`,
 

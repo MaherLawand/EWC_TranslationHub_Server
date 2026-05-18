@@ -451,8 +451,29 @@ const emailResponse =
 
     to: email,
 
+    replyTo:
+  "translations@ewctranslations.org",
+
     subject:
       "Complete Your EWC Account Setup",
+
+      text: `
+Welcome to EWC Translations
+
+Your account has been created successfully.
+
+To activate your account and create your password, open the link below:
+
+${inviteLink}
+
+This invitation link expires in 24 hours.
+
+If you did not expect this email, you can safely ignore it.
+
+© 2026 EWC Translations
+`,
+
+
 
     html: `
 <div
@@ -800,8 +821,31 @@ export async function updateUser(
 
     to: email,
 
+        replyTo:
+
+      "translations@ewctranslations.org",
+
     subject:
+
       "Complete Your EWC Account Setup",
+
+    text: `
+
+Welcome to EWC Translations
+
+Your account has been successfully created.
+
+To activate your account and create your password, open the link below:
+
+${inviteLink}
+
+This invitation link expires in 24 hours.
+
+If you did not expect this invitation, you can safely ignore this email.
+
+© 2026 EWC Translations
+
+`,
 
     html: `
 <div
