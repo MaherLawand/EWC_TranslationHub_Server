@@ -1639,8 +1639,6 @@ export async function updateOrderStatus(
 
               deadlineDate: true,
 
-              wordCount: true,
-
               deliveryFormat: true,
 
               deliveries: {
