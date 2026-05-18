@@ -1628,28 +1628,28 @@ export async function updateOrderStatus(
           */
 
           marketing: {
-            select: {
-              id: true,
+  select: {
+    id: true,
 
-              contentTitle: true,
+    contentTitle: true,
 
-              sourceFileLink: true,
+    sourceLanguage: true,
 
-              deliveryDate: true,
+    targetLanguages: true,
 
-              deadlineDate: true,
+    sourceFileLink: true,
 
-              deliveryFormat: true,
+    deliveryFormat: true,
 
-              deliveries: {
-                select: {
-                  id: true,
-                  language: true,
-                  deliveryLink: true,
-                },
-              },
-            },
-          },
+    deliveries: {
+      select: {
+        id: true,
+        language: true,
+        deliveryLink: true,
+      },
+    },
+  },
+},
         },
       })
 
