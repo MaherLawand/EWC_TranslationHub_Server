@@ -39,7 +39,15 @@ include: {
 
   broadcast: {
     include: {
-      game: true,
+      game: {
+  include: {
+    assignedUsers: {
+      include: {
+        user: true,
+      },
+    },
+  },
+},
       deliveries: true,
     },
   },
@@ -236,7 +244,15 @@ if (!canCreate) {
 
               broadcast: {
                 include: {
-                  game: true,
+                  game: {
+  include: {
+    assignedUsers: {
+      include: {
+        user: true,
+      },
+    },
+  },
+},
 
                   deliveries: true,
                 },
@@ -570,7 +586,15 @@ include: {
 
   broadcast: {
     include: {
-      game: true,
+      game: {
+  include: {
+    assignedUsers: {
+      include: {
+        user: true,
+      },
+    },
+  },
+},
 
       deliveries: true,
     },
