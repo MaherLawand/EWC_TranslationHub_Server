@@ -150,7 +150,7 @@ export async function notifyTranslatorsSourceReady(
 
           await resend.emails.send({
             from:
-              "EWC Translations <noreply@ewctranslations.org>",
+  "EWC Translations <translations@ewctranslations.org>",
 
             to: translator.email,
 

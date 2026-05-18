@@ -17,7 +17,7 @@ console.log(process.env.RESEND_API_KEY)
 
   await resend.emails.send({
     from:
-      "EWC Translation Hub <noreply@ewctranslations.org>",
+  "EWC Translations <translations@ewctranslations.org>",
 
     to: email,
 
