@@ -293,6 +293,28 @@ export async function notifyTranslatorsSourceReady(
                   }
                 </p>
 
+                <p style="margin:14px 0 0;">
+  <strong style="color:white;">
+    Priority:
+  </strong>
+
+  <span
+    style="
+      font-weight:700;
+
+      ${
+        order.priority === "HIGH"
+          ? "color:#F87171;"
+          : order.priority === "MEDIUM"
+          ? "color:#FACC15;"
+          : "color:#4ADE80;"
+      }
+    "
+  >
+    ${order.priority}
+  </span>
+</p>
+
               </div>
 
               <div
@@ -321,58 +343,6 @@ export async function notifyTranslatorsSourceReady(
 
               </div>
 
-              <div
-                style="
-                  margin-top:32px;
-                  display:flex;
-                  align-items:center;
-                  gap:12px;
-                "
-              >
-
-                <span
-                  style="
-                    color:#9CA3AF;
-                    font-size:14px;
-                  "
-                >
-                  Priority:
-                </span>
-
-                <span
-                  style="
-                    display:inline-block;
-                    padding:8px 14px;
-                    border-radius:999px;
-                    font-size:13px;
-                    font-weight:700;
-                    letter-spacing:0.04em;
-
-                    ${
-                      order.priority === "HIGH"
-                        ? `
-                          background:rgba(239,68,68,0.15);
-                          color:#F87171;
-                          border:1px solid rgba(239,68,68,0.35);
-                        `
-                        : order.priority === "MEDIUM"
-                        ? `
-                          background:rgba(250,204,21,0.12);
-                          color:#FACC15;
-                          border:1px solid rgba(250,204,21,0.30);
-                        `
-                        : `
-                          background:rgba(34,197,94,0.12);
-                          color:#4ADE80;
-                          border:1px solid rgba(34,197,94,0.30);
-                        `
-                    }
-                  "
-                >
-                  ${order.priority}
-                </span>
-
-              </div>
 
             </td>
           </tr>
