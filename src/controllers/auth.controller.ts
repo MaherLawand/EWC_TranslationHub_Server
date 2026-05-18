@@ -458,7 +458,7 @@ export async function createUser(
    const emailResponse =
   await resend.emails.send({
     from:
-      "EWC Translations <onboarding@resend.dev>",
+  "EWC Translations <noreply@ewctranslations.org>",
 
     to: email,
 
@@ -705,7 +705,7 @@ export async function updateUser(
       const emailResponse =
         await resend.emails.send({
           from:
-            "EWC Translations <onboarding@resend.dev>",
+  "EWC Translations <noreply@ewctranslations.org>",
 
           to: email,
 
