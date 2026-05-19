@@ -1186,9 +1186,15 @@ if (!canManageOrders(user)){
           "Order not found",
       })
     }
-    if (
-  type &&
-  type !== existingOrder.type
+const normalizedExisting =
+  existingOrder.type.toUpperCase()
+
+const normalizedIncoming =
+  req.body.type.toUpperCase()
+
+if (
+  normalizedExisting !==
+  normalizedIncoming
 ) {
   return res.status(400).json({
     message:
