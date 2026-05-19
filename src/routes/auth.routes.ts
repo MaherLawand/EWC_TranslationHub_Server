@@ -11,6 +11,7 @@ import {
   updateUser,
   deleteUser,
   assignGamesToUser,
+  pusherAuth,
 } from "../controllers/auth.controller.js"
 import { requireAuth } from "../middleware/auth.middleware.js"
 import {
@@ -63,6 +64,12 @@ router.post(
 router.post(
   "/set-password",
   setPassword
+)
+
+router.post(
+  "/pusher/auth",
+  requireAuth,
+  pusherAuth
 )
 
 export default router

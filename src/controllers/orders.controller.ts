@@ -7,6 +7,7 @@ import type {
 } from "../middleware/auth.middleware.js"
 
 import { prisma } from "../lib/prisma.js"
+import { triggerNotifications } from "../lib/pusher.js"
 import { notifyTranslatorsSourceReady } from "./notification.controller.js"
 import type { Prisma } from "@prisma/client"
 import {
@@ -2001,24 +2002,36 @@ if (
       ) {
 
         await prisma.notification.createMany({
-          data:
-            uniqueUserIds.map(
-              (userId) => ({
-                title:
-                  "Order Completed",
-
-                message: `${updatedOrder.title} has been marked as completed by ${user.firstName} ${user.lastName}`,
-
-                type:
-                  "ORDER_COMPLETED",
-
-                userId,
-
-                orderId:
-                  updatedOrder.id,
-              })
-            ),
+          data: uniqueUserIds.map((userId) => ({
+            title: "Order Completed",
+            message: `${updatedOrder.title} has been marked as completed by ${user.firstName} ${user.lastName}`,
+            type: "ORDER_COMPLETED",
+            userId,
+            orderId: updatedOrder.id,
+          })),
         }).catch(console.error)
+
+        // fetch created notifications and push via Pusher
+        const created = await prisma.notification.findMany({
+          where: {
+            orderId: updatedOrder.id,
+            type: "ORDER_COMPLETED",
+            isRead: false,
+          },
+          select: {
+            id: true,
+            userId: true,
+            title: true,
+            message: true,
+            type: true,
+            isRead: true,
+            createdAt: true,
+            order: { select: { id: true, title: true } },
+          },
+          orderBy: { createdAt: "desc" },
+          take: uniqueUserIds.length,
+        })
+        triggerNotifications(created).catch(console.error)
       }
     }
 
@@ -2239,6 +2252,31 @@ export async function assignUsersToMarketingOrder(
         })
       }
     })
+
+    // push assigned notifications via Pusher
+    if (newUserIds.length > 0) {
+      const assignedNotifications = await prisma.notification.findMany({
+        where: {
+          orderId,
+          type: "ASSIGNED_TO_ORDER",
+          userId: { in: newUserIds },
+          isRead: false,
+        },
+        select: {
+          id: true,
+          userId: true,
+          title: true,
+          message: true,
+          type: true,
+          isRead: true,
+          createdAt: true,
+          order: { select: { id: true, title: true } },
+        },
+        orderBy: { createdAt: "desc" },
+        take: newUserIds.length,
+      })
+      triggerNotifications(assignedNotifications).catch(console.error)
+    }
 
     /*
       RETURN UPDATED ORDER

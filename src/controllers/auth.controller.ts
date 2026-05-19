@@ -11,6 +11,7 @@ import {
 import type { AuthRequest } from "../middleware/auth.middleware.js"
 import type { Request, Response } from "express"
 import { Resend } from "resend"
+import { pusher } from "../lib/pusher.js"
 
 const resend = new Resend(
   process.env.RESEND_API_KEY
@@ -1233,4 +1234,25 @@ export async function assignGamesToUser(
         "Failed to assign games",
     })
   }
+}
+
+export async function pusherAuth(
+  req: AuthRequest,
+  res: Response
+) {
+  const socketId = req.body.socket_id
+  const channelName = req.body.channel_name
+
+  if (!socketId || !channelName) {
+    return res.status(400).json({ message: "Missing socket_id or channel_name" })
+  }
+
+  // Only allow subscribing to own channel
+  const expectedChannel = `private-user-${req.userId}`
+  if (channelName !== expectedChannel) {
+    return res.status(403).json({ message: "Forbidden" })
+  }
+
+  const authResponse = pusher.authorizeChannel(socketId, channelName)
+  return res.json(authResponse)
 }
