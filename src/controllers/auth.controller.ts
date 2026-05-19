@@ -31,6 +31,29 @@ export async function setPassword(
       password,
     } = req.body
 
+    if (!token || typeof token !== "string") {
+      return res.status(400).json({
+        message: "Invalid token",
+      })
+    }
+
+    if (!password || typeof password !== "string") {
+      return res.status(400).json({ message: "Password is required" })
+    }
+
+    const passwordErrors: string[] = []
+    if (password.length < 8) passwordErrors.push("at least 8 characters")
+    if (!/[A-Z]/.test(password)) passwordErrors.push("one uppercase letter")
+    if (!/[a-z]/.test(password)) passwordErrors.push("one lowercase letter")
+    if (!/[0-9]/.test(password)) passwordErrors.push("one number")
+    if (!/[!@#$%^&*()_+\-=\[\]{}|;':",.<>?/\\`~]/.test(password)) passwordErrors.push("one special character")
+
+    if (passwordErrors.length > 0) {
+      return res.status(400).json({
+        message: `Password must contain: ${passwordErrors.join(", ")}`,
+      })
+    }
+
     const user =
       await prisma.user.findFirst({
         where: {
@@ -91,22 +114,20 @@ export async function login(
   res: Response
 ) {
   try {
-    const { email, password } = req.body
-    console.log("LOGIN HIT")
+    const { password } = req.body
+    const email = typeof req.body.email === "string" ? req.body.email.trim().toLowerCase() : ""
+
     if (!email || !password) {
-      return res.status(400).json({
-        message: "Missing fields",
-      })
+      return res.status(400).json({ message: "Email and password are required" })
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ message: "Invalid email address" })
     }
 
     const user = await prisma.user.findUnique({
-      where: {
-        email,
-      },
+      where: { email },
     })
-console.log(email)
-
-console.log(user)
     if (!user || !user.password) {
       return res.status(401).json({
         message: "Invalid credentials",
@@ -419,55 +440,14 @@ export async function createUser(
   res: Response
 ) {
   try {
-    console.log(
-      "========== CREATE USER =========="
-    )
-
-    const currentUser =
-      await prisma.user.findUnique({
-        where: {
-          id: req.userId,
-        },
-      })
-
-    console.log(
-      "Current user:",
-      currentUser?.email
-    )
-
-    if (
-      currentUser?.role !==
-      "ADMIN"
-    ) {
-      console.log(
-        "Unauthorized attempt"
-      )
-
-      return res.status(403).json({
-        message: "Unauthorized",
-      })
-    }
-
-   const {
-  firstName,
-  lastName,
-  email,
-  role,
-  department,
-  position,
-} = req.body
-
-    console.log(
-      "Incoming user:",
-      {
-        firstName,
-        lastName,
-        email,
-        role,
-        department,
-        position,
-      }
-    )
+    const {
+      firstName,
+      lastName,
+      email,
+      role,
+      department,
+      position,
+    } = req.body
 
     const existingUser =
       await prisma.user.findUnique({
@@ -477,10 +457,6 @@ export async function createUser(
       })
 
     if (existingUser) {
-      console.log(
-        "Duplicate email detected"
-      )
-
       return res.status(400).json({
         message:
           "User with this email already exists",
@@ -490,32 +466,18 @@ export async function createUser(
     const inviteToken =
       generateInviteToken()
 
-    console.log(
-      "Invite token generated:",
-      inviteToken
-    )
-
     const inviteExpiry =
       new Date(
         Date.now() +
           1000 * 60 * 60 * 24
       )
 
-   const inviteLink =
-  `${CLIENT_URL}/setup-password?token=${inviteToken}`
-
-    console.log(
-      "Invite link:",
-      inviteLink
-    )
+    const inviteLink =
+      `${CLIENT_URL}/setup-password?token=${inviteToken}`
 
     /*
       SEND EMAIL FIRST
     */
-
-    console.log(
-      "Sending email..."
-    )
 
 const emailResponse =
   await resend.emails.send({
@@ -701,8 +663,6 @@ If you did not expect this email, you can safely ignore it.
 `,
   })
 
-console.log(emailResponse)
-
 /*
   STOP IF EMAIL FAILED
 */
@@ -753,16 +713,6 @@ lastName: true,
     },
   })
 
-    console.log(
-      "User created successfully:"
-    )
-
-    console.log(user)
-
-    console.log(
-      "========== SUCCESS =========="
-    )
-
     return res.json({
   ...user,
 
@@ -770,11 +720,7 @@ lastName: true,
 })
 
   } catch (error) {
-    console.error(
-      "========== CREATE USER ERROR =========="
-    )
-
-    console.error(error)
+    console.error("CREATE USER ERROR:", error)
 
     return res.status(500).json({
       message:
@@ -788,22 +734,6 @@ export async function updateUser(
   res: Response
 ) {
   try {
-    const currentUser =
-      await prisma.user.findUnique({
-        where: {
-          id: req.userId,
-        },
-      })
-
-    if (
-      currentUser?.role !==
-      "ADMIN"
-    ) {
-      return res.status(403).json({
-        message: "Unauthorized",
-      })
-    }
-
     const rawId = req.params.id
 
     const id = Array.isArray(rawId)
@@ -1141,22 +1071,6 @@ export async function deleteUser(
   res: Response
 ) {
   try {
-    const currentUser =
-      await prisma.user.findUnique({
-        where: {
-          id: req.userId,
-        },
-      })
-
-    if (
-      currentUser?.role !==
-      "ADMIN"
-    ) {
-      return res.status(403).json({
-        message: "Unauthorized",
-      })
-    }
-
     const rawId = req.params.id
 
     const id = Array.isArray(rawId)
@@ -1169,7 +1083,7 @@ export async function deleteUser(
       })
     }
 
-    if (id === currentUser.id) {
+    if (id === req.userId) {
       return res.status(400).json({
         message:
           "You cannot delete yourself",
@@ -1197,27 +1111,82 @@ export async function deleteUser(
   }
 }
 
+export async function searchUsers(
+  req: AuthRequest,
+  res: Response
+) {
+  try {
+    const q = String(req.query.q || "").trim()
+
+    const [firstName, lastName] = q.split(" ")
+
+    const where = q
+      ? {
+          OR: [
+            {
+              firstName: {
+                contains: q,
+                mode: "insensitive" as const,
+              },
+            },
+            {
+              lastName: {
+                contains: q,
+                mode: "insensitive" as const,
+              },
+            },
+            ...(firstName && lastName
+              ? [
+                  {
+                    AND: [
+                      {
+                        firstName: {
+                          contains: firstName,
+                          mode: "insensitive" as const,
+                        },
+                      },
+                      {
+                        lastName: {
+                          contains: lastName,
+                          mode: "insensitive" as const,
+                        },
+                      },
+                    ],
+                  },
+                ]
+              : []),
+          ],
+        }
+      : {}
+
+    const users = await prisma.user.findMany({
+      where,
+      take: 25,
+      orderBy: [
+        { firstName: "asc" },
+        { lastName: "asc" },
+      ],
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        position: true,
+        department: true,
+      },
+    })
+
+    return res.json(users)
+  } catch (error) {
+    console.error("SEARCH USERS ERROR:", error)
+    return res.status(500).json({ message: "Failed to search users" })
+  }
+}
+
 export async function assignGamesToUser(
   req: AuthRequest,
   res: Response
 ) {
   try {
-    const currentUser =
-      await prisma.user.findUnique({
-        where: {
-          id: req.userId,
-        },
-      })
-
-    if (
-      currentUser?.role !==
-      "ADMIN"
-    ) {
-      return res.status(403).json({
-        message: "Unauthorized",
-      })
-    }
-
     const rawId = req.params.id
 
     const userId = Array.isArray(rawId)

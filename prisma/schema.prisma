@@ -64,6 +64,7 @@ enum OrderPriority {
 enum NotificationType {
   ORDER_COMPLETED
   STATUS_ADDED
+  ASSIGNED_TO_ORDER
 }
 
 enum EventType {
@@ -119,6 +120,8 @@ model User {
   position UserPosition?
 
   assignedGames GameAssignment[]
+
+  marketingAssignments MarketingOrderAssignment[]
 
   isActive Boolean @default(true)
 
@@ -317,6 +320,8 @@ model MarketingDetails {
   deliveries MarketingDelivery[]
 
   deliveryFormats MarketingDeliveryFormat[]
+
+  assignments MarketingOrderAssignment[]
 }
 
 model BroadcastDelivery {
@@ -376,5 +381,23 @@ model MarketingDeliveryFormat {
   marketing MarketingDetails @relation(fields: [marketingId], references: [id], onDelete: Cascade)
 
   @@unique([marketingId, format])
+  @@index([marketingId])
+}
+
+model MarketingOrderAssignment {
+  id String @id @default(cuid())
+
+  userId String
+
+  marketingId String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  marketing MarketingDetails @relation(fields: [marketingId], references: [id], onDelete: Cascade)
+
+  assignedAt DateTime @default(now())
+
+  @@unique([userId, marketingId])
+  @@index([userId])
   @@index([marketingId])
 }

@@ -5,6 +5,7 @@ import {
 } from "../middleware/auth.middleware.js"
 
 import {
+  assignUsersToMarketingOrder,
   createOrder,
   deleteOrder,
   getOrders,
@@ -43,6 +44,12 @@ router.patch(
   "/notifications/read",
   requireAuth,
   markNotificationsAsRead
+)
+
+router.post(
+  "/:id/assign",
+  requireAuth,
+  assignUsersToMarketingOrder
 )
 
 router.delete(

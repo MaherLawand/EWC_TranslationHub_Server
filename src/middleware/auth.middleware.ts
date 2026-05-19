@@ -1,11 +1,12 @@
 import type { Request, Response, NextFunction } from "express"
 import jwt from "jsonwebtoken"
+import { prisma } from "../lib/prisma.js"
 
 export interface AuthRequest extends Request {
   userId?: string
 }
 
-export function requireAuth(
+export async function requireAuth(
   req: AuthRequest,
   res: Response,
   next: NextFunction
@@ -24,10 +25,21 @@ export function requireAuth(
       process.env.JWT_SECRET as string
     ) as { userId: string }
 
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      select: { isActive: true },
+    })
+
+    if (!user || !user.isActive) {
+      return res.status(401).json({
+        message: "Unauthorized",
+      })
+    }
+
     req.userId = decoded.userId
 
     next()
-  } catch (error) {
+  } catch {
     return res.status(401).json({
       message: "Unauthorized",
     })

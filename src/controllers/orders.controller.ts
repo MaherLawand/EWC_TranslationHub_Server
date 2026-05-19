@@ -16,7 +16,8 @@ import {
   OrderType,
   EventType,
   UserRole,
-  UserPosition
+  UserPosition,
+  UserDepartment,
 } from "@prisma/client"
 
 const orderSelect = {
@@ -203,6 +204,28 @@ const orderSelect = {
           deliveryLink: true,
         },
       },
+
+      assignments: {
+        select: {
+          id: true,
+
+          assignedAt: true,
+
+          user: {
+            select: {
+              id: true,
+
+              firstName: true,
+
+              lastName: true,
+
+              position: true,
+
+              department: true,
+            },
+          },
+        },
+      },
     },
   },
 } satisfies Prisma.TranslationOrderSelect
@@ -362,10 +385,12 @@ const assignedOnly =
     req.query.event || ""
   )
 
-    const format =
-      String(
-        req.query.format || ""
-      )
+    const formatRaw = req.query.format
+    const formatValues = Array.isArray(formatRaw)
+      ? formatRaw
+      : formatRaw
+      ? [String(formatRaw)]
+      : []
 
     const gameId =
       String(
@@ -518,48 +543,43 @@ const existingAnd = Array.isArray(
     /*
       FORMAT
     */
-const parsedFormat =
-  isDeliveryFormat(format)
-    ? format
-    : undefined
+    const parsedFormats = formatValues
+      .filter(isDeliveryFormat)
 
-
-    if (parsedFormat) {
-
-where.AND = [
-  ...existingAnd,
-  {
-    OR: [
-      {
-        broadcast: {
-          is: {
-            deliveryFormats: {
-              some: {
-                format:
-                parsedFormat
-                ,
+    if (parsedFormats.length > 0) {
+      where.AND = [
+        ...existingAnd,
+        {
+          OR: [
+            {
+              broadcast: {
+                is: {
+                  deliveryFormats: {
+                    some: {
+                      format: {
+                        in: parsedFormats,
+                      },
+                    },
+                  },
+                },
               },
             },
-          },
-        },
-      },
-
-      {
-        marketing: {
-          is: {
-            deliveryFormats: {
-              some: {
-                format:
-                parsedFormat
-                ,
+            {
+              marketing: {
+                is: {
+                  deliveryFormats: {
+                    some: {
+                      format: {
+                        in: parsedFormats,
+                      },
+                    },
+                  },
+                },
               },
             },
-          },
+          ],
         },
-      },
-    ],
-  },
-]
+      ]
     }
 
     /*
@@ -817,16 +837,7 @@ if (
       PERMISSIONS
     */
 
-    // const canCreate =
-    //   user.role === "ADMIN" ||
-
-    //   user.position ===
-    //     "PRODUCER" ||
-
-    //   user.position ===
-    //     "POST_PRODUCTION_MANAGER"
-
-    if (!canManageOrders(user)){
+    if (!canManageOrders(user)) {
       return res.status(403).json({
         message: "Unauthorized",
       })
@@ -975,15 +986,10 @@ isOrderPriority(priority)
                     },
 
                     game: {
-  connectOrCreate: {
-    where: {
-      name: normalizedGame
-    },
-    create: {
-    name: normalizedGame
-    },
-  },
-}
+                      connect: {
+                        id: normalizedGame,
+                      },
+                    }
                   },
                 },
               }
@@ -1133,16 +1139,7 @@ export async function updateOrder(
       PERMISSIONS
     */
 
-    // const canUpdate =
-    //   user.role === "ADMIN" ||
-
-    //   user.position ===
-    //     "PRODUCER" ||
-
-    //   user.position ===
-    //     "POST_PRODUCTION_MANAGER"
-
-if (!canManageOrders(user)){
+    if (!canManageOrders(user)) {
       return res.status(403).json({
         message: "Unauthorized",
       })
@@ -1186,19 +1183,18 @@ if (!canManageOrders(user)){
           "Order not found",
       })
     }
-const normalizedExisting =
-  existingOrder.type.toUpperCase()
-
-const normalizedIncoming =
-  req.body.type.toUpperCase()
+if (typeof req.body.type !== "string") {
+  return res.status(400).json({
+    message: "Order type is required",
+  })
+}
 
 if (
-  normalizedExisting !==
-  normalizedIncoming
+  existingOrder.type.toUpperCase() !==
+  req.body.type.toUpperCase()
 ) {
   return res.status(400).json({
-    message:
-      "Order type cannot be changed",
+    message: "Order type cannot be changed",
   })
 }
 
@@ -1267,7 +1263,7 @@ await prisma.$transaction(async (tx) => {
       },
 
       data: {
-       ...(typeof title === "string"
+       ...(typeof title === "string" && title.trim()
     ? {
         title: title.trim(),
       }
@@ -1322,18 +1318,12 @@ await prisma.$transaction(async (tx) => {
         }
       : {}),
 
-    ...(sourceLanguage !==
-    undefined
-      ? {
-          sourceLanguage,
-        }
+    ...(isStringArray(sourceLanguage)
+      ? { sourceLanguage }
       : {}),
 
-    ...(targetLanguages !==
-    undefined
-      ? {
-          targetLanguages,
-        }
+    ...(isStringArray(targetLanguages)
+      ? { targetLanguages }
       : {}),
 
     ...(typeof sourceFileLink ===
@@ -1766,24 +1756,9 @@ export async function updateOrderStatus(
 
     const { status } = req.body
 
-    /*
-      VALIDATION
-    */
-
-    const validStatuses = [
-      "PENDING",
-      "IN_PROGRESS",
-      "COMPLETED",
-    ]
-
-    if (
-      !validStatuses.includes(
-        status
-      )
-    ) {
+    if (!isOrderStatus(status)) {
       return res.status(400).json({
-        message:
-          "Invalid status",
+        message: "Invalid status",
       })
     }
 
@@ -1816,19 +1791,7 @@ export async function updateOrderStatus(
       PERMISSIONS
     */
 
-    // const canUpdate =
-    //   user.role === "ADMIN" ||
-
-    //   user.position ===
-    //     "PRODUCER" ||
-
-    //   user.position ===
-    //     "POST_PRODUCTION_MANAGER" ||
-
-    //   user.position ===
-    //     "TRANSLATOR"
-
-if (!canUpdateStatus(user)){
+    if (!canUpdateStatus(user)) {
       return res.status(403).json({
         message: "Unauthorized",
       })
@@ -2118,6 +2081,191 @@ export async function markNotificationsAsRead(
   }
 }
 
+export async function assignUsersToMarketingOrder(
+  req: AuthRequest,
+  res: Response
+) {
+  try {
+
+    if (!req.userId) {
+      return res.status(401).json({
+        message: "Unauthorized",
+      })
+    }
+
+    const orderId = String(
+      req.params.id
+    )
+
+    const { userIds } = req.body
+
+    if (
+      !Array.isArray(userIds) ||
+      !userIds.every(
+        (id) => typeof id === "string"
+      )
+    ) {
+      return res.status(400).json({
+        message:
+          "userIds must be an array of strings",
+      })
+    }
+
+    /*
+      REQUESTER
+    */
+
+    const requester =
+      await prisma.user.findUnique({
+        where: { id: req.userId },
+        select: {
+          id: true,
+          role: true,
+          department: true,
+          position: true,
+        },
+      })
+
+    if (!requester) {
+      return res.status(404).json({
+        message: "User not found",
+      })
+    }
+
+    /*
+      PERMISSIONS
+    */
+
+    const canAssign =
+      requester.role === UserRole.ADMIN ||
+      (requester.department ===
+        UserDepartment.MARKETING &&
+        (requester.position ===
+          UserPosition.PRODUCER ||
+          requester.position ===
+            UserPosition.POST_PRODUCTION_MANAGER))
+
+    if (!canAssign) {
+      return res.status(403).json({
+        message: "Unauthorized",
+      })
+    }
+
+    /*
+      FIND ORDER
+    */
+
+    const order =
+      await prisma.translationOrder.findUnique({
+        where: { id: orderId },
+        select: {
+          id: true,
+          title: true,
+          type: true,
+          marketing: {
+            select: {
+              id: true,
+              assignments: {
+                select: {
+                  userId: true,
+                },
+              },
+            },
+          },
+        },
+      })
+
+    if (!order) {
+      return res.status(404).json({
+        message: "Order not found",
+      })
+    }
+
+    if (order.type !== OrderType.MARKETING) {
+      return res.status(400).json({
+        message:
+          "Can only assign users to marketing orders",
+      })
+    }
+
+    const marketingId = order.marketing!.id
+
+    const existingUserIds = new Set(
+      order.marketing!.assignments.map(
+        (a) => a.userId
+      )
+    )
+
+    const newUserIds = userIds.filter(
+      (id) => !existingUserIds.has(id)
+    )
+
+    const removedUserIds = [
+      ...existingUserIds,
+    ].filter((id) => !userIds.includes(id))
+
+    /*
+      UPSERT ASSIGNMENTS + NOTIFY NEW
+    */
+
+    await prisma.$transaction(async (tx) => {
+
+      if (removedUserIds.length > 0) {
+        await tx.marketingOrderAssignment.deleteMany({
+          where: {
+            marketingId,
+            userId: { in: removedUserIds },
+          },
+        })
+      }
+
+      if (newUserIds.length > 0) {
+        await tx.marketingOrderAssignment.createMany({
+          data: newUserIds.map((userId) => ({
+            userId,
+            marketingId,
+          })),
+          skipDuplicates: true,
+        })
+
+        await tx.notification.createMany({
+          data: newUserIds.map((userId) => ({
+            title: "Assigned to Order",
+            message: `You have been assigned to the marketing order: ${order.title}`,
+            type: "ASSIGNED_TO_ORDER" as const,
+            userId,
+            orderId,
+          })),
+        })
+      }
+    })
+
+    /*
+      RETURN UPDATED ORDER
+    */
+
+    const updatedOrder =
+      await prisma.translationOrder.findUnique({
+        where: { id: orderId },
+        select: orderSelect,
+      })
+
+    return res.json(updatedOrder)
+
+  } catch (error) {
+
+    console.error(
+      "ASSIGN USERS ERROR:",
+      error
+    )
+
+    return res.status(500).json({
+      message:
+        "Failed to assign users",
+    })
+  }
+}
+
 export async function deleteOrder(
   req: AuthRequest,
   res: Response
@@ -2159,16 +2307,7 @@ export async function deleteOrder(
       PERMISSIONS
     */
 
-    // const canDelete =
-    //   user.role === "ADMIN" ||
-
-    //   user.position ===
-    //     "PRODUCER" ||
-
-    //   user.position ===
-    //     "POST_PRODUCTION_MANAGER"
-
-if (!canManageOrders(user)){
+    if (!canManageOrders(user)) {
       return res.status(403).json({
         message: "Unauthorized",
       })

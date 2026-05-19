@@ -6,6 +6,7 @@ import {
   logout,
   getCurrentUser,
   getAllUsers,
+  searchUsers,
   createUser,
   updateUser,
   deleteUser,
@@ -27,7 +28,9 @@ router.post(
 
 router.get("/me", requireAuth, getCurrentUser)
 
-router.get("/getAllUsers",requireAuth,getAllUsers)
+router.get("/getAllUsers", requireAuth, getAllUsers)
+
+router.get("/users/search", requireAuth, searchUsers)
 
 router.post(
   "/users",
