@@ -66,6 +66,11 @@ enum NotificationType {
   STATUS_ADDED
 }
 
+enum EventType {
+  EWC
+  ENC
+}
+
 model Notification {
   id String @id @default(cuid())
 
@@ -80,9 +85,15 @@ model Notification {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   orderId String?
-  order   TranslationOrder? @relation(fields: [orderId], references: [id])
+
+  order TranslationOrder? @relation(fields: [orderId], references: [id])
 
   createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([orderId])
+  @@index([isRead])
+  @@index([createdAt])
 }
 
 /**
@@ -125,6 +136,11 @@ model User {
   lastEditedOrders TranslationOrder[] @relation("LastEditedBy")
 
   createdAt DateTime @default(now())
+
+  @@index([role])
+  @@index([department])
+  @@index([position])
+  @@index([isActive])
 }
 
 /**
@@ -143,6 +159,10 @@ model Game {
   broadcasts BroadcastDetails[]
 
   assignedUsers GameAssignment[]
+
+  createdAt DateTime @default(now())
+
+  @@index([name])
 }
 
 model GameAssignment {
@@ -158,6 +178,8 @@ model GameAssignment {
   assignedAt DateTime @default(now())
 
   @@unique([userId, gameId])
+  @@index([userId])
+  @@index([gameId])
 }
 
 /**
@@ -171,8 +193,11 @@ model TranslationOrder {
 
   type OrderType
 
-  title       String
-  description String?
+  event EventType @default(EWC)
+
+  title String
+
+  notes String?
 
   status OrderStatus @default(PENDING)
 
@@ -191,7 +216,7 @@ model TranslationOrder {
   completedAt DateTime?
 
   /**
-   * LAST EDIT INFO
+   * LAST EDIT
    */
 
   lastEditedById String?
@@ -201,7 +226,7 @@ model TranslationOrder {
   lastEditedAt DateTime?
 
   /**
-   * FULL EDIT HISTORY
+   * HISTORY
    */
 
   editHistory TranslationOrderEdit[]
@@ -211,6 +236,17 @@ model TranslationOrder {
   broadcast BroadcastDetails?
 
   marketing MarketingDetails?
+
+  @@index([event])
+  @@index([type])
+  @@index([status])
+  @@index([priority])
+  @@index([createdById])
+  @@index([completedById])
+  @@index([lastEditedById])
+  @@index([dateAdded])
+  @@index([event, status])
+  @@index([type, status])
 }
 
 model TranslationOrderEdit {
@@ -225,14 +261,18 @@ model TranslationOrderEdit {
   editedBy User @relation(fields: [editedById], references: [id], onDelete: Cascade)
 
   editedAt DateTime @default(now())
+
+  @@index([orderId])
+  @@index([editedById])
+  @@index([editedAt])
 }
 
 model BroadcastDetails {
   id String @id @default(cuid())
 
-  gameId String?
+  gameId String
 
-  game Game? @relation(fields: [gameId], references: [id])
+  game Game @relation(fields: [gameId], references: [id])
 
   estimatedMinutes Int
 
@@ -240,9 +280,7 @@ model BroadcastDetails {
 
   targetLanguages String[]
 
-  deliveryFormat DeliveryFormat
-
-  sourceFileLink String
+  sourceFileLink String?
 
   deliveryDate DateTime
 
@@ -252,7 +290,13 @@ model BroadcastDetails {
 
   order TranslationOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
-  deliveries TranslationDelivery[]
+  deliveries BroadcastDelivery[]
+
+  deliveryFormats BroadcastDeliveryFormat[]
+
+  @@index([gameId])
+  @@index([deliveryDate])
+  @@index([deadlineDate])
 }
 
 model MarketingDetails {
@@ -264,18 +308,18 @@ model MarketingDetails {
 
   targetLanguages String[]
 
-  sourceFileLink String
-
-  deliveryFormat DeliveryFormat
+  sourceFileLink String?
 
   orderId String @unique
 
   order TranslationOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   deliveries MarketingDelivery[]
+
+  deliveryFormats MarketingDeliveryFormat[]
 }
 
-model TranslationDelivery {
+model BroadcastDelivery {
   id String @id @default(cuid())
 
   language String
@@ -285,6 +329,9 @@ model TranslationDelivery {
   broadcastId String
 
   broadcast BroadcastDetails @relation(fields: [broadcastId], references: [id], onDelete: Cascade)
+
+  @@unique([broadcastId, language])
+  @@index([broadcastId])
 }
 
 model MarketingDelivery {
@@ -297,4 +344,37 @@ model MarketingDelivery {
   marketingId String
 
   marketing MarketingDetails @relation(fields: [marketingId], references: [id], onDelete: Cascade)
+
+  @@unique([marketingId, language])
+  @@index([marketingId])
+}
+
+model BroadcastDeliveryFormat {
+  id String @id @default(cuid())
+
+  format DeliveryFormat
+
+  deliveryLink String?
+
+  broadcastId String
+
+  broadcast BroadcastDetails @relation(fields: [broadcastId], references: [id], onDelete: Cascade)
+
+  @@unique([broadcastId, format])
+  @@index([broadcastId])
+}
+
+model MarketingDeliveryFormat {
+  id String @id @default(cuid())
+
+  format DeliveryFormat
+
+  deliveryLink String?
+
+  marketingId String
+
+  marketing MarketingDetails @relation(fields: [marketingId], references: [id], onDelete: Cascade)
+
+  @@unique([marketingId, format])
+  @@index([marketingId])
 }

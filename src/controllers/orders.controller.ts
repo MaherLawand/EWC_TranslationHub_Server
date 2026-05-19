@@ -1,6 +1,6 @@
 // controllers/orders.controller.ts
 
-import type { Response,Request } from "express"
+import type { Response } from "express"
 
 import type {
   AuthRequest,
@@ -8,6 +8,300 @@ import type {
 
 import { prisma } from "../lib/prisma.js"
 import { notifyTranslatorsSourceReady } from "./notification.controller.js"
+import type { Prisma } from "@prisma/client"
+import {
+  DeliveryFormat,
+  OrderStatus,
+  OrderPriority,
+  OrderType,
+  EventType,
+  UserRole,
+  UserPosition
+} from "@prisma/client"
+
+const orderSelect = {
+  
+  id: true,
+
+  type: true,
+  event: true,
+
+  title: true,
+
+  notes: true,
+
+  status: true,
+
+  priority: true,
+
+  dateAdded: true,
+
+  completedAt: true,
+
+  lastEditedAt: true,
+
+  createdBy: {
+    select: {
+      id: true,
+
+      firstName: true,
+
+      lastName: true,
+
+      role: true,
+
+      department: true,
+
+      position: true,
+    },
+  },
+
+  completedBy: {
+    select: {
+      id: true,
+
+      firstName: true,
+
+      lastName: true,
+    },
+  },
+
+  lastEditedBy: {
+    select: {
+      id: true,
+
+      firstName: true,
+
+      lastName: true,
+    },
+  },
+
+  editHistory: {
+    take: 10,
+
+    orderBy: {
+      editedAt: "desc" as const,
+    },
+
+    select: {
+      id: true,
+
+      editedAt: true,
+
+      editedBy: {
+        select: {
+          id: true,
+
+          firstName: true,
+
+          lastName: true,
+        },
+      },
+    },
+  },
+
+  broadcast: {
+    select: {
+      id: true,
+
+      gameId: true,
+
+      estimatedMinutes: true,
+
+      sourceLanguage: true,
+
+      targetLanguages: true,
+
+      deliveryFormats: {
+        select: {
+          id: true,
+          format: true,
+          deliveryLink: true,
+        },
+      },
+
+      sourceFileLink: true,
+
+      deliveryDate: true,
+
+      deadlineDate: true,
+
+      game: {
+        select: {
+          id: true,
+
+          name: true,
+
+          logo: true,
+
+          assignedUsers: {
+            select: {
+              id: true,
+
+              assignedAt: true,
+
+              user: {
+                select: {
+                  id: true,
+
+                  firstName: true,
+
+                  lastName: true,
+
+                  role: true,
+
+                  department: true,
+
+                  position: true,
+
+                  isActive: true,
+                },
+              },
+            },
+          },
+        },
+      },
+
+      deliveries: {
+        select: {
+          id: true,
+
+          language: true,
+
+          deliveryLink: true,
+        },
+      },
+    },
+  },
+
+  marketing: {
+    select: {
+      id: true,
+
+      contentTitle: true,
+
+      sourceLanguage: true,
+
+      targetLanguages: true,
+
+      sourceFileLink: true,
+
+      deliveryFormats: {
+        select: {
+          id: true,
+          format: true,
+          deliveryLink: true,
+        },
+      },
+
+      deliveries: {
+        select: {
+          id: true,
+
+          language: true,
+
+          deliveryLink: true,
+        },
+      },
+    },
+  },
+} satisfies Prisma.TranslationOrderSelect
+
+function isStringArray(
+  value: unknown
+): value is string[] {
+  return (
+    Array.isArray(value) &&
+    value.every(
+      (item) =>
+        typeof item === "string"
+    )
+  )
+}
+
+function isDeliveryFormat(
+  value: unknown
+): value is DeliveryFormat {
+  return DELIVERY_FORMATS
+  .includes(
+    value as DeliveryFormat
+  )
+}
+
+function isOrderStatus(
+  value: unknown
+): value is OrderStatus {
+  return ORDER_STATUSES.includes(
+    value as OrderStatus
+  )
+}
+
+function isEventType(
+  value: unknown
+): value is EventType {
+  return EVENT_TYPES.includes(
+    value as EventType
+  )
+}
+
+function isOrderPriority(
+  value: unknown
+): value is OrderPriority {
+  return ORDER_PRIORITY.includes(
+    value as OrderPriority
+  )
+}
+
+function isOrderType(
+  value: unknown
+): value is OrderType {
+  return ORDER_TYPE.includes(
+    value as OrderType
+  )
+}
+
+type PermissionUser = {
+  role: UserRole
+  position: UserPosition | null
+}
+
+function canManageOrders(
+  user: PermissionUser
+) {
+  return (
+    user.role === "ADMIN" ||
+    user.position ===
+      "PRODUCER" ||
+    user.position ===
+      "POST_PRODUCTION_MANAGER"
+  )
+}
+
+function canUpdateStatus(
+  user: PermissionUser
+) {
+  return (
+    canManageOrders(user) ||
+    user.position ===
+      "TRANSLATOR"
+  )
+}
+
+const EVENT_TYPES =
+  Object.values(EventType)
+
+const ORDER_STATUSES =
+  Object.values(OrderStatus)
+
+const DELIVERY_FORMATS =
+  Object.values(DeliveryFormat)
+
+  const ORDER_PRIORITY =
+  Object.values(OrderPriority)
+
+  const ORDER_TYPE = 
+  Object.values(OrderType)
+
 
 export async function getOrders(
   req: AuthRequest,
@@ -19,11 +313,18 @@ export async function getOrders(
       PAGINATION
     */
 
-    const page =
-      Number(req.query.page) || 1
+const page = Math.max(
+  Number(req.query.page) || 1,
+  1
+)
 
-    const limit =
-      Number(req.query.limit) || 50
+const limit = Math.min(
+  Math.max(
+    Number(req.query.limit) || 50,
+    1
+  ),
+  100
+)
 
     const skip =
       (page - 1) * limit
@@ -56,6 +357,11 @@ const assignedOnly =
         req.query.type || ""
       )
 
+      const event =
+  String(
+    req.query.event || ""
+  )
+
     const format =
       String(
         req.query.format || ""
@@ -75,12 +381,16 @@ const assignedOnly =
       String(
         req.query.deadlineSort || ""
       )
+const [
+  firstNameSearch = "",
+  lastNameSearch = "",
+] = search.split(" ")
 
     /*
       WHERE
     */
 
-    const where: any = {}
+const where: Prisma.TranslationOrderWhereInput = {}
 
     /*
       SEARCH
@@ -88,97 +398,188 @@ const assignedOnly =
 
     if (search) {
 
-      where.OR = [
+where.OR = [
+  {
+    title: {
+      contains: search,
+      mode: "insensitive",
+    },
+  },
+
+  {
+    notes: {
+      contains: search,
+      mode: "insensitive",
+    },
+  },
+
+ {
+  marketing: {
+    is: {
+      contentTitle: {
+        contains: search,
+        mode: "insensitive",
+      },
+    },
+  },
+},
+{
+createdBy: {
+  is: {
+    firstName: {
+      contains: search,
+      mode: "insensitive",
+    },
+  },
+},
+},
+  {
+    createdBy: {
+      is: {
+      lastName: {
+        contains: search,
+        mode: "insensitive",
+      },
+    },
+    },
+  },
+]
+
+if (
+  firstNameSearch &&
+  lastNameSearch
+) {
+  where.OR.push({
+    createdBy: {
+      is:{
+      AND: [
         {
-          title: {
-            contains: search,
-            mode: "insensitive",
+          firstName: {
+            contains:
+              firstNameSearch,
+            mode:
+              "insensitive",
           },
         },
 
         {
-          description: {
-            contains: search,
-            mode: "insensitive",
+          lastName: {
+            contains:
+              lastNameSearch,
+            mode:
+              "insensitive",
           },
         },
-
-        {
-          marketing: {
-            contentTitle: {
-              contains: search,
-              mode: "insensitive",
-            },
-          },
-        },
-      ]
+      ],
+    },
+    },
+  })
+}
     }
 
-    /*
-      STATUS
-    */
+if (
+  isOrderStatus(status)
+) {
+  where.status =
+    status
+}
 
-    if (status) {
-      where.status = status
-    }
+if(isEventType(event)
+){
+  where.event = 
+  event
+}
 
-    /*
-      PRIORITY
-    */
+if (
+ isOrderPriority(priority)
+) {
+  where.priority =
+    priority
+}
 
-    if (priority) {
-      where.priority = priority
-    }
+if (
+  isOrderType(type)
+) {
+  where.type =
+    type
+}
 
-    /*
-      TYPE
-    */
 
-    if (type) {
-      where.type = type
-    }
 
+const existingAnd = Array.isArray(
+  where.AND
+)
+  ? where.AND
+  : where.AND
+    ? [where.AND]
+    : []
+
+    
     /*
       FORMAT
     */
+const parsedFormat =
+  isDeliveryFormat(format)
+    ? format
+    : undefined
 
-    if (format) {
 
-      where.AND = [
-        ...(where.AND || []),
+    if (parsedFormat) {
 
-        {
-          OR: [
-            {
-              broadcast: {
-                deliveryFormat:
-                  format,
+where.AND = [
+  ...existingAnd,
+  {
+    OR: [
+      {
+        broadcast: {
+          is: {
+            deliveryFormats: {
+              some: {
+                format:
+                parsedFormat
+                ,
               },
             },
-
-            {
-              marketing: {
-                deliveryFormat:
-                  format,
-              },
-            },
-          ],
+          },
         },
-      ]
+      },
+
+      {
+        marketing: {
+          is: {
+            deliveryFormats: {
+              some: {
+                format:
+                parsedFormat
+                ,
+              },
+            },
+          },
+        },
+      },
+    ],
+  },
+]
     }
 
     /*
       GAME FILTER
     */
 
-    if (gameId) {
-
-      where.broadcast = {
-        ...(where.broadcast || {}),
-
-        gameId,
-      }
-    }
+if (gameId) {
+  where.broadcast = {
+    is: {
+      ...(where.broadcast &&
+      typeof where.broadcast ===
+        "object" &&
+      "is" in where.broadcast &&
+      where.broadcast.is
+        ? where.broadcast.is
+        : {}),
+      gameId,
+    },
+  }
+}
 
     /*
       CONTENT TITLE
@@ -187,22 +588,24 @@ const assignedOnly =
     if (contentTitle) {
 
       where.marketing = {
-        ...(where.marketing || {}),
-
-        contentTitle: {
-          equals: contentTitle,
-          mode: "insensitive",
-        },
-      }
+  is: {
+    contentTitle: {
+      equals: contentTitle,
+      mode: "insensitive",
+    },
+  },
+}
     }
 
     /*
       ORDER BY
     */
 
-    let orderBy: any = {
-      dateAdded: "desc",
-    }
+    let orderBy:
+  Prisma.TranslationOrderOrderByWithRelationInput =
+{
+  dateAdded: "desc",
+}
 
     /*
       DEADLINE SORT
@@ -212,7 +615,7 @@ const assignedOnly =
 
       orderBy = {
         broadcast: {
-          deadlineDate: "asc",
+          deadlineDate: "asc" as const,
         },
       }
     }
@@ -221,7 +624,7 @@ const assignedOnly =
 
       orderBy = {
         broadcast: {
-          deadlineDate: "desc",
+          deadlineDate: "desc" as const,
         },
       }
     }
@@ -234,10 +637,15 @@ if (
   assignedOnly &&
   req.userId
 ) {
-
-  where.broadcast = {
-    ...(where.broadcast || {}),
-
+where.broadcast = {
+  is: {
+    ...(where.broadcast &&
+    typeof where.broadcast ===
+      "object" &&
+    "is" in where.broadcast &&
+    where.broadcast.is
+      ? where.broadcast.is
+      : {}),
     game: {
       assignedUsers: {
         some: {
@@ -245,7 +653,8 @@ if (
         },
       },
     },
-  }
+  },
+}
 }
 
     /*
@@ -266,179 +675,7 @@ if (
 
         take: limit,
 
-        select: {
-          id: true,
-
-          type: true,
-
-          title: true,
-
-          description: true,
-
-          status: true,
-
-          priority: true,
-
-          dateAdded: true,
-
-          completedAt: true,
-
-          lastEditedAt: true,
-
-          createdBy: {
-            select: {
-              id: true,
-
-              firstName: true,
-
-              lastName: true,
-
-              role: true,
-
-              department: true,
-
-              position: true,
-            },
-          },
-
-          completedBy: {
-            select: {
-              id: true,
-
-              firstName: true,
-
-              lastName: true,
-            },
-          },
-
-          lastEditedBy: {
-            select: {
-              id: true,
-
-              firstName: true,
-
-              lastName: true,
-            },
-          },
-
-          editHistory: {
-            take: 10,
-
-            orderBy: {
-              editedAt: "desc",
-            },
-
-            select: {
-              id: true,
-
-              editedAt: true,
-
-              editedBy: {
-                select: {
-                  id: true,
-
-                  firstName: true,
-
-                  lastName: true,
-                },
-              },
-            },
-          },
-
-          broadcast: {
-            select: {
-              id: true,
-
-              gameId: true,
-
-              estimatedMinutes: true,
-
-              sourceLanguage: true,
-
-              targetLanguages: true,
-
-              deliveryFormat: true,
-
-              sourceFileLink: true,
-
-              deliveryDate: true,
-
-              deadlineDate: true,
-
-              game: {
-                select: {
-                  id: true,
-
-                  name: true,
-
-                  logo: true,
-
-                  assignedUsers: {
-                    select: {
-                      id: true,
-
-                      assignedAt: true,
-
-                      user: {
-                        select: {
-                          id: true,
-
-                          firstName: true,
-
-                          lastName: true,
-
-                          role: true,
-
-                          department: true,
-
-                          position: true,
-
-                          isActive: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-
-              deliveries: {
-                select: {
-                  id: true,
-
-                  language: true,
-
-                  deliveryLink: true,
-                },
-              },
-            },
-          },
-
-          marketing: {
-            select: {
-              id: true,
-
-              contentTitle: true,
-
-              sourceLanguage: true,
-
-              targetLanguages: true,
-
-              sourceFileLink: true,
-
-              deliveryFormat: true,
-
-              deliveries: {
-                select: {
-                  id: true,
-
-                  language: true,
-
-                  deliveryLink: true,
-                },
-              },
-            },
-          },
-        },
+        select:orderSelect,
       }),
 
       prisma.translationOrder.count({
@@ -486,8 +723,9 @@ export async function createOrder(
 
     const {
       title,
-      description,
+      notes,
       type,
+      event,
       status,
       priority,
       game,
@@ -495,7 +733,7 @@ export async function createOrder(
       sourceLanguage,
       targetLanguages,
       contentTitle,
-      format,
+      deliveryFormats,
       deliveries,
       sourceFileLink,
       deliveryDate,
@@ -512,21 +750,43 @@ export async function createOrder(
       })
     }
 
-    if (!Array.isArray(sourceLanguage)) {
+    if (!isStringArray(sourceLanguage)) {
       return res.status(400).json({
         message:
           "Source language must be an array",
       })
     }
-
     if (
-      !Array.isArray(targetLanguages)
-    ) {
+  deliveryFormats &&
+  !Array.isArray(
+    deliveryFormats
+  )
+) {
+  return res.status(400).json({
+    message:
+      "Delivery formats must be an array",
+  })
+}
+
+const parsedEstimatedMinutes =
+  Number(estimatedMinutes)
+if (
+  Number.isNaN(parsedEstimatedMinutes)
+) {
+  return res.status(400).json({
+    message:
+      "Estimated minutes must be a number",
+  })
+}
+
+    if (!isStringArray(targetLanguages)){
       return res.status(400).json({
         message:
           "Target languages must be an array",
       })
     }
+
+
 
     /*
       USER
@@ -557,16 +817,16 @@ export async function createOrder(
       PERMISSIONS
     */
 
-    const canCreate =
-      user.role === "ADMIN" ||
+    // const canCreate =
+    //   user.role === "ADMIN" ||
 
-      user.position ===
-        "PRODUCER" ||
+    //   user.position ===
+    //     "PRODUCER" ||
 
-      user.position ===
-        "POST_PRODUCTION_MANAGER"
+    //   user.position ===
+    //     "POST_PRODUCTION_MANAGER"
 
-    if (!canCreate) {
+    if (!canManageOrders(user)){
       return res.status(403).json({
         message: "Unauthorized",
       })
@@ -576,18 +836,45 @@ export async function createOrder(
       ORDER TYPE
     */
 
-    const orderType =
-      type === "Marketing"
-        ? "MARKETING"
-        : "BROADCAST"
+const orderType: OrderType =
+  type === OrderType.MARKETING
+    ? OrderType.MARKETING
+    : OrderType.BROADCAST
+
+
+const normalizedGame =
+  typeof game === "string"
+    ? game.trim()
+    : ""
+
+if (
+  orderType === OrderType.BROADCAST &&
+  !normalizedGame
+) {
+  return res.status(400).json({
+    message: "Game is required",
+  })
+}
+
+if (event && !isEventType(event)){
+  return res.status(400).json({
+    message: "Invalid event",
+  })
+}
 
     /*
       CLEAN DELIVERIES
     */
 
     const parsedDeliveries =
-      Array.isArray(deliveries)
-        ? deliveries.map(
+  Array.isArray(deliveries)
+    ? deliveries
+        .filter(
+          (delivery) =>
+            typeof delivery?.language ===
+            "string"
+        )
+        .map(
             (delivery: any) => ({
               language:
                 delivery.language,
@@ -608,16 +895,27 @@ export async function createOrder(
         data: {
           title: title.trim(),
 
-          description:
-            description?.trim() || null,
+          notes:
+  typeof notes === "string"
+    ? notes.trim() || null
+    : undefined,
 
           type: orderType,
 
+          event:
+  isEventType(event)
+    ? event
+    : EventType.EWC,
+
           status:
-            status || "PENDING",
+isOrderStatus(status)
+    ? status
+    : OrderStatus.PENDING,
 
           priority:
-            priority || "MEDIUM",
+isOrderPriority(priority)
+    ? priority
+    : OrderPriority.MEDIUM,
 
           createdById: user.id,
 
@@ -626,17 +924,32 @@ export async function createOrder(
             ? {
                 broadcast: {
                   create: {
-                    estimatedMinutes:
-                      Number(
-                        estimatedMinutes
-                      ) || 0,
+                    estimatedMinutes:parsedEstimatedMinutes,
 
                     sourceLanguage,
 
                     targetLanguages,
 
-                    deliveryFormat:
-                      format,
+                    deliveryFormats: {
+  create:
+    Array.isArray(
+      deliveryFormats
+    )
+      ? deliveryFormats.map(
+          (item: any) => ({
+            format: isDeliveryFormat(
+  item.format
+)
+  ? item.format
+  : DeliveryFormat.SRT,
+
+            deliveryLink:
+              item.deliveryLink ||
+              "",
+          })
+        )
+      : [],
+},
 
                     sourceFileLink:
                       sourceFileLink ||
@@ -661,22 +974,16 @@ export async function createOrder(
                         parsedDeliveries,
                     },
 
-                    game: game
-                      ? {
-                          connectOrCreate:
-                            {
-                              where: {
-                                name:
-                                  game.trim(),
-                              },
-
-                              create: {
-                                name:
-                                  game.trim(),
-                              },
-                            },
-                        }
-                      : undefined,
+                    game: {
+  connectOrCreate: {
+    where: {
+      name: normalizedGame
+    },
+    create: {
+    name: normalizedGame
+    },
+  },
+}
                   },
                 },
               }
@@ -684,19 +991,40 @@ export async function createOrder(
                 marketing: {
                   create: {
                     contentTitle:
-                      contentTitle?.trim() ||
-                      null,
+  typeof contentTitle ===
+  "string"
+    ? contentTitle.trim() ||
+      null
+    : undefined,
 
                     sourceLanguage,
 
                     targetLanguages,
 
-                    sourceFileLink:
-                      sourceFileLink ||
-                      "",
+                    sourceFileLink:typeof sourceFileLink === "string"
+  ? sourceFileLink
+  : undefined,
 
-                    deliveryFormat:
-                      format,
+                   deliveryFormats: {
+  create:
+    Array.isArray(
+      deliveryFormats
+    )
+      ? deliveryFormats.map(
+          (item: any) => ({
+            format: isDeliveryFormat(
+  item.format
+)
+  ? item.format
+  : DeliveryFormat.SRT,
+
+            deliveryLink:
+              item.deliveryLink ||
+              "",
+          })
+        )
+      : [],
+},
 
                     deliveries: {
                       create:
@@ -707,101 +1035,7 @@ export async function createOrder(
               }),
         },
 
-        select: {
-          id: true,
-
-          type: true,
-
-          title: true,
-
-          description: true,
-
-          status: true,
-
-          priority: true,
-
-          dateAdded: true,
-
-          createdBy: {
-            select: {
-              id: true,
-
-              firstName: true,
-
-              lastName: true,
-
-              role: true,
-
-              position: true,
-            },
-          },
-
-          broadcast: {
-            select: {
-              id: true,
-
-              estimatedMinutes: true,
-
-              sourceLanguage: true,
-
-              targetLanguages: true,
-
-              deliveryFormat: true,
-
-              sourceFileLink: true,
-
-              deliveryDate: true,
-
-              deadlineDate: true,
-
-              game: {
-                select: {
-                  id: true,
-
-                  name: true,
-
-                  logo: true,
-                },
-              },
-
-              deliveries: {
-                select: {
-                  id: true,
-
-                  language: true,
-
-                  deliveryLink: true,
-                },
-              },
-            },
-          },
-
-          marketing: {
-            select: {
-              id: true,
-
-              contentTitle: true,
-
-              sourceLanguage: true,
-
-              targetLanguages: true,
-
-              sourceFileLink: true,
-
-              deliveryFormat: true,
-
-              deliveries: {
-                select: {
-                  id: true,
-
-                  language: true,
-
-                  deliveryLink: true,
-                },
-              },
-            },
-          },
-        },
+        select:orderSelect,
       })
 
     /*
@@ -843,16 +1077,17 @@ export async function updateOrder(
 
     const {
       title,
-      description,
+      notes,
       status,
       priority,
       type,
+      event,
       game,
       estimatedMinutes,
       sourceLanguage,
       targetLanguages,
       contentTitle,
-      format,
+      deliveryFormats,
       sourceFileLink,
       deliveryDate,
       deadline,
@@ -898,16 +1133,16 @@ export async function updateOrder(
       PERMISSIONS
     */
 
-    const canUpdate =
-      user.role === "ADMIN" ||
+    // const canUpdate =
+    //   user.role === "ADMIN" ||
 
-      user.position ===
-        "PRODUCER" ||
+    //   user.position ===
+    //     "PRODUCER" ||
 
-      user.position ===
-        "POST_PRODUCTION_MANAGER"
+    //   user.position ===
+    //     "POST_PRODUCTION_MANAGER"
 
-    if (!canUpdate) {
+if (!canManageOrders(user)){
       return res.status(403).json({
         message: "Unauthorized",
       })
@@ -927,6 +1162,7 @@ export async function updateOrder(
           id: true,
 
           type: true,
+          event:true,
 
           broadcast: {
             select: {
@@ -950,41 +1186,112 @@ export async function updateOrder(
           "Order not found",
       })
     }
+    if (
+  type &&
+  type !== existingOrder.type
+) {
+  return res.status(400).json({
+    message:
+      "Order type cannot be changed",
+  })
+}
 
     /*
       ORDER TYPE
     */
 
-    const orderType =
-      type === "Marketing"
-        ? "MARKETING"
-        : "BROADCAST"
+const orderType: OrderType =
+  isOrderType(type)
+    ? type
+    : existingOrder.type
+
+const normalizedGame =
+  typeof game === "string"
+    ? game.trim()
+    : undefined
+
+if (
+  orderType === OrderType.BROADCAST &&
+  game !== undefined &&
+  !normalizedGame
+) {
+  return res.status(400).json({
+    message: "Game is required",
+  })
+}
+
+if (
+  event &&
+  !isEventType(event)
+) {
+  return res.status(400).json({
+    message: "Invalid event",
+  })
+}
+
+let parsedEstimatedMinutes:
+  number | undefined
+
+if (
+  estimatedMinutes !== undefined
+) {
+  parsedEstimatedMinutes =
+    Number(estimatedMinutes)
+
+  if (
+    Number.isNaN(
+      parsedEstimatedMinutes
+    )
+  ) {
+    return res.status(400).json({
+      message:
+        "Estimated minutes must be a number",
+    })
+  }
+}
 
     /*
       UPDATE ORDER
     */
+await prisma.$transaction(async (tx) => {
 
-    await prisma.translationOrder.update({
+  await tx.translationOrder.update({
       where: {
         id: orderId,
       },
 
       data: {
-        title:
-          title?.trim(),
+       ...(typeof title === "string"
+    ? {
+        title: title.trim(),
+      }
+    : {}),
+  ...(typeof notes === "string"
+    ? {
+        notes:
+          notes.trim() || null,
+      }
+    : {}),
 
-        description:
-          description?.trim() ||
-          null,
+        ...(isOrderStatus(status)
+  ? { status }
+  : {}),
 
-        status,
+...(isOrderPriority(priority)
+? {priority}
+: {}),
 
-        priority,
+...(isEventType(event)
+  ? { event }
+  : {}),
 
         type: orderType,
 
-        lastEditedById:
-          user.id,
+        lastEditedBy: {
+  connect: {
+    id: user.id,
+  },
+},
 
         lastEditedAt:
           new Date(),
@@ -999,74 +1306,90 @@ export async function updateOrder(
         ...(orderType ===
         "BROADCAST"
           ? {
-              broadcast: {
-                update: {
-                  estimatedMinutes:
-                    Number(
-                      estimatedMinutes
-                    ) || 0,
+            broadcast: {
+  update: {
+    ...(parsedEstimatedMinutes !==
+    undefined
+      ? {
+          estimatedMinutes:
+            parsedEstimatedMinutes,
+        }
+      : {}),
 
-                  sourceLanguage,
+    ...(sourceLanguage !==
+    undefined
+      ? {
+          sourceLanguage,
+        }
+      : {}),
 
-                  targetLanguages,
+    ...(targetLanguages !==
+    undefined
+      ? {
+          targetLanguages,
+        }
+      : {}),
 
-                  deliveryFormat:
-                    format,
+    ...(typeof sourceFileLink ===
+    "string"
+      ? {
+          sourceFileLink,
+        }
+      : {}),
 
-                  sourceFileLink:
-                    sourceFileLink ||
-                    "",
+    ...(deliveryDate
+      ? {
+          deliveryDate:
+            new Date(
+              deliveryDate
+            ),
+        }
+      : {}),
 
-                  deliveryDate:
-                    deliveryDate
-                      ? new Date(
-                          deliveryDate
-                        )
-                      : undefined,
+    ...(deadline
+      ? {
+          deadlineDate:
+            new Date(deadline),
+        }
+      : {}),
 
-                  deadlineDate:
-                    deadline
-                      ? new Date(
-                          deadline
-                        )
-                      : undefined,
-
-                  game: game
-                    ? {
-                        connectOrCreate:
-                          {
-                            where: {
-                              name:
-                                game.trim(),
-                            },
-
-                            create: {
-                              name:
-                                game.trim(),
-                            },
-                          },
-                      }
-                    : undefined,
-                },
+    ...(normalizedGame
+      ? {
+          game: {
+            connectOrCreate: {
+              where: {
+                name:
+                  normalizedGame,
               },
+
+              create: {
+                name:
+                  normalizedGame,
+              },
+            },
+          },
+        }
+      : {}),
+  },
+},
             }
           : {
               marketing: {
                 update: {
                   contentTitle:
-                    contentTitle?.trim() ||
-                    null,
+  typeof contentTitle ===
+  "string"
+    ? contentTitle.trim() ||
+      null
+    : undefined,
 
                   sourceLanguage,
 
                   targetLanguages,
 
-                  sourceFileLink:
-                    sourceFileLink ||
-                    "",
-
-                  deliveryFormat:
-                    format,
+                  sourceFileLink:typeof sourceFileLink === "string"
+  ? sourceFileLink
+  : undefined,
                 },
               },
             }),
@@ -1091,13 +1414,30 @@ export async function updateOrder(
         const broadcastId =
             existingOrder.broadcast.id
 
+            await tx.broadcastDelivery.deleteMany({
+  where: {
+    broadcastId,
+
+    id: {
+      notIn:
+        deliveries
+          .filter(
+            (d: any) => d.id
+          )
+          .map(
+            (d: any) => d.id
+          ),
+    },
+  },
+})
+
         await Promise.all(
           deliveries.map(
             (delivery: any) => {
 
               if (delivery.id) {
 
-                return prisma.translationDelivery.update(
+                return tx.broadcastDelivery.update(
                   {
                     where: {
                       id: delivery.id,
@@ -1115,7 +1455,7 @@ export async function updateOrder(
                 )
               }
 
-              return prisma.translationDelivery.create(
+              return tx.broadcastDelivery.create(
                 {
                   data: {
                     language:
@@ -1141,13 +1481,29 @@ export async function updateOrder(
 const marketingId =
   existingOrder.marketing.id
 
+  await tx.marketingDelivery.deleteMany({
+  where: {
+    marketingId,
+
+    id: {
+      notIn:
+        deliveries
+          .filter(
+            (d: any) => d.id
+          )
+          .map(
+            (d: any) => d.id
+          ),
+    },
+  },
+})
         await Promise.all(
           deliveries.map(
             (delivery: any) => {
 
               if (delivery.id) {
 
-                return prisma.marketingDelivery.update(
+                return tx.marketingDelivery.update(
                   {
                     where: {
                       id: delivery.id,
@@ -1165,7 +1521,7 @@ const marketingId =
                 )
               }
 
-              return prisma.marketingDelivery.create(
+              return tx.marketingDelivery.create(
                 {
                   data: {
                     language:
@@ -1186,14 +1542,183 @@ const marketingId =
     }
 
     /*
+  DELIVERY FORMATS
+*/
+
+if (
+  deliveryFormats &&
+  Array.isArray(
+    deliveryFormats
+  )
+) {
+  if (
+  orderType ===
+    "BROADCAST" &&
+  existingOrder.broadcast
+) {
+  const broadcastId =
+    existingOrder.broadcast.id
+
+  await tx.broadcastDeliveryFormat.deleteMany({
+    where: {
+      broadcastId,
+
+      id: {
+        notIn:
+          deliveryFormats
+            .filter(
+              (item: any) =>
+                item.id
+            )
+            .map(
+              (item: any) =>
+                item.id
+            ),
+      },
+    },
+  })
+
+
+
+  await Promise.all(
+    deliveryFormats.map(
+      (item: any) => {
+
+        if (item.id) {
+
+          return tx.broadcastDeliveryFormat.update(
+            {
+              where: {
+                id: item.id,
+              },
+
+              data: {
+                format: isDeliveryFormat(
+  item.format
+)
+  ? item.format
+  : DeliveryFormat.SRT,
+
+                deliveryLink:
+                  item.deliveryLink ||
+                  "",
+              },
+            }
+          )
+        }
+
+        return tx.broadcastDeliveryFormat.create(
+          {
+            data: {
+             format: isDeliveryFormat(
+  item.format
+)
+  ? item.format
+  : DeliveryFormat.SRT,
+
+              deliveryLink:
+                item.deliveryLink ||
+                "",
+
+              broadcastId,
+            },
+          }
+        )
+      }
+    )
+  )
+}
+
+if (
+  orderType ===
+    "MARKETING" &&
+  existingOrder.marketing
+) {
+  const marketingId =
+    existingOrder.marketing.id
+
+  await tx.marketingDeliveryFormat.deleteMany({
+    where: {
+      marketingId,
+
+      id: {
+        notIn:
+          deliveryFormats
+            .filter(
+              (item: any) =>
+                item.id
+            )
+            .map(
+              (item: any) =>
+                item.id
+            ),
+      },
+    },
+  })
+
+  await Promise.all(
+    deliveryFormats.map(
+      (item: any) => {
+
+        if (item.id) {
+
+          return tx.marketingDeliveryFormat.update(
+            {
+              where: {
+                id: item.id,
+              },
+
+              data: {
+               format: isDeliveryFormat(
+  item.format
+)
+  ? item.format
+  : DeliveryFormat.SRT,
+
+                deliveryLink:
+                  item.deliveryLink ||
+                  "",
+              },
+            }
+          )
+        }
+
+        return tx.marketingDeliveryFormat.create(
+          {
+            data: {
+             format: isDeliveryFormat(
+  item.format
+)
+  ? item.format
+  : DeliveryFormat.SRT,
+
+              deliveryLink:
+                item.deliveryLink ||
+                "",
+
+              marketingId,
+            },
+          }
+        )
+      }
+    )
+  )
+}
+}
+},{
+  timeout: 10000,
+})
+
+
+    /*
       SOURCE FILE CHANGED
     */
 
-    const sourceWasChanged =
-      existingOrder
-        ?.broadcast
-        ?.sourceFileLink !==
-      sourceFileLink
+const sourceWasChanged =
+  orderType === "BROADCAST" &&
+  existingOrder.broadcast
+    ?.sourceFileLink !==
+  sourceFileLink
 
     if (sourceWasChanged) {
 
@@ -1212,151 +1737,7 @@ const marketingId =
           id: orderId,
         },
 
-        select: {
-          id: true,
-
-          type: true,
-
-          title: true,
-
-          description: true,
-
-          status: true,
-
-          priority: true,
-
-          dateAdded: true,
-
-          completedAt: true,
-
-          lastEditedAt: true,
-
-          createdBy: {
-            select: {
-              id: true,
-
-              firstName: true,
-
-              lastName: true,
-
-              role: true,
-
-              position: true,
-            },
-          },
-
-          completedBy: {
-            select: {
-              id: true,
-
-              firstName: true,
-
-              lastName: true,
-            },
-          },
-
-          lastEditedBy: {
-            select: {
-              id: true,
-
-              firstName: true,
-
-              lastName: true,
-            },
-          },
-
-          editHistory: {
-            take: 10,
-
-            orderBy: {
-              editedAt: "desc",
-            },
-
-            select: {
-              id: true,
-
-              editedAt: true,
-
-              editedBy: {
-                select: {
-                  id: true,
-
-                  firstName: true,
-
-                  lastName: true,
-                },
-              },
-            },
-          },
-
-          broadcast: {
-            select: {
-              id: true,
-
-              gameId: true,
-
-              estimatedMinutes: true,
-
-              sourceLanguage: true,
-
-              targetLanguages: true,
-
-              deliveryFormat: true,
-
-              sourceFileLink: true,
-
-              deliveryDate: true,
-
-              deadlineDate: true,
-
-              game: {
-                select: {
-                  id: true,
-
-                  name: true,
-
-                  logo: true,
-                },
-              },
-
-              deliveries: {
-                select: {
-                  id: true,
-
-                  language: true,
-
-                  deliveryLink: true,
-                },
-              },
-            },
-          },
-
-          marketing: {
-            select: {
-              id: true,
-
-              contentTitle: true,
-
-              sourceLanguage: true,
-
-              targetLanguages: true,
-
-              sourceFileLink: true,
-
-              deliveryFormat: true,
-
-              deliveries: {
-                select: {
-                  id: true,
-
-                  language: true,
-
-                  deliveryLink: true,
-                },
-              },
-            },
-          },
-        },
+        select: orderSelect,
       })
 
     return res.json(updatedOrder)
@@ -1437,19 +1818,19 @@ export async function updateOrderStatus(
       PERMISSIONS
     */
 
-    const canUpdate =
-      user.role === "ADMIN" ||
+    // const canUpdate =
+    //   user.role === "ADMIN" ||
 
-      user.position ===
-        "PRODUCER" ||
+    //   user.position ===
+    //     "PRODUCER" ||
 
-      user.position ===
-        "POST_PRODUCTION_MANAGER" ||
+    //   user.position ===
+    //     "POST_PRODUCTION_MANAGER" ||
 
-      user.position ===
-        "TRANSLATOR"
+    //   user.position ===
+    //     "TRANSLATOR"
 
-    if (!canUpdate) {
+if (!canUpdateStatus(user)){
       return res.status(403).json({
         message: "Unauthorized",
       })
@@ -1503,26 +1884,35 @@ export async function updateOrderStatus(
       UPDATE DATA
     */
 
-    const updateData: any = {
-      status,
-    }
+    const parsedStatus =
+ isOrderStatus(status)
+    ? status
+    : OrderStatus.PENDING
 
-    if (status === "COMPLETED") {
+const updateData:
+  Prisma.TranslationOrderUpdateInput =
+{
+  status: parsedStatus,
+}
 
-      updateData.completedById =
-        user.id
-
-      updateData.completedAt =
-        new Date()
-
-    } else {
-
-      updateData.completedById =
-        null
-
-      updateData.completedAt =
-        null
-    }
+if (
+  parsedStatus ===
+  OrderStatus.COMPLETED
+){
+  updateData.completedBy = {
+    connect: {
+      id: user.id,
+    },
+  }
+  updateData.completedAt =
+    new Date()
+} else {
+  updateData.completedBy = {
+    disconnect: true,
+  }
+  updateData.completedAt =
+    null
+}
 
     /*
       UPDATE ORDER
@@ -1536,128 +1926,17 @@ export async function updateOrderStatus(
 
         data: updateData,
 
-        select: {
-          id: true,
-
-          type: true,
-
-          title: true,
-
-          status: true,
-
-          priority: true,
-
-          completedAt: true,
-
-          createdBy: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-            },
-          },
-
-          completedBy: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-            },
-          },
-
-          /*
-            BROADCAST
-          */
-
-          broadcast: {
-            select: {
-              id: true,
-
-              sourceLanguage: true,
-
-              targetLanguages: true,
-
-              deliveryFormat: true,
-
-              estimatedMinutes: true,
-
-              sourceFileLink: true,
-
-              deliveryDate: true,
-
-              deadlineDate: true,
-
-              gameId: true,
-
-              game: {
-                select: {
-                  id: true,
-
-                  name: true,
-
-                  logo: true,
-
-                  assignedUsers: {
-                    select: {
-                      user: {
-                        select: {
-                          id: true,
-                          firstName: true,
-                          lastName: true,
-                          role: true,
-                          position: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-
-              deliveries: {
-                select: {
-                  id: true,
-                  language: true,
-                  deliveryLink: true,
-                },
-              },
-            },
-          },
-
-          /*
-            MARKETING
-          */
-
-          marketing: {
-  select: {
-    id: true,
-
-    contentTitle: true,
-
-    sourceLanguage: true,
-
-    targetLanguages: true,
-
-    sourceFileLink: true,
-
-    deliveryFormat: true,
-
-    deliveries: {
-      select: {
-        id: true,
-        language: true,
-        deliveryLink: true,
-      },
-    },
-  },
-},
-        },
+        select:orderSelect,
       })
 
     /*
       NOTIFICATIONS
     */
 
-    if (status === "COMPLETED") {
+    if (
+  parsedStatus ===
+  OrderStatus.COMPLETED
+){
 
       let notifyUsers: {
         id: string
@@ -1760,7 +2039,7 @@ export async function updateOrderStatus(
         uniqueUserIds.length > 0
       ) {
 
-        prisma.notification.createMany({
+        await prisma.notification.createMany({
           data:
             uniqueUserIds.map(
               (userId) => ({
@@ -1882,16 +2161,16 @@ export async function deleteOrder(
       PERMISSIONS
     */
 
-    const canDelete =
-      user.role === "ADMIN" ||
+    // const canDelete =
+    //   user.role === "ADMIN" ||
 
-      user.position ===
-        "PRODUCER" ||
+    //   user.position ===
+    //     "PRODUCER" ||
 
-      user.position ===
-        "POST_PRODUCTION_MANAGER"
+    //   user.position ===
+    //     "POST_PRODUCTION_MANAGER"
 
-    if (!canDelete) {
+if (!canManageOrders(user)){
       return res.status(403).json({
         message: "Unauthorized",
       })
