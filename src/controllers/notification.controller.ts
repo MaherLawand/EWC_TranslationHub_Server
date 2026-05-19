@@ -30,12 +30,14 @@ export async function notifyTranslatorsSourceReady(
               },
 
               deliveries: true,
+              deliveryFormats:true,
             },
           },
 
           marketing: {
             include: {
               deliveries: true,
+              deliveryFormats:true,
             },
           },
         },
@@ -171,11 +173,15 @@ ${
     : `Content: ${order.marketing?.contentTitle || "Marketing Content"}`
 }
 
-Delivery Format:
+Delivery Formats:
 ${
   order.type === "BROADCAST"
-    ? order.broadcast?.deliveryFormat
-    : order.marketing?.deliveryFormat
+    ? order.broadcast?.deliveryFormats
+        ?.map((f) => f.format)
+        .join(", ")
+    : order.marketing?.deliveryFormats
+        ?.map((f) => f.format)
+        .join(", ")
 }
 
 Priority:
@@ -319,11 +325,14 @@ ${sourceFileLink}
                     Delivery Format:
                   </strong>
                   ${
-                    order.type ===
-                    "BROADCAST"
-                      ? order.broadcast?.deliveryFormat
-                      : order.marketing?.deliveryFormat
-                  }
+  order.type === "BROADCAST"
+    ? order.broadcast?.deliveryFormats
+        ?.map((f) => f.format)
+        .join(", ")
+    : order.marketing?.deliveryFormats
+        ?.map((f) => f.format)
+        .join(", ")
+}
                 </p>
 
                 <p style="margin:14px 0 0;">
