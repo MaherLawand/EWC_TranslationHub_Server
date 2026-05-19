@@ -1359,23 +1359,15 @@ await prisma.$transaction(async (tx) => {
         }
       : {}),
 
-    ...(normalizedGame
-      ? {
-          game: {
-            connectOrCreate: {
-              where: {
-                name:
-                  normalizedGame,
-              },
-
-              create: {
-                name:
-                  normalizedGame,
-              },
-            },
-          },
-        }
-      : {}),
+...(normalizedGame
+  ? {
+      game: {
+        connect: {
+          id: normalizedGame,
+        },
+      },
+    }
+  : {}),
   },
 },
             }
