@@ -124,6 +124,8 @@ const orderSelect = {
 
       sourceFileLink: true,
 
+      srtAvailableLink: true,
+
       deliveryDate: true,
 
       deadlineDate: true,
@@ -187,6 +189,8 @@ const orderSelect = {
       targetLanguages: true,
 
       sourceFileLink: true,
+
+      srtAvailableLink: true,
 
       deliveryFormats: {
         select: {
@@ -757,6 +761,7 @@ export async function createOrder(
       deliveryFormats,
       deliveries,
       sourceFileLink,
+      srtAvailableLink,
       deliveryDate,
       deadline,
     } = req.body
@@ -967,6 +972,11 @@ isOrderPriority(priority)
                       sourceFileLink ||
                       "",
 
+                    srtAvailableLink:
+                      typeof srtAvailableLink === "string"
+                        ? srtAvailableLink.trim() || null
+                        : null,
+
                     deliveryDate:
                       deliveryDate
                         ? new Date(
@@ -1011,6 +1021,11 @@ isOrderPriority(priority)
                     sourceFileLink:typeof sourceFileLink === "string"
   ? sourceFileLink
   : undefined,
+
+                    srtAvailableLink:
+                      typeof srtAvailableLink === "string"
+                        ? srtAvailableLink.trim() || null
+                        : null,
 
                    deliveryFormats: {
   create:
@@ -1096,6 +1111,7 @@ export async function updateOrder(
       contentTitle,
       deliveryFormats,
       sourceFileLink,
+      srtAvailableLink,
       deliveryDate,
       deadline,
       deliveries,
@@ -1334,6 +1350,13 @@ await prisma.$transaction(async (tx) => {
         }
       : {}),
 
+    ...(typeof srtAvailableLink === "string"
+      ? {
+          srtAvailableLink:
+            srtAvailableLink.trim() || null,
+        }
+      : {}),
+
     ...(deliveryDate
       ? {
           deliveryDate:
@@ -1379,6 +1402,13 @@ await prisma.$transaction(async (tx) => {
                   sourceFileLink:typeof sourceFileLink === "string"
   ? sourceFileLink
   : undefined,
+
+                  ...(typeof srtAvailableLink === "string"
+                    ? {
+                        srtAvailableLink:
+                          srtAvailableLink.trim() || null,
+                      }
+                    : {}),
                 },
               },
             }),

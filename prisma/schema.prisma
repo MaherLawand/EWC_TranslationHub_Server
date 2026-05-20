@@ -285,6 +285,8 @@ model BroadcastDetails {
 
   sourceFileLink String?
 
+  srtAvailableLink String?
+
   deliveryDate DateTime
 
   deadlineDate DateTime
@@ -312,6 +314,8 @@ model MarketingDetails {
   targetLanguages String[]
 
   sourceFileLink String?
+
+  srtAvailableLink String?
 
   orderId String @unique
 
