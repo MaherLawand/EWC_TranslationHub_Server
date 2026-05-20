@@ -157,8 +157,7 @@ export async function login(
     res.cookie("token", token, {
       httpOnly: true,
       secure: true,
-      sameSite: "none",
-
+      sameSite: "lax",
       maxAge: 1000 * 60 * 60 * 24 * 7,
     })
 
@@ -199,7 +198,7 @@ export async function logout(
   res.clearCookie("token", {
     httpOnly: true,
     secure: true,
-    sameSite: "none",
+    sameSite: "lax",
   })
 
   return res.json({
