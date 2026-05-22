@@ -36,6 +36,13 @@ app.use("/games", gameRoutes)
 
 app.use(
   "/game-logos",
+  // Helmet sets Cross-Origin-Resource-Policy: same-origin globally, which
+  // blocks browsers from loading these images cross-origin (e.g. :5173 → :4000).
+  // Override it to "cross-origin" for this static route only.
+  (_req, res, next) => {
+    res.setHeader("Cross-Origin-Resource-Policy", "cross-origin")
+    next()
+  },
   express.static(
     path.resolve(
       "src/uploads/games"

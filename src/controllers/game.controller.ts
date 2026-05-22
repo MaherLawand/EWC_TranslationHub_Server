@@ -1,3 +1,4 @@
+import path from "path"
 import { prisma } from "../lib/prisma.js"
 import type { Request, Response } from "express"
 
@@ -13,7 +14,18 @@ export async function getGames(
         },
       })
 
-    return res.json(games)
+    // The DB stores full URLs seeded against a specific host (e.g. production).
+    // Rewrite the logo to always point at the current server so logos load in
+    // every environment without re-seeding.
+    const base = `${req.protocol}://${req.get("host")}`
+    const mapped = games.map((g) => ({
+      ...g,
+      logo: g.logo
+        ? `${base}/game-logos/${path.basename(g.logo)}`
+        : null,
+    }))
+
+    return res.json(mapped)
 
   } catch (error) {
     console.error(error)
