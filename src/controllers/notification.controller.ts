@@ -22,8 +22,8 @@ export async function notifyTranslatorsSourceReady(
               game: {
                 include: {
                   assignedUsers: {
-                    include: {
-                      user: true,
+                    select: {
+                      user: { select: { id: true } },
                     },
                   },
                 },
@@ -97,23 +97,13 @@ export async function notifyTranslatorsSourceReady(
     }
 
     /*
-      REMOVE DUPLICATES
+      REMOVE DUPLICATES — O(n) via Set
     */
 
-    const uniqueTranslators =
-      translators.filter(
-        (
-          translator,
-          index,
-          self
-        ) =>
-          index ===
-          self.findIndex(
-            (u) =>
-              u.id ===
-              translator.id
-          )
-      )
+    const seen = new Set<string>()
+    const uniqueTranslators = translators.filter(
+      (t) => seen.has(t.id) ? false : (seen.add(t.id), true)
+    )
 
     /*
       CREATE NOTIFICATIONS

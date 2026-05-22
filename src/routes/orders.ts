@@ -8,6 +8,7 @@ import {
   assignUsersToMarketingOrder,
   createOrder,
   deleteOrder,
+  getOrderById,
   getOrders,
   markNotificationsAsRead,
   updateOrder,
@@ -26,6 +27,12 @@ router.post(
   "/",
   requireAuth,
   createOrder
+)
+
+router.get(
+  "/:id",
+  requireAuth,
+  getOrderById
 )
 
 router.patch(

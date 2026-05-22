@@ -1,7 +1,10 @@
 import { Router } from "express"
+import rateLimit from "express-rate-limit"
 
 import {
   setPassword,
+  validateInvite,
+  resendInvite,
   login,
   logout,
   getCurrentUser,
@@ -18,9 +21,27 @@ import {
   requireAdmin,
 } from "../middleware/admin.middleware.js"
 
+// 10 attempts per 15 min — login, set-password, resend-invite
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { message: "Too many requests, please try again later." },
+  standardHeaders: true,
+  legacyHeaders: false,
+})
+
+// 30 attempts per 15 min — read-only token check
+const checkLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  message: { message: "Too many requests, please try again later." },
+  standardHeaders: true,
+  legacyHeaders: false,
+})
+
 const router = Router()
 
-router.post("/login", login)
+router.post("/login", authLimiter, login)
 
 router.post(
   "/logout",
@@ -61,9 +82,22 @@ router.post(
   assignGamesToUser
 )
 
+router.get(
+  "/validate-invite",
+  checkLimiter,
+  validateInvite
+)
+
 router.post(
   "/set-password",
+  authLimiter,
   setPassword
+)
+
+router.post(
+  "/resend-invite",
+  authLimiter,
+  resendInvite
 )
 
 router.post(

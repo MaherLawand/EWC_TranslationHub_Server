@@ -21,6 +21,55 @@ import {
   UserDepartment,
 } from "@prisma/client"
 
+const listOrderSelect = {
+  id: true,
+  type: true,
+  title: true,
+  status: true,
+  priority: true,
+  dateAdded: true,
+  broadcast: {
+    select: {
+      id: true,
+      sourceLanguage: true,
+      targetLanguages: true,
+      deadlineDate: true,
+      deliveryFormats: {
+        select: {
+          id: true,
+          format: true,
+        },
+      },
+      game: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+  },
+  marketing: {
+    select: {
+      id: true,
+      contentTitle: true,
+      sourceLanguage: true,
+      targetLanguages: true,
+      deadlineDate: true,
+      deliveryFormats: {
+        select: {
+          id: true,
+          format: true,
+        },
+      },
+      assignments: {
+        select: {
+          id: true,
+        },
+      },
+    },
+  },
+} satisfies Prisma.TranslationOrderSelect
+
 const orderSelect = {
   
   id: true,
@@ -191,6 +240,8 @@ const orderSelect = {
       sourceFileLink: true,
 
       srtAvailableLink: true,
+
+      deadlineDate: true,
 
       deliveryFormats: {
         select: {
@@ -700,7 +751,7 @@ where.broadcast = {
 
         take: limit,
 
-        select:orderSelect,
+        select: listOrderSelect,
       }),
 
       prisma.translationOrder.count({
@@ -740,6 +791,25 @@ where.broadcast = {
     })
   }
 }
+export async function getOrderById(
+  req: AuthRequest,
+  res: Response
+) {
+  try {
+    const order = await prisma.translationOrder.findUnique({
+      where: { id: String(req.params.id) },
+      select: orderSelect,
+    })
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" })
+    }
+    return res.json(order)
+  } catch (error) {
+    console.error("GET ORDER BY ID ERROR:", error)
+    return res.status(500).json({ message: "Failed to fetch order" })
+  }
+}
+
 export async function createOrder(
   req: AuthRequest,
   res: Response
@@ -1025,6 +1095,11 @@ isOrderPriority(priority)
                     srtAvailableLink:
                       typeof srtAvailableLink === "string"
                         ? srtAvailableLink.trim() || null
+                        : null,
+
+                    deadlineDate:
+                      deadline
+                        ? new Date(deadline)
                         : null,
 
                    deliveryFormats: {
@@ -1409,6 +1484,10 @@ await prisma.$transaction(async (tx) => {
                           srtAvailableLink.trim() || null,
                       }
                     : {}),
+
+                  ...(deadline
+                    ? { deadlineDate: new Date(deadline) }
+                    : { deadlineDate: null }),
                 },
               },
             }),
@@ -1794,23 +1873,57 @@ export async function updateOrderStatus(
     }
 
     /*
-      USER
+      USER + EXISTING ORDER — fetched in parallel (independent queries)
     */
 
-    const user =
-      await prisma.user.findUnique({
-        where: {
-          id: req.userId,
-        },
+    const [user, existingOrder] =
+      await Promise.all([
+        prisma.user.findUnique({
+          where: {
+            id: req.userId,
+          },
 
-        select: {
-          id: true,
-          firstName: true,
-          lastName: true,
-          role: true,
-          position: true,
-        },
-      })
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            role: true,
+            position: true,
+          },
+        }),
+
+        prisma.translationOrder.findUnique({
+          where: {
+            id: orderId,
+          },
+
+          select: {
+            id: true,
+            title: true,
+            type: true,
+
+            broadcast: {
+              select: {
+                game: {
+                  select: {
+                    assignedUsers: {
+                      select: {
+                        user: {
+                          select: {
+                            id: true,
+                            role: true,
+                            position: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        }),
+      ])
 
     if (!user) {
       return res.status(404).json({
@@ -1827,43 +1940,6 @@ export async function updateOrderStatus(
         message: "Unauthorized",
       })
     }
-
-    /*
-      EXISTING ORDER
-    */
-
-    const existingOrder =
-      await prisma.translationOrder.findUnique({
-        where: {
-          id: orderId,
-        },
-
-        select: {
-          id: true,
-          title: true,
-          type: true,
-
-          broadcast: {
-            select: {
-              game: {
-                select: {
-                  assignedUsers: {
-                    select: {
-                      user: {
-                        select: {
-                          id: true,
-                          role: true,
-                          position: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      })
 
     if (!existingOrder) {
       return res.status(404).json({
@@ -1907,19 +1983,33 @@ if (
 }
 
     /*
-      UPDATE ORDER
+      UPDATE ORDER + ADMIN LOOKUP — run in parallel when status is COMPLETED
     */
 
-    const updatedOrder =
-      await prisma.translationOrder.update({
-        where: {
-          id: orderId,
-        },
+    let adminsForNotification: { id: string }[] = []
 
-        data: updateData,
+    const [updatedOrder] =
+      await Promise.all([
+        prisma.translationOrder.update({
+          where: {
+            id: orderId,
+          },
 
-        select:orderSelect,
-      })
+          data: updateData,
+
+          select: orderSelect,
+        }),
+
+        // Pre-fetch admins in parallel with the update — only needed for COMPLETED
+        parsedStatus === OrderStatus.COMPLETED
+          ? prisma.user.findMany({
+              where: { role: "ADMIN" },
+              select: { id: true },
+            }).then((admins) => {
+              adminsForNotification = admins
+            })
+          : Promise.resolve(),
+      ])
 
     /*
       NOTIFICATIONS
@@ -1957,20 +2047,9 @@ if (
                   "POST_PRODUCTION_MANAGER"
             )
 
-        const admins =
-          await prisma.user.findMany({
-            where: {
-              role: "ADMIN",
-            },
-
-            select: {
-              id: true,
-            },
-          })
-
         notifyUsers = [
           ...assignedUsers,
-          ...admins,
+          ...adminsForNotification,
         ]
       }
 
@@ -1983,24 +2062,14 @@ if (
         "MARKETING"
       ) {
 
-        notifyUsers =
+        // For marketing, also include producers and PPMs — filter from
+        // the already-fetched admins list plus a targeted extra query
+        const extraUsers =
           await prisma.user.findMany({
             where: {
               OR: [
-                {
-                  role:
-                    "ADMIN",
-                },
-
-                {
-                  position:
-                    "PRODUCER",
-                },
-
-                {
-                  position:
-                    "POST_PRODUCTION_MANAGER",
-                },
+                { position: "PRODUCER" },
+                { position: "POST_PRODUCTION_MANAGER" },
               ],
             },
 
@@ -2008,6 +2077,11 @@ if (
               id: true,
             },
           })
+
+        notifyUsers = [
+          ...adminsForNotification,
+          ...extraUsers,
+        ]
       }
 
       /*

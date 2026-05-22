@@ -2,6 +2,7 @@ import express from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser"
 import path from "path"
+import helmet from "helmet"
 
 import authRoutes from "./routes/auth.routes.js"
 import userRoutes from "./routes/user.routes.js"
@@ -10,6 +11,9 @@ import gameRoutes from "./routes/games.routes.js"
 
 const app = express()
 
+// Security headers
+app.use(helmet())
+
 app.use(
   cors({
     origin: process.env.CLIENT_URL,
@@ -17,7 +21,8 @@ app.use(
   })
 )
 
-app.use(express.json())
+// 1 MB body limit — prevents memory exhaustion from large payloads
+app.use(express.json({ limit: "1mb" }))
 
 app.use(cookieParser())
 

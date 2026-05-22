@@ -317,6 +317,8 @@ model MarketingDetails {
 
   srtAvailableLink String?
 
+  deadlineDate DateTime?
+
   orderId String @unique
 
   order TranslationOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)

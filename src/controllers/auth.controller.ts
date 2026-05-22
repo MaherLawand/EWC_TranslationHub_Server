@@ -110,6 +110,66 @@ export async function setPassword(
   }
 }
 
+export async function validateInvite(
+  req: Request,
+  res: Response
+) {
+  try {
+    const token = String(req.query.token || "")
+    if (!token) return res.status(400).json({ valid: false, reason: "missing" })
+
+    const user = await prisma.user.findFirst({ where: { inviteToken: token } })
+    if (!user) return res.json({ valid: false, reason: "invalid" })
+    if (user.inviteExpiry && user.inviteExpiry < new Date()) {
+      return res.json({ valid: false, reason: "expired" })
+    }
+    return res.json({ valid: true })
+  } catch (error) {
+    console.error("VALIDATE INVITE ERROR:", error)
+    return res.status(500).json({ valid: false, reason: "error" })
+  }
+}
+
+export async function resendInvite(
+  req: Request,
+  res: Response
+) {
+  try {
+    const { email } = req.body
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" })
+    }
+
+    // Always return the same vague 200 so callers can't enumerate accounts
+    const vague = { message: "If that email matches a pending account, a new link has been sent." }
+
+    const user = await prisma.user.findUnique({ where: { email } })
+
+    // No user found, or user already activated — do nothing but respond vaguely
+    if (!user || user.isActive) {
+      return res.json(vague)
+    }
+
+    const token = generateInviteToken()
+    const inviteExpiry = new Date(Date.now() + 1000 * 60 * 60 * 24 * 3)
+
+
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { inviteToken: token, inviteExpiry },
+    })
+
+    await sendInviteEmail(user.email, token)
+
+    return res.json(vague)
+  } catch (error) {
+    console.error("RESEND INVITE ERROR:", error)
+    return res.status(500).json({ message: "Failed to resend invite" })
+  }
+}
+
 export async function login(
   req: Request,
   res: Response
@@ -329,6 +389,24 @@ export async function getAllUsers(
       currentUser.role === "ADMIN"
 
     /*
+      SEARCH
+    */
+
+    const search = req.query.search
+      ? String(req.query.search).trim()
+      : ""
+
+    const where = search
+      ? {
+          OR: [
+            { firstName: { contains: search, mode: "insensitive" as const } },
+            { lastName: { contains: search, mode: "insensitive" as const } },
+            { email: { contains: search, mode: "insensitive" as const } },
+          ],
+        }
+      : {}
+
+    /*
       PAGINATION
     */
 
@@ -393,20 +471,19 @@ export async function getAllUsers(
       FETCH USERS
     */
 
-    const users =
-      await prisma.user.findMany({
-        skip,
+    const [users, total] =
+      await Promise.all([
+        prisma.user.findMany({
+          where,
+          skip,
+          take: limit,
+          orderBy: { createdAt: "desc" },
+          select: isAdmin ? adminSelect : normalSelect,
+        }),
+        prisma.user.count({ where }),
+      ])
 
-        take: limit,
-
-        orderBy: {
-          createdAt: "desc",
-        },
-
-        select: isAdmin
-          ? adminSelect
-          : normalSelect,
-      })
+    const totalPages = Math.ceil(total / limit) || 1
 
     /*
       RESPONSE
@@ -414,12 +491,10 @@ export async function getAllUsers(
 
     return res.json({
       page,
-
       limit,
-
-      total: users.length,
-
-      users: users
+      total,
+      totalPages,
+      users,
     })
 
   } catch (error) {
@@ -449,6 +524,22 @@ export async function createUser(
       position,
     } = req.body
 
+    // Input validation
+    if (!firstName?.trim() || !lastName?.trim()) {
+      return res.status(400).json({ message: "First and last name are required" })
+    }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ message: "Valid email is required" })
+    }
+    const VALID_ROLES = ["ADMIN", "EDITOR", "TRANSLATOR"]
+    const VALID_DEPARTMENTS = ["BROADCAST", "MARKETING"]
+    if (!VALID_ROLES.includes(role)) {
+      return res.status(400).json({ message: "Invalid role" })
+    }
+    if (!VALID_DEPARTMENTS.includes(department)) {
+      return res.status(400).json({ message: "Invalid department" })
+    }
+
     const existingUser =
       await prisma.user.findUnique({
         where: {
@@ -467,10 +558,9 @@ export async function createUser(
       generateInviteToken()
 
     const inviteExpiry =
-      new Date(
-        Date.now() +
-          1000 * 60 * 60 * 24
-      )
+new Date(Date.now() + 1000 * 60 * 60 * 24 * 3)
+
+
 
     const inviteLink =
       `${CLIENT_URL}/setup-password?token=${inviteToken}`
@@ -808,10 +898,7 @@ export async function updateUser(
       inviteExpiry =
         new Date(
           Date.now() +
-            1000 *
-              60 *
-              60 *
-              24
+            1000 * 60 * 60 * 24 * 3
         )
 
       const inviteLink =
