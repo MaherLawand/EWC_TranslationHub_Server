@@ -530,7 +530,7 @@ export async function createUser(
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return res.status(400).json({ message: "Valid email is required" })
     }
-    const VALID_ROLES = ["ADMIN", "EDITOR", "TRANSLATOR"]
+    const VALID_ROLES = ["ADMIN", "VIEWER", "EDITOR", "TRANSLATOR"]
     const VALID_DEPARTMENTS = ["BROADCAST", "MARKETING"]
     if (!VALID_ROLES.includes(role)) {
       return res.status(400).json({ message: "Invalid role" })
@@ -590,7 +590,7 @@ To activate your account and create your password, open the link below:
 
 ${inviteLink}
 
-This invitation link expires in 24 hours.
+This invitation link expires in 72 hours.
 
 If you did not expect this email, you can safely ignore it.
 
@@ -717,7 +717,7 @@ If you did not expect this email, you can safely ignore it.
               </div>
 
               <p>
-                For security reasons, this invitation link will expire in 24 hours.
+                For security reasons, this invitation link will expire in 72 hours.
               </p>
 
               <p style="margin-bottom:0;">
@@ -928,7 +928,7 @@ To activate your account and create your password, open the link below:
 
 ${inviteLink}
 
-This invitation link expires in 24 hours.
+This invitation link expires in 72 hours.
 
 If you did not expect this invitation, you can safely ignore this email.
 
@@ -1054,7 +1054,7 @@ If you did not expect this invitation, you can safely ignore this email.
               </div>
 
               <p>
-                For security reasons, this invitation link will expire in 24 hours.
+                For security reasons, this invitation link will expire in 72 hours.
               </p>
 
               <p style="margin-bottom:0;">
