@@ -722,24 +722,44 @@ if (
   assignedOnly &&
   req.userId
 ) {
-where.broadcast = {
-  is: {
-    ...(where.broadcast &&
-    typeof where.broadcast ===
-      "object" &&
-    "is" in where.broadcast &&
-    where.broadcast.is
-      ? where.broadcast.is
-      : {}),
-    game: {
-      assignedUsers: {
-        some: {
-          userId: req.userId,
+  if (type === "MARKETING") {
+    // For marketing: filter by user assigned to the order
+    where.marketing = {
+      is: {
+        ...(where.marketing &&
+        typeof where.marketing === "object" &&
+        "is" in where.marketing &&
+        where.marketing.is
+          ? where.marketing.is
+          : {}),
+        assignments: {
+          some: {
+            userId: req.userId,
+          },
         },
       },
-    },
-  },
-}
+    }
+  } else {
+    // For broadcast: filter by user assigned to the game
+    where.broadcast = {
+      is: {
+        ...(where.broadcast &&
+        typeof where.broadcast ===
+          "object" &&
+        "is" in where.broadcast &&
+        where.broadcast.is
+          ? where.broadcast.is
+          : {}),
+        game: {
+          assignedUsers: {
+            some: {
+              userId: req.userId,
+            },
+          },
+        },
+      },
+    }
+  }
 }
 
     /*
