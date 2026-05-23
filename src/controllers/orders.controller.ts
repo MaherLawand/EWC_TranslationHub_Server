@@ -1910,6 +1910,7 @@ export async function updateOrderStatus(
             id: true,
             title: true,
             type: true,
+            createdById: true,
 
             broadcast: {
               select: {
@@ -1920,12 +1921,20 @@ export async function updateOrderStatus(
                         user: {
                           select: {
                             id: true,
-                            role: true,
-                            position: true,
                           },
                         },
                       },
                     },
+                  },
+                },
+              },
+            },
+
+            marketing: {
+              select: {
+                assignments: {
+                  select: {
+                    userId: true,
                   },
                 },
               },
@@ -1992,119 +2001,62 @@ if (
 }
 
     /*
-      UPDATE ORDER + ADMIN LOOKUP — run in parallel when status is COMPLETED
+      UPDATE ORDER
     */
 
-    let adminsForNotification: { id: string }[] = []
+    const updatedOrder =
+      await prisma.translationOrder.update({
+        where: {
+          id: orderId,
+        },
 
-    const [updatedOrder] =
-      await Promise.all([
-        prisma.translationOrder.update({
-          where: {
-            id: orderId,
-          },
+        data: updateData,
 
-          data: updateData,
-
-          select: orderSelect,
-        }),
-
-        // Pre-fetch admins in parallel with the update — only needed for COMPLETED
-        parsedStatus === OrderStatus.COMPLETED
-          ? prisma.user.findMany({
-              where: { role: "ADMIN" },
-              select: { id: true },
-            }).then((admins) => {
-              adminsForNotification = admins
-            })
-          : Promise.resolve(),
-      ])
+        select: orderSelect,
+      })
 
     /*
       NOTIFICATIONS
     */
 
-    if (
-  parsedStatus ===
-  OrderStatus.COMPLETED
-){
+    if (parsedStatus === OrderStatus.COMPLETED) {
 
-      let notifyUsers: {
-        id: string
-      }[] = []
+      let notifyUserIds: string[] = []
 
       /*
-        BROADCAST
+        BROADCAST — game-assigned users + order creator
       */
 
-      if (
-        existingOrder
-          .broadcast?.game
-      ) {
-
-        const assignedUsers =
+      if (existingOrder.broadcast?.game) {
+        const gameUserIds =
           existingOrder.broadcast.game.assignedUsers
-            .map(
-              (a) => a.user
-            )
-            .filter(
-              (u) =>
-                u.position ===
-                  "PRODUCER" ||
+            .map((a) => a.user.id)
 
-                u.position ===
-                  "POST_PRODUCTION_MANAGER"
-            )
-
-        notifyUsers = [
-          ...assignedUsers,
-          ...adminsForNotification,
-        ]
+        notifyUserIds = [...gameUserIds]
       }
 
       /*
-        MARKETING
+        MARKETING — order-assigned users + order creator
       */
 
-      if (
-        existingOrder.type ===
-        "MARKETING"
-      ) {
+      if (existingOrder.type === "MARKETING") {
+        const assignedUserIds =
+          existingOrder.marketing?.assignments
+            .map((a) => a.userId) ?? []
 
-        // For marketing, also include producers and PPMs — filter from
-        // the already-fetched admins list plus a targeted extra query
-        const extraUsers =
-          await prisma.user.findMany({
-            where: {
-              OR: [
-                { position: "PRODUCER" },
-                { position: "POST_PRODUCTION_MANAGER" },
-              ],
-            },
+        notifyUserIds = [...assignedUserIds]
+      }
 
-            select: {
-              id: true,
-            },
-          })
-
-        notifyUsers = [
-          ...adminsForNotification,
-          ...extraUsers,
-        ]
+      // Always include the order creator
+      if (existingOrder.createdById) {
+        notifyUserIds.push(existingOrder.createdById)
       }
 
       /*
         REMOVE DUPLICATES
       */
 
-      const uniqueUserIds =
-        [
-          ...new Set(
-            notifyUsers.map(
-              (u) => u.id
-            )
-          ),
-        ]
+      const uniqueUserIds = [...new Set(notifyUserIds)]
 
       /*
         CREATE NOTIFICATIONS
