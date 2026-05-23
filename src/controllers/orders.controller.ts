@@ -471,6 +471,12 @@ const assignedOnly =
       String(
         req.query.deadlineSort || ""
       )
+
+    const orderId =
+      String(
+        req.query.orderId || ""
+      )
+
 const [
   firstNameSearch = "",
   lastNameSearch = "",
@@ -481,6 +487,11 @@ const [
     */
 
 const where: Prisma.TranslationOrderWhereInput = {}
+
+    // Exact ID match — short-circuits all other filters when set
+    if (orderId) {
+      where.id = orderId
+    }
 
     /*
       SEARCH

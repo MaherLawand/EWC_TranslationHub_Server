@@ -136,6 +136,13 @@ export async function notifyTranslatorsSourceReady(
       SEND EMAILS
     */
 
+    const orderPage =
+      order.type === "BROADCAST"
+        ? "Broadcast"
+        : "marketing"
+
+    const orderLink = `${process.env.CLIENT_URL}?page=${orderPage}&orderId=${order.id}`
+
     await Promise.all(
       uniqueTranslators.map(
         async (translator) => {
@@ -177,8 +184,8 @@ ${
 Priority:
 ${order.priority}
 
-Open Source File:
-${sourceFileLink}
+View Order:
+${orderLink}
 
 © 2026 EWC Translations
 `,
@@ -357,7 +364,7 @@ ${sourceFileLink}
               >
 
                 <a
-                  href="${sourceFileLink}"
+                  href="${orderLink}"
                   target="_blank"
                   style="
                     display:inline-block;
@@ -370,7 +377,7 @@ ${sourceFileLink}
                     font-weight:700;
                   "
                 >
-                  Open Source File
+                  View Order
                 </a>
 
               </div>
