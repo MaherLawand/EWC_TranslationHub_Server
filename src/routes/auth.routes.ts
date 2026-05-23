@@ -14,7 +14,6 @@ import {
   updateUser,
   deleteUser,
   assignGamesToUser,
-  pusherAuth,
 } from "../controllers/auth.controller.js"
 import { requireAuth } from "../middleware/auth.middleware.js"
 import {
@@ -98,12 +97,6 @@ router.post(
   "/resend-invite",
   authLimiter,
   resendInvite
-)
-
-router.post(
-  "/pusher/auth",
-  requireAuth,
-  pusherAuth
 )
 
 export default router

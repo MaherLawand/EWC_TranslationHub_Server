@@ -7,7 +7,7 @@ import type {
 } from "../middleware/auth.middleware.js"
 
 import { prisma } from "../lib/prisma.js"
-import { triggerNotifications } from "../lib/pusher.js"
+import { triggerNotifications } from "../lib/socket.js"
 import { notifyTranslatorsSourceReady } from "./notification.controller.js"
 import type { Prisma } from "@prisma/client"
 import {
@@ -44,6 +44,7 @@ const listOrderSelect = {
         select: {
           id: true,
           name: true,
+          logo: true,
         },
       },
     },
@@ -64,6 +65,14 @@ const listOrderSelect = {
       assignments: {
         select: {
           id: true,
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              position: true,
+            },
+          },
         },
       },
     },
