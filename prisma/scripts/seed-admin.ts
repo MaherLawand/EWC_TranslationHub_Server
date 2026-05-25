@@ -54,7 +54,7 @@ async function main() {
         lastName: "User",
         email: "producer1@ewc.com",
         password: hashedPassword,
-        role: UserRole.EDITOR,
+        role: UserRole.USER,
         department:
           UserDepartment.BROADCAST,
         position:
@@ -67,7 +67,7 @@ async function main() {
         lastName: "User",
         email: "translator1@ewc.com",
         password: hashedPassword,
-        role: UserRole.VIEWER,
+        role: UserRole.USER,
         department:
           UserDepartment.BROADCAST,
         position:
@@ -79,7 +79,7 @@ async function main() {
         lastName: "User",
         email: "translator2@ewc.com",
         password: hashedPassword,
-        role: UserRole.VIEWER,
+        role: UserRole.USER,
         department:
           UserDepartment.MARKETING,
         position:

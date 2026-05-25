@@ -15,8 +15,7 @@ datasource db {
 
 enum UserRole {
   ADMIN
-  EDITOR
-  VIEWER
+  USER
 }
 
 enum UserDepartment {
@@ -113,7 +112,7 @@ model User {
 
   password String?
 
-  role UserRole @default(VIEWER)
+  role UserRole @default(USER)
 
   department UserDepartment?
 

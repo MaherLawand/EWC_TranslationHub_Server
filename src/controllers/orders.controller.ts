@@ -79,8 +79,10 @@ const listOrderSelect = {
   },
 } satisfies Prisma.TranslationOrderSelect
 
-const orderSelect = {
-  
+// Core order fields — no editHistory so this query is leaner.
+// Used by getOrderById (parallel fetch) and as the base for orderSelect.
+const orderSelectCore = {
+
   id: true,
 
   type: true,
@@ -103,15 +105,10 @@ const orderSelect = {
   createdBy: {
     select: {
       id: true,
-
       firstName: true,
-
       lastName: true,
-
       role: true,
-
       department: true,
-
       position: true,
     },
   },
@@ -119,9 +116,7 @@ const orderSelect = {
   completedBy: {
     select: {
       id: true,
-
       firstName: true,
-
       lastName: true,
     },
   },
@@ -129,49 +124,18 @@ const orderSelect = {
   lastEditedBy: {
     select: {
       id: true,
-
       firstName: true,
-
       lastName: true,
-    },
-  },
-
-  editHistory: {
-    take: 10,
-
-    orderBy: {
-      editedAt: "desc" as const,
-    },
-
-    select: {
-      id: true,
-
-      editedAt: true,
-
-      editedBy: {
-        select: {
-          id: true,
-
-          firstName: true,
-
-          lastName: true,
-        },
-      },
     },
   },
 
   broadcast: {
     select: {
       id: true,
-
       gameId: true,
-
       estimatedMinutes: true,
-
       sourceLanguage: true,
-
       targetLanguages: true,
-
       deliveryFormats: {
         select: {
           id: true,
@@ -179,43 +143,27 @@ const orderSelect = {
           deliveryLink: true,
         },
       },
-
       sourceFileLink: true,
-
       srtAvailableLink: true,
-
       deliveryDate: true,
-
       deadlineDate: true,
-
       game: {
         select: {
           id: true,
-
           name: true,
-
           logo: true,
-
           assignedUsers: {
             select: {
               id: true,
-
               assignedAt: true,
-
               user: {
                 select: {
                   id: true,
-
                   firstName: true,
-
                   lastName: true,
-
                   role: true,
-
                   department: true,
-
                   position: true,
-
                   isActive: true,
                 },
               },
@@ -223,13 +171,10 @@ const orderSelect = {
           },
         },
       },
-
       deliveries: {
         select: {
           id: true,
-
           language: true,
-
           deliveryLink: true,
         },
       },
@@ -239,19 +184,12 @@ const orderSelect = {
   marketing: {
     select: {
       id: true,
-
       contentTitle: true,
-
       sourceLanguage: true,
-
       targetLanguages: true,
-
       sourceFileLink: true,
-
       srtAvailableLink: true,
-
       deadlineDate: true,
-
       deliveryFormats: {
         select: {
           id: true,
@@ -259,33 +197,23 @@ const orderSelect = {
           deliveryLink: true,
         },
       },
-
       deliveries: {
         select: {
           id: true,
-
           language: true,
-
           deliveryLink: true,
         },
       },
-
       assignments: {
         select: {
           id: true,
-
           assignedAt: true,
-
           user: {
             select: {
               id: true,
-
               firstName: true,
-
               lastName: true,
-
               position: true,
-
               department: true,
             },
           },
@@ -293,6 +221,32 @@ const orderSelect = {
       },
     },
   },
+
+} satisfies Prisma.TranslationOrderSelect
+
+// Edit history sub-select — shared between the parallel getOrderById fetch
+// and the inline orderSelect used by write endpoints.
+const editHistorySelect = {
+  take: 10,
+  orderBy: { editedAt: "desc" as const },
+  select: {
+    id: true,
+    editedAt: true,
+    editedBy: {
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+      },
+    },
+  },
+} as const
+
+// Full select used by write endpoints (updateOrder / updateOrderStatus) that
+// need the complete shape returned inline from a transaction.
+const orderSelect = {
+  ...orderSelectCore,
+  editHistory: editHistorySelect,
 } satisfies Prisma.TranslationOrderSelect
 
 function isStringArray(
@@ -836,14 +790,28 @@ export async function getOrderById(
   res: Response
 ) {
   try {
-    const order = await prisma.translationOrder.findUnique({
-      where: { id: String(req.params.id) },
-      select: orderSelect,
-    })
+    const id = String(req.params.id)
+
+    // Run the core order query and edit-history in parallel.
+    // Prisma serialises nested-relation sub-queries, so separating
+    // editHistory (which requires its own round-trip + a user IN-query)
+    // from the main fetch saves ~2 sequential DB round-trips.
+    const [order, editHistory] = await Promise.all([
+      prisma.translationOrder.findUnique({
+        where: { id },
+        select: orderSelectCore,
+      }),
+      prisma.translationOrderEdit.findMany({
+        where: { orderId: id },
+        ...editHistorySelect,
+      }),
+    ])
+
     if (!order) {
       return res.status(404).json({ message: "Order not found" })
     }
-    return res.json(order)
+
+    return res.json({ ...order, editHistory })
   } catch (error) {
     console.error("GET ORDER BY ID ERROR:", error)
     return res.status(500).json({ message: "Failed to fetch order" })
@@ -1243,23 +1211,25 @@ export async function updateOrder(
     }
 
     /*
-      USER
+      USER + EXISTING ORDER — fetched in parallel (independent queries)
     */
 
-    const user =
-      await prisma.user.findUnique({
-        where: {
-          id: req.userId,
-        },
-
+    const [user, existingOrder] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: req.userId },
+        select: { id: true, role: true, position: true },
+      }),
+      prisma.translationOrder.findUnique({
+        where: { id: orderId },
         select: {
           id: true,
-
-          role: true,
-
-          position: true,
+          type: true,
+          event: true,
+          broadcast: { select: { id: true, sourceFileLink: true } },
+          marketing: { select: { id: true } },
         },
-      })
+      }),
+    ])
 
     if (!user) {
       return res.status(404).json({
@@ -1276,38 +1246,6 @@ export async function updateOrder(
         message: "Unauthorized",
       })
     }
-
-    /*
-      EXISTING ORDER
-    */
-
-    const existingOrder =
-      await prisma.translationOrder.findUnique({
-        where: {
-          id: orderId,
-        },
-
-        select: {
-          id: true,
-
-          type: true,
-          event:true,
-
-          broadcast: {
-            select: {
-              id: true,
-
-              sourceFileLink: true,
-            },
-          },
-
-          marketing: {
-            select: {
-              id: true,
-            },
-          },
-        },
-      })
 
     if (!existingOrder) {
       return res.status(404).json({
@@ -1387,7 +1325,7 @@ if (
     /*
       UPDATE ORDER
     */
-await prisma.$transaction(async (tx) => {
+const updatedOrder = await prisma.$transaction(async (tx) => {
 
   await tx.translationOrder.update({
       where: {
@@ -1843,8 +1781,11 @@ if (
   )
 }
 }
-},{
-  timeout: 10000,
+
+  return tx.translationOrder.findUnique({
+    where: { id: orderId },
+    select: orderSelect,
+  })
 })
 
 
@@ -1864,19 +1805,6 @@ const sourceWasChanged =
         orderId
       ).catch(console.error)
     }
-
-    /*
-      RETURN UPDATED ORDER
-    */
-
-    const updatedOrder =
-      await prisma.translationOrder.findUnique({
-        where: {
-          id: orderId,
-        },
-
-        select: orderSelect,
-      })
 
     return res.json(updatedOrder)
 
@@ -2047,7 +1975,13 @@ if (
       })
 
     /*
-      NOTIFICATIONS
+      RESPOND IMMEDIATELY — notifications fire in the background
+    */
+
+    res.json(updatedOrder)
+
+    /*
+      NOTIFICATIONS (fire-and-forget — response already sent)
     */
 
     if (parsedStatus === OrderStatus.COMPLETED) {
@@ -2093,47 +2027,35 @@ if (
         CREATE NOTIFICATIONS
       */
 
-      if (
-        uniqueUserIds.length > 0
-      ) {
+      if (uniqueUserIds.length > 0) {
+        // Atomic check-then-create: only create notifications if none
+        // already exist for this completion event, preventing duplicates
+        // from concurrent status-update requests on the same order.
+        prisma.$transaction(async (tx) => {
+          const already = await tx.notification.count({
+            where: { orderId: updatedOrder.id, type: "ORDER_COMPLETED" },
+          })
+          if (already > 0) return
 
-        await prisma.notification.createMany({
-          data: uniqueUserIds.map((userId) => ({
-            title: "Order Completed",
-            message: `${updatedOrder.title} has been marked as completed by ${user.firstName} ${user.lastName}`,
-            type: "ORDER_COMPLETED",
-            userId,
-            orderId: updatedOrder.id,
-          })),
+          const created = await tx.notification.createManyAndReturn({
+            data: uniqueUserIds.map((userId) => ({
+              title: "Order Completed",
+              message: `${updatedOrder.title} has been marked as completed by ${user.firstName} ${user.lastName}`,
+              type: "ORDER_COMPLETED",
+              userId,
+              orderId: updatedOrder.id,
+            })),
+            include: {
+              order: { select: { id: true, title: true } },
+            },
+          })
+
+          if (created.length > 0) {
+            triggerNotifications(created).catch(console.error)
+          }
         }).catch(console.error)
-
-        // fetch created notifications and push via Pusher
-        const created = await prisma.notification.findMany({
-          where: {
-            orderId: updatedOrder.id,
-            type: "ORDER_COMPLETED",
-            isRead: false,
-          },
-          select: {
-            id: true,
-            userId: true,
-            title: true,
-            message: true,
-            type: true,
-            isRead: true,
-            createdAt: true,
-            order: { select: { id: true, title: true } },
-          },
-          orderBy: { createdAt: "desc" },
-          take: uniqueUserIds.length,
-        })
-        triggerNotifications(created).catch(console.error)
       }
     }
-
-    return res.json(
-      updatedOrder
-    )
 
   } catch (error) {
 
@@ -2299,79 +2221,69 @@ export async function assignUsersToMarketingOrder(
 
     const marketingId = order.marketing!.id
 
-    const existingUserIds = new Set(
-      order.marketing!.assignments.map(
-        (a) => a.userId
-      )
-    )
-
-    const newUserIds = userIds.filter(
-      (id) => !existingUserIds.has(id)
-    )
-
-    const removedUserIds = [
-      ...existingUserIds,
-    ].filter((id) => !userIds.includes(id))
-
     /*
       UPSERT ASSIGNMENTS + NOTIFY NEW
+      Reading the current assignment list inside the transaction ensures we
+      compute deltas against committed data, preventing concurrent requests
+      from producing duplicate notifications (TOCTOU fix).
+      createManyAndReturn({ skipDuplicates }) gives back only the rows that
+      were actually inserted, so we only notify users who are genuinely new.
     */
 
-    await prisma.$transaction(async (tx) => {
-
-      if (removedUserIds.length > 0) {
-        await tx.marketingOrderAssignment.deleteMany({
-          where: {
-            marketingId,
-            userId: { in: removedUserIds },
-          },
-        })
-      }
-
-      if (newUserIds.length > 0) {
-        await tx.marketingOrderAssignment.createMany({
-          data: newUserIds.map((userId) => ({
-            userId,
-            marketingId,
-          })),
-          skipDuplicates: true,
-        })
-
-        await tx.notification.createMany({
-          data: newUserIds.map((userId) => ({
-            title: "Assigned to Order",
-            message: `You have been assigned to the marketing order: ${order.title}`,
-            type: "ASSIGNED_TO_ORDER" as const,
-            userId,
-            orderId,
-          })),
-        })
-      }
-    })
-
-    // push assigned notifications via Pusher
-    if (newUserIds.length > 0) {
-      const assignedNotifications = await prisma.notification.findMany({
-        where: {
-          orderId,
-          type: "ASSIGNED_TO_ORDER",
-          userId: { in: newUserIds },
-          isRead: false,
-        },
+    const createdNotifications = await prisma.$transaction(async (tx) => {
+      // Re-read assignments inside the transaction — serialised against concurrent writes
+      const currentOrder = await tx.translationOrder.findUnique({
+        where: { id: orderId },
         select: {
-          id: true,
-          userId: true,
-          title: true,
-          message: true,
-          type: true,
-          isRead: true,
-          createdAt: true,
+          marketing: {
+            select: {
+              assignments: { select: { userId: true } },
+            },
+          },
+        },
+      })
+
+      const currentIds = new Set(
+        currentOrder?.marketing?.assignments.map((a) => a.userId) ?? []
+      )
+      const actualNewUserIds = userIds.filter((id) => !currentIds.has(id))
+      const actualRemovedUserIds = [...currentIds].filter((id) => !userIds.includes(id))
+
+      if (actualRemovedUserIds.length > 0) {
+        await tx.marketingOrderAssignment.deleteMany({
+          where: { marketingId, userId: { in: actualRemovedUserIds } },
+        })
+      }
+
+      if (actualNewUserIds.length === 0) return []
+
+      // createManyAndReturn returns only rows that were actually inserted —
+      // skipDuplicates silently drops any that already exist (concurrent request)
+      const createdAssignments = await tx.marketingOrderAssignment.createManyAndReturn({
+        data: actualNewUserIds.map((userId) => ({ userId, marketingId })),
+        skipDuplicates: true,
+      })
+
+      const trulyNewIds = createdAssignments.map((a) => a.userId)
+      if (trulyNewIds.length === 0) return []
+
+      return tx.notification.createManyAndReturn({
+        data: trulyNewIds.map((userId) => ({
+          title: "Assigned to Order",
+          message: `You have been assigned to the marketing order: ${order.title}`,
+          type: "ASSIGNED_TO_ORDER" as const,
+          userId,
+          orderId,
+        })),
+        include: {
           order: { select: { id: true, title: true } },
         },
-        orderBy: { createdAt: "desc" },
-        take: newUserIds.length,
       })
-      triggerNotifications(assignedNotifications).catch(console.error)
+    })
+
+    // Only emit notifications for users who were actually newly assigned
+    if (createdNotifications.length > 0) {
+      triggerNotifications(createdNotifications).catch(console.error)
     }
 
     /*

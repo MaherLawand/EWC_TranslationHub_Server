@@ -164,6 +164,9 @@ A new source file is available for translation.
 Order:
 ${order.title}
 
+Department:
+${order.type === "BROADCAST" ? "Broadcast" : "Marketing"}
+
 ${
   order.type === "BROADCAST"
     ? `Game: ${order.broadcast?.game?.name}`
@@ -294,6 +297,13 @@ ${orderLink}
                     Order:
                   </strong>
                   ${order.title}
+                </p>
+
+                <p style="margin:0 0 10px;">
+                  <strong style="color:white;">
+                    Department:
+                  </strong>
+                  ${order.type === "BROADCAST" ? "Broadcast" : "Marketing"}
                 </p>
 
                 ${

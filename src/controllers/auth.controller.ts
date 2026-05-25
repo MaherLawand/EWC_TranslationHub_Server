@@ -530,7 +530,7 @@ export async function createUser(
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return res.status(400).json({ message: "Valid email is required" })
     }
-    const VALID_ROLES = ["ADMIN", "VIEWER", "EDITOR", "TRANSLATOR"]
+    const VALID_ROLES = ["ADMIN", "USER"]
     const VALID_DEPARTMENTS = ["BROADCAST", "MARKETING"]
     if (!VALID_ROLES.includes(role)) {
       return res.status(400).json({ message: "Invalid role" })
