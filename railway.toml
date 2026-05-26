@@ -1,6 +1,5 @@
 [build]
-buildCommand = "npm install && npx prisma generate && npm run build"
+builder = "RAILPACK"
 
 [deploy]
-startCommand = "npm start"
 healthcheckPath = "/health"
