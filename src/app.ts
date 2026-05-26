@@ -29,9 +29,10 @@ app.use(cookieParser())
 
 // General API rate limiter — 300 requests per 15 min per IP
 // Auth routes have their own tighter limiter (10 req/15 min).
+// ⚠️  LOAD TEST MODE — revert max to 300 after testing and redeploy
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 300,
+  max: 50000, // TODO: revert to 300
   message: { message: "Too many requests, please try again later." },
   standardHeaders: true,
   legacyHeaders: false,
