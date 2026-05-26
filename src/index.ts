@@ -46,7 +46,7 @@ setIo(io)
 
 const PORT = Number(process.env.PORT) || 4000
 
-httpServer.listen(PORT, () => {
+httpServer.listen(PORT, "0.0.0.0", () => {
   logger.info({ action: "SERVER_START", port: PORT })
 })
 
