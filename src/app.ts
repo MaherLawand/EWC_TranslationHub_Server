@@ -14,16 +14,11 @@ import { logger } from "./lib/logger.js"
 
 const app = express()
 
-const corsOptions = {
+// CORS before helmet so preflight OPTIONS requests are answered first.
+app.use(cors({
   origin: process.env.CLIENT_URL,
   credentials: true,
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-}
-
-// CORS must come before helmet so preflight OPTIONS requests are answered
-// before helmet can add headers that might interfere.
-app.use(cors(corsOptions))
+}))
 
 // Security headers
 app.use(helmet())
