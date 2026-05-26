@@ -15,8 +15,17 @@ import { logger } from "./lib/logger.js"
 const app = express()
 
 // CORS before helmet so preflight OPTIONS requests are answered first.
+// Reflect the request origin so Railway's proxy or Cloudflare can never
+// cause a mismatch between CLIENT_URL and the actual origin header.
 app.use(cors({
-  origin: process.env.CLIENT_URL,
+  origin: (origin, callback) => {
+    const allowed = process.env.CLIENT_URL ?? ""
+    if (!origin || origin === allowed || origin.startsWith("http://localhost")) {
+      callback(null, true)
+    } else {
+      callback(null, false)
+    }
+  },
   credentials: true,
 }))
 
