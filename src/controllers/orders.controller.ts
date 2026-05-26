@@ -1867,8 +1867,6 @@ export async function updateOrderStatus(
 
           select: {
             id: true,
-            firstName: true,
-            lastName: true,
             role: true,
             position: true,
           },
@@ -1883,35 +1881,6 @@ export async function updateOrderStatus(
             id: true,
             title: true,
             type: true,
-            createdById: true,
-
-            broadcast: {
-              select: {
-                game: {
-                  select: {
-                    assignedUsers: {
-                      select: {
-                        user: {
-                          select: {
-                            id: true,
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-
-            marketing: {
-              select: {
-                assignments: {
-                  select: {
-                    userId: true,
-                  },
-                },
-              },
-            },
           },
         }),
       ])
@@ -1985,7 +1954,7 @@ if (
 
         data: updateData,
 
-        select: listOrderSelect,
+        select: { id: true, type: true, status: true },
       })
 
     /*
@@ -2001,52 +1970,51 @@ if (
     */
 
     if (parsedStatus === OrderStatus.COMPLETED) {
+      // Fetch notification recipients + completer name after response is sent
+      Promise.all([
+        prisma.translationOrder.findUnique({
+          where: { id: orderId },
+          select: {
+            createdById: true,
+            broadcast: {
+              select: {
+                game: {
+                  select: {
+                    assignedUsers: {
+                      select: { user: { select: { id: true } } },
+                    },
+                  },
+                },
+              },
+            },
+            marketing: {
+              select: {
+                assignments: { select: { userId: true } },
+              },
+            },
+          },
+        }),
+        prisma.user.findUnique({
+          where: { id: req.userId },
+          select: { firstName: true, lastName: true },
+        }),
+      ]).then(([notifOrder, completer]) => {
+        if (!notifOrder || !completer) return
 
-      let notifyUserIds: string[] = []
+        let notifyUserIds: string[] = []
 
-      /*
-        BROADCAST — game-assigned users + order creator
-      */
+        if (existingOrder.type === "BROADCAST" && notifOrder.broadcast?.game) {
+          notifyUserIds = notifOrder.broadcast.game.assignedUsers.map((a) => a.user.id)
+        } else if (existingOrder.type === "MARKETING") {
+          notifyUserIds = notifOrder.marketing?.assignments.map((a) => a.userId) ?? []
+        }
 
-      if (existingOrder.broadcast?.game) {
-        const gameUserIds =
-          existingOrder.broadcast.game.assignedUsers
-            .map((a) => a.user.id)
+        if (notifOrder.createdById) notifyUserIds.push(notifOrder.createdById)
 
-        notifyUserIds = [...gameUserIds]
-      }
+        const uniqueUserIds = [...new Set(notifyUserIds)]
+        if (uniqueUserIds.length === 0) return
 
-      /*
-        MARKETING — order-assigned users + order creator
-      */
-
-      if (existingOrder.type === "MARKETING") {
-        const assignedUserIds =
-          existingOrder.marketing?.assignments
-            .map((a) => a.userId) ?? []
-
-        notifyUserIds = [...assignedUserIds]
-      }
-
-      // Always include the order creator
-      if (existingOrder.createdById) {
-        notifyUserIds.push(existingOrder.createdById)
-      }
-
-      /*
-        REMOVE DUPLICATES
-      */
-
-      const uniqueUserIds = [...new Set(notifyUserIds)]
-
-      /*
-        CREATE NOTIFICATIONS
-      */
-
-      if (uniqueUserIds.length > 0) {
-        // Atomic check-then-create: only create notifications if none
-        // already exist for this completion event, preventing duplicates
-        // from concurrent status-update requests on the same order.
+        // Atomic check-then-create to prevent duplicate notifications
         prisma.$transaction(async (tx) => {
           const already = await tx.notification.count({
             where: { orderId: updatedOrder.id, type: "ORDER_COMPLETED" },
@@ -2056,7 +2024,7 @@ if (
           const created = await tx.notification.createManyAndReturn({
             data: uniqueUserIds.map((userId) => ({
               title: "Order Completed",
-              message: `${updatedOrder.title} has been marked as completed by ${user.firstName} ${user.lastName}`,
+              message: `${existingOrder.title} has been marked as completed by ${completer.firstName} ${completer.lastName}`,
               type: "ORDER_COMPLETED",
               userId,
               orderId: updatedOrder.id,
@@ -2071,7 +2039,7 @@ if (
             triggerNotifications(created).catch((e) => logger.error({ action: "TRIGGER_NOTIFICATIONS_ERROR", orderId, err: e }))
           }
         }).catch((e) => logger.error({ action: "ORDER_COMPLETED_NOTIFICATION_ERROR", orderId, err: e }))
-      }
+      }).catch((e) => logger.error({ action: "ORDER_COMPLETED_NOTIFICATION_ERROR", orderId, err: e }))
     }
 
   } catch (error) {
