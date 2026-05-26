@@ -10,6 +10,7 @@ import { prisma } from "../lib/prisma.js"
 import { triggerNotifications } from "../lib/socket.js"
 import { notifyTranslatorsSourceReady } from "./notification.controller.js"
 import { logger } from "../lib/logger.js"
+import { ordersCache } from "../lib/ordersCache.js"
 import type { Prisma } from "@prisma/client"
 import {
   DeliveryFormat,
@@ -735,6 +736,14 @@ if (
 }
 
     /*
+      CACHE CHECK
+    */
+
+    const cacheKey = `orders:${JSON.stringify({ page, limit, skip, where, orderBy })}:${assignedOnly ? req.userId : "all"}`
+    const cached = ordersCache.get(cacheKey)
+    if (cached) return res.json(cached)
+
+    /*
       FETCH
     */
 
@@ -764,20 +773,17 @@ if (
       RESPONSE
     */
 
-    return res.json({
+    const result = {
       orders,
-
       total,
-
       page,
-
       limit,
+      totalPages: Math.ceil(total / limit),
+    }
 
-      totalPages:
-        Math.ceil(
-          total / limit
-        ),
-    })
+    ordersCache.set(cacheKey, result, 3_000) // 3s TTL
+
+    return res.json(result)
 
   } catch (error) {
 
@@ -1165,6 +1171,7 @@ isOrderPriority(priority)
 
     logger.info({ action: "CREATE_ORDER", userId: req.userId, orderId: order.id, type: order.type, title: order.title })
 
+    ordersCache.invalidate()
     return res.json(order)
 
   } catch (error) {
@@ -1823,6 +1830,7 @@ const sourceWasChanged =
 
     logger.info({ action: "UPDATE_ORDER", userId: req.userId, orderId, title: updatedOrder?.title })
 
+    ordersCache.invalidate()
     return res.json(updatedOrder)
 
   } catch (error) {
@@ -1963,6 +1971,7 @@ if (
 
     logger.info({ action: "UPDATE_ORDER_STATUS", userId: req.userId, orderId, status: parsedStatus, title: existingOrder.title })
 
+    ordersCache.invalidate()
     res.json(updatedOrder)
 
     /*
@@ -2277,6 +2286,7 @@ export async function assignUsersToMarketingOrder(
 
     logger.info({ action: "ASSIGN_USERS_TO_ORDER", userId: req.userId, orderId, userIds, orderTitle: order.title })
 
+    ordersCache.invalidate()
     return res.json(updatedOrder)
 
   } catch (error) {
@@ -2350,6 +2360,7 @@ export async function deleteOrder(
 
     logger.info({ action: "DELETE_ORDER", userId: req.userId, orderId })
 
+    ordersCache.invalidate()
     return res.json({
       success: true,
     })
@@ -2491,6 +2502,10 @@ export async function getOrderCounts(
       }
     }
 
+    const countsCacheKey = `counts:${JSON.stringify(where)}:${assignedOnly ? req.userId : "all"}`
+    const cachedCounts = ordersCache.get(countsCacheKey)
+    if (cachedCounts) return res.json(cachedCounts)
+
     const groups = await prisma.translationOrder.groupBy({
       by: ["status"],
       _count: { _all: true },
@@ -2503,6 +2518,8 @@ export async function getOrderCounts(
       if (key in counts) counts[key] = g._count._all
       counts.total += g._count._all
     }
+
+    ordersCache.set(countsCacheKey, counts, 5_000) // 5s TTL
 
     return res.json(counts)
   } catch (error) {

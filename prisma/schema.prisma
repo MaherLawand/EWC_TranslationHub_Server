@@ -333,6 +333,8 @@ model MarketingDetails {
   deliveryFormats MarketingDeliveryFormat[]
 
   assignments MarketingOrderAssignment[]
+
+  @@index([deadlineDate])
 }
 
 model BroadcastDelivery {
