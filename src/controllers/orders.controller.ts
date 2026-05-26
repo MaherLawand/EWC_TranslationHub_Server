@@ -1330,6 +1330,13 @@ if (
   }
 }
 
+    if (deliveryDate && isNaN(new Date(deliveryDate).getTime())) {
+      return res.status(400).json({ message: "Invalid delivery date" })
+    }
+    if (deadline && isNaN(new Date(deadline).getTime())) {
+      return res.status(400).json({ message: "Invalid deadline date" })
+    }
+
     /*
       UPDATE ORDER
     */
