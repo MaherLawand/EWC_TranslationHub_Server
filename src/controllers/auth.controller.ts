@@ -8,6 +8,9 @@ import {
 import {
   sendInviteEmail,
 } from "../utils/sendInviteEmail.js"
+import {
+  sendResetEmail,
+} from "../utils/sendResetEmail.js"
 import type { AuthRequest } from "../middleware/auth.middleware.js"
 import type { Request, Response } from "express"
 import { Resend } from "resend"
@@ -1369,6 +1372,145 @@ export async function assignGamesToUser(
       message:
         "Failed to assign games",
     })
+  }
+}
+
+// ─── FORGOT PASSWORD ──────────────────────────────────────────────────────────
+
+export async function forgotPassword(
+  req: Request,
+  res: Response
+) {
+  // Always return the same response regardless of whether the email exists —
+  // prevents account enumeration.
+  const SAFE_RESPONSE = {
+    message: "If that email is registered, a reset link has been sent.",
+  }
+
+  try {
+    const { email } = req.body
+
+    if (!email || typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      // Return safe response even for invalid email format
+      return res.json(SAFE_RESPONSE)
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email: email.trim().toLowerCase() },
+      select: { id: true, email: true, isActive: true },
+    })
+
+    // Send email only if user exists and is active
+    if (user && user.isActive) {
+      const token = generateInviteToken()
+      const expiry = new Date(Date.now() + 60 * 60 * 1000) // 1 hour
+
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { resetToken: token, resetExpiry: expiry },
+      })
+
+      await sendResetEmail(user.email, token)
+
+      logger.info({ action: "FORGOT_PASSWORD", userId: user.id, email: user.email })
+    }
+
+    return res.json(SAFE_RESPONSE)
+  } catch (error) {
+    logger.error({ action: "FORGOT_PASSWORD_ERROR", err: error })
+    // Still return safe response — don't leak server errors
+    return res.json(SAFE_RESPONSE)
+  }
+}
+
+// ─── VALIDATE RESET TOKEN ─────────────────────────────────────────────────────
+
+export async function validateResetToken(
+  req: Request,
+  res: Response
+) {
+  try {
+    const token = String(req.query.token || "")
+    if (!token) return res.status(400).json({ valid: false, reason: "missing" })
+
+    const user = await prisma.user.findFirst({
+      where: { resetToken: token },
+      select: { id: true, resetExpiry: true },
+    })
+
+    if (!user) return res.json({ valid: false, reason: "invalid" })
+
+    if (user.resetExpiry && user.resetExpiry < new Date()) {
+      return res.json({ valid: false, reason: "expired" })
+    }
+
+    return res.json({ valid: true })
+  } catch (error) {
+    logger.error({ action: "VALIDATE_RESET_TOKEN_ERROR", err: error })
+    return res.status(500).json({ valid: false, reason: "error" })
+  }
+}
+
+// ─── RESET PASSWORD ───────────────────────────────────────────────────────────
+
+export async function resetPassword(
+  req: Request,
+  res: Response
+) {
+  try {
+    const { token, password } = req.body
+
+    if (!token || typeof token !== "string") {
+      return res.status(400).json({ message: "Invalid token" })
+    }
+
+    if (!password || typeof password !== "string") {
+      return res.status(400).json({ message: "Password is required" })
+    }
+
+    // Same complexity rules as setPassword
+    const passwordErrors: string[] = []
+    if (password.length < 8) passwordErrors.push("at least 8 characters")
+    if (!/[A-Z]/.test(password)) passwordErrors.push("one uppercase letter")
+    if (!/[a-z]/.test(password)) passwordErrors.push("one lowercase letter")
+    if (!/[0-9]/.test(password)) passwordErrors.push("one number")
+    if (!/[!@#$%^&*()_+\-=\[\]{}|;':",.<>?/\\`~]/.test(password)) passwordErrors.push("one special character")
+
+    if (passwordErrors.length > 0) {
+      return res.status(400).json({
+        message: `Password must contain: ${passwordErrors.join(", ")}`,
+      })
+    }
+
+    const user = await prisma.user.findFirst({
+      where: { resetToken: token },
+    })
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired reset link" })
+    }
+
+    if (user.resetExpiry && user.resetExpiry < new Date()) {
+      return res.status(400).json({ message: "Reset link expired" })
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10)
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        resetToken: null,
+        resetExpiry: null,
+      },
+    })
+
+    logger.info({ action: "RESET_PASSWORD", userId: user.id, email: user.email })
+
+    return res.json({ message: "Password reset successfully" })
+  } catch (error) {
+    logger.error({ action: "RESET_PASSWORD_ERROR", err: error })
+    return res.status(500).json({ message: "Failed to reset password" })
   }
 }
 

@@ -14,11 +14,23 @@ import {
   updateUser,
   deleteUser,
   assignGamesToUser,
+  forgotPassword,
+  validateResetToken,
+  resetPassword,
 } from "../controllers/auth.controller.js"
 import { requireAuth } from "../middleware/auth.middleware.js"
 import {
   requireAdmin,
 } from "../middleware/admin.middleware.js"
+
+// 3 attempts per hour — forgot-password (prevents email spam)
+const forgotPasswordLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 3,
+  message: { message: "Too many requests, please try again later." },
+  standardHeaders: true,
+  legacyHeaders: false,
+})
 
 // 10 attempts per 15 min — login, set-password, resend-invite
 const authLimiter = rateLimit({
@@ -97,6 +109,24 @@ router.post(
   "/resend-invite",
   authLimiter,
   resendInvite
+)
+
+router.post(
+  "/forgot-password",
+  forgotPasswordLimiter,
+  forgotPassword
+)
+
+router.get(
+  "/validate-reset-token",
+  checkLimiter,
+  validateResetToken
+)
+
+router.post(
+  "/reset-password",
+  authLimiter,
+  resetPassword
 )
 
 export default router
