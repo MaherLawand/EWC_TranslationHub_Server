@@ -90,6 +90,7 @@ model Notification {
 
   createdAt DateTime @default(now())
 
+  @@unique([orderId, userId, type])
   @@index([userId])
   @@index([orderId])
   @@index([isRead])
@@ -143,6 +144,7 @@ model User {
   @@index([department])
   @@index([position])
   @@index([isActive])
+  @@index([inviteToken])
 }
 
 /**

@@ -9,6 +9,7 @@ import {
   createOrder,
   deleteOrder,
   getOrderById,
+  getOrderCounts,
   getOrders,
   markNotificationsAsRead,
   updateOrder,
@@ -21,6 +22,13 @@ router.get(
   "/",
   requireAuth,
   getOrders
+)
+
+// Must be before /:id to avoid "counts" being treated as an order id
+router.get(
+  "/counts",
+  requireAuth,
+  getOrderCounts
 )
 
 router.post(

@@ -1,6 +1,7 @@
 import { Router } from "express"
 
 import { prisma } from "../lib/prisma.js"
+import { logger } from "../lib/logger.js"
 
 import {
   requireAuth,
@@ -27,7 +28,8 @@ router.get(
 
           select: {
             id: true,
-            name: true,
+            firstName: true,
+            lastName: true,
             email: true,
             role: true,
             department: true,
@@ -37,16 +39,16 @@ router.get(
 
       if (!user) {
         return res.status(404).json({
-          error: "User not found",
+          message: "User not found",
         })
       }
 
       return res.json(user)
     } catch (error) {
-      console.error(error)
+      logger.error({ action: "GET_ME_ERROR", userId: req.userId, err: error })
 
       return res.status(500).json({
-        error:
+        message:
           "Failed to fetch current user",
       })
     }
@@ -71,7 +73,8 @@ router.get(
 
           select: {
             id: true,
-            name: true,
+            firstName: true,
+            lastName: true,
             email: true,
             role: true,
             department: true,
@@ -82,10 +85,10 @@ router.get(
 
       return res.json(users)
     } catch (error) {
-      console.error(error)
+      logger.error({ action: "GET_ALL_USERS_ERROR", userId: req.userId, err: error })
 
       return res.status(500).json({
-        error:
+        message:
           "Failed to fetch users",
       })
     }

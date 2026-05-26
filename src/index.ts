@@ -5,6 +5,8 @@ import cookie from "cookie"
 import jwt from "jsonwebtoken"
 import app from "./app.js"
 import { setIo } from "./lib/socket.js"
+import { logger } from "./lib/logger.js"
+import { prisma } from "./lib/prisma.js"
 
 // Fail fast — missing these env vars means auth is silently broken
 if (!process.env.JWT_SECRET) throw new Error("Missing env var: JWT_SECRET")
@@ -42,6 +44,14 @@ io.on("connection", (socket) => {
 // Make the io instance available to controllers via the socket lib module
 setIo(io)
 
-httpServer.listen(4000, () => {
-  console.log("Server running on port 4000")
+const PORT = Number(process.env.PORT) || 4000
+
+httpServer.listen(PORT, () => {
+  logger.info({ action: "SERVER_START", port: PORT })
+})
+
+process.on("SIGTERM", async () => {
+  logger.info({ action: "GRACEFUL_SHUTDOWN" })
+  await prisma.$disconnect()
+  httpServer.close(() => process.exit(0))
 })

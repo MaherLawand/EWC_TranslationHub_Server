@@ -8,10 +8,9 @@ export async function sendInviteEmail(
   email: string,
   token: string
 ) {
-  const CLIENT_URL =
-    process.env.CLIENT_URL
-console.log("USING RESEND")
-console.log(process.env.RESEND_API_KEY)
+  const CLIENT_URL = process.env.CLIENT_URL
+  if (!CLIENT_URL) throw new Error("Missing env var: CLIENT_URL")
+
   const inviteUrl =
     `${CLIENT_URL}/setup-password?token=${token}`
 

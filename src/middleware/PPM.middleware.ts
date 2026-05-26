@@ -1,4 +1,5 @@
 import { prisma } from "../lib/prisma.js"
+import { logger } from "../lib/logger.js"
 
 import type {
   AuthRequest,
@@ -27,6 +28,7 @@ export async function requirePPM(
         where: {
           id: req.userId,
         },
+        select: { position: true },
       })
 
     if (!user) {
@@ -49,7 +51,7 @@ export async function requirePPM(
     next()
 
   } catch (error) {
-    console.error(error)
+    logger.error({ action: "PPM_MIDDLEWARE_ERROR", userId: req.userId, err: error })
 
     return res.status(500).json({
       message:

@@ -1,5 +1,6 @@
 import { prisma } from "../lib/prisma.js"
 import { Resend } from "resend"
+import { logger } from "../lib/logger.js"
 
 const resend = new Resend(
   process.env.RESEND_API_KEY
@@ -129,6 +130,8 @@ export async function notifyTranslatorsSourceReady(
                 order.id,
             })
           ),
+
+        skipDuplicates: true,
       }
     )
 
@@ -424,9 +427,6 @@ ${orderLink}
     )
 
   } catch (error) {
-    console.error(
-      "Failed to notify translators:",
-      error
-    )
+    logger.error({ action: "NOTIFY_TRANSLATORS_ERROR", orderId, err: error })
   }
 }

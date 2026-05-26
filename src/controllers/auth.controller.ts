@@ -11,6 +11,7 @@ import {
 import type { AuthRequest } from "../middleware/auth.middleware.js"
 import type { Request, Response } from "express"
 import { Resend } from "resend"
+import { logger } from "../lib/logger.js"
 
 const resend = new Resend(
   process.env.RESEND_API_KEY
@@ -95,12 +96,14 @@ export async function setPassword(
       },
     })
 
+    logger.info({ action: "SET_PASSWORD", userId: user.id, email: user.email })
+
     return res.json({
       message:
         "Password set successfully",
     })
   } catch (error) {
-    console.error(error)
+    logger.error({ action: "SET_PASSWORD_ERROR", err: error })
 
     return res.status(500).json({
       message:
@@ -124,7 +127,7 @@ export async function validateInvite(
     }
     return res.json({ valid: true })
   } catch (error) {
-    console.error("VALIDATE INVITE ERROR:", error)
+    logger.error({ action: "VALIDATE_INVITE_ERROR", err: error })
     return res.status(500).json({ valid: false, reason: "error" })
   }
 }
@@ -162,9 +165,11 @@ export async function resendInvite(
 
     await sendInviteEmail(user.email, token)
 
+    logger.info({ action: "RESEND_INVITE", targetEmail: user.email, targetUserId: user.id })
+
     return res.json(vague)
   } catch (error) {
-    console.error("RESEND INVITE ERROR:", error)
+    logger.error({ action: "RESEND_INVITE_ERROR", err: error })
     return res.status(500).json({ message: "Failed to resend invite" })
   }
 }
@@ -189,11 +194,13 @@ export async function login(
       where: { email },
     })
     if (!user || !user.password) {
+      logger.warn({ action: "LOGIN_FAILED", email, reason: "invalid_credentials" })
       return res.status(401).json({
         message: "Invalid credentials",
       })
     }
     if (!user.isActive) {
+      logger.warn({ action: "LOGIN_FAILED", email, userId: user.id, reason: "account_inactive" })
   return res.status(403).json({
     message:
       "Account not activated yet",
@@ -206,6 +213,7 @@ export async function login(
     )
 
     if (!validPassword) {
+      logger.warn({ action: "LOGIN_FAILED", email, userId: user.id, reason: "wrong_password" })
       return res.status(401).json({
         message: "Invalid credentials",
       })
@@ -219,6 +227,8 @@ export async function login(
       sameSite: "lax",
       maxAge: 1000 * 60 * 60 * 24 * 7,
     })
+
+    logger.info({ action: "LOGIN", userId: user.id, email: user.email, role: user.role })
 
     return res.json({
       message: "Login successful",
@@ -242,7 +252,7 @@ export async function login(
 },
     })
   } catch (error) {
-    console.error(error)
+    logger.error({ action: "LOGIN_ERROR", err: error })
 
     return res.status(500).json({
       message: "Server error",
@@ -338,7 +348,7 @@ lastName: true,
   name: `${user.firstName} ${user.lastName}`,
 })
   } catch (error) {
-    console.error(error)
+    logger.error({ action: "GET_CURRENT_USER_ERROR", err: error })
 
     return res.status(500).json({
       message:
@@ -394,6 +404,10 @@ export async function getAllUsers(
     const search = req.query.search
       ? String(req.query.search).trim()
       : ""
+
+    if (search.length > 100) {
+      return res.status(400).json({ message: "Search query too long" })
+    }
 
     const where = search
       ? {
@@ -498,10 +512,7 @@ export async function getAllUsers(
 
   } catch (error) {
 
-    console.error(
-      "GET USERS ERROR:",
-      error
-    )
+    logger.error({ action: "GET_USERS_ERROR", err: error })
 
     return res.status(500).json({
       message:
@@ -532,11 +543,15 @@ export async function createUser(
     }
     const VALID_ROLES = ["ADMIN", "USER"]
     const VALID_DEPARTMENTS = ["BROADCAST", "MARKETING"]
+    const VALID_POSITIONS = ["PRODUCER", "POST_PRODUCTION_MANAGER", "TRANSLATOR", "VIEWER", "EDITOR"]
     if (!VALID_ROLES.includes(role)) {
       return res.status(400).json({ message: "Invalid role" })
     }
     if (!VALID_DEPARTMENTS.includes(department)) {
       return res.status(400).json({ message: "Invalid department" })
+    }
+    if (position && !VALID_POSITIONS.includes(position)) {
+      return res.status(400).json({ message: "Invalid position" })
     }
 
     const existingUser =
@@ -757,13 +772,7 @@ If you did not expect this email, you can safely ignore it.
 */
 
 if (emailResponse.error) {
-  console.error(
-    "Email sending failed:"
-  )
-
-  console.error(
-    emailResponse.error
-  )
+  logger.error({ action: "CREATE_USER_EMAIL_FAILED", err: emailResponse.error })
 
   return res.status(500).json({
     message:
@@ -802,6 +811,8 @@ lastName: true,
     },
   })
 
+    logger.info({ action: "CREATE_USER", byUserId: req.userId, newUserId: user.id, email: user.email, role: user.role, department: user.department })
+
     return res.json({
   ...user,
 
@@ -809,7 +820,7 @@ lastName: true,
 })
 
   } catch (error) {
-    console.error("CREATE USER ERROR:", error)
+    logger.error({ action: "CREATE_USER_ERROR", byUserId: req.userId, err: error })
 
     return res.status(500).json({
       message:
@@ -843,6 +854,27 @@ export async function updateUser(
       department,
       position,
     } = req.body
+
+    /*
+      FIELD VALIDATION
+    */
+
+    const VALID_ROLES_U = ["ADMIN", "USER"]
+    const VALID_DEPARTMENTS_U = ["BROADCAST", "MARKETING"]
+    const VALID_POSITIONS_U = ["PRODUCER", "POST_PRODUCTION_MANAGER", "TRANSLATOR", "VIEWER", "EDITOR"]
+
+    if (role && !VALID_ROLES_U.includes(role)) {
+      return res.status(400).json({ message: "Invalid role" })
+    }
+    if (department && !VALID_DEPARTMENTS_U.includes(department)) {
+      return res.status(400).json({ message: "Invalid department" })
+    }
+    if (position && !VALID_POSITIONS_U.includes(position)) {
+      return res.status(400).json({ message: "Invalid position" })
+    }
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ message: "Valid email is required" })
+    }
 
     const existingUser =
       await prisma.user.findUnique({
@@ -1092,9 +1124,7 @@ If you did not expect this invitation, you can safely ignore this email.
       if (
         emailResponse.error
       ) {
-        console.error(
-          emailResponse.error
-        )
+        logger.error({ action: "UPDATE_USER_EMAIL_FAILED", byUserId: req.userId, targetUserId: id, err: emailResponse.error })
 
         return res.status(500).json({
           message:
@@ -1137,14 +1167,21 @@ lastName: true,
         },
       })
 
+    logger.info({ action: "UPDATE_USER", byUserId: req.userId, targetUserId: updatedUser.id, email: updatedUser.email, role: updatedUser.role })
+
     return res.json({
   ...updatedUser,
 
   name: `${updatedUser.firstName} ${updatedUser.lastName}`,
 })
 
-  } catch (error) {
-    console.error(error)
+  } catch (error: any) {
+    // Unique constraint on email — return a clear 400 instead of a generic 500
+    if (error?.code === "P2002") {
+      return res.status(400).json({ message: "Email already in use" })
+    }
+
+    logger.error({ action: "UPDATE_USER_ERROR", byUserId: req.userId, err: error })
 
     return res.status(500).json({
       message:
@@ -1182,13 +1219,15 @@ export async function deleteUser(
       },
     })
 
+    logger.info({ action: "DELETE_USER", byUserId: req.userId, targetUserId: id })
+
     return res.json({
       message:
         "User deleted successfully",
     })
 
   } catch (error) {
-    console.error(error)
+    logger.error({ action: "DELETE_USER_ERROR", byUserId: req.userId, targetUserId: req.params.id, err: error })
 
     return res.status(500).json({
       message:
@@ -1203,6 +1242,10 @@ export async function searchUsers(
 ) {
   try {
     const q = String(req.query.q || "").trim()
+
+    if (q.length > 100) {
+      return res.status(400).json({ message: "Search query too long" })
+    }
 
     const [firstName, lastName] = q.split(" ")
 
@@ -1263,7 +1306,7 @@ export async function searchUsers(
 
     return res.json(users)
   } catch (error) {
-    console.error("SEARCH USERS ERROR:", error)
+    logger.error({ action: "SEARCH_USERS_ERROR", err: error })
     return res.status(500).json({ message: "Failed to search users" })
   }
 }
@@ -1287,6 +1330,10 @@ export async function assignGamesToUser(
 
     const { gameIds } = req.body
 
+    if (gameIds !== undefined && (!Array.isArray(gameIds) || gameIds.length > 50)) {
+      return res.status(400).json({ message: "gameIds must be an array of up to 50 IDs" })
+    }
+
     await prisma.gameAssignment.deleteMany({
       where: {
         userId,
@@ -1307,12 +1354,14 @@ export async function assignGamesToUser(
       })
     }
 
+    logger.info({ action: "ASSIGN_GAMES_TO_USER", byUserId: req.userId, targetUserId: userId, gameIds: gameIds ?? [] })
+
     return res.json({
       message:
         "Games assigned successfully",
     })
   } catch (error) {
-    console.error(error)
+    logger.error({ action: "ASSIGN_GAMES_TO_USER_ERROR", byUserId: req.userId, targetUserId: req.params.id, err: error })
 
     return res.status(500).json({
       message:

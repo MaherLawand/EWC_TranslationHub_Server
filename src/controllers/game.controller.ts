@@ -1,6 +1,7 @@
 import path from "path"
 import { prisma } from "../lib/prisma.js"
 import type { Request, Response } from "express"
+import { logger } from "../lib/logger.js"
 
 export async function getGames(
   req: Request,
@@ -28,7 +29,7 @@ export async function getGames(
     return res.json(mapped)
 
   } catch (error) {
-    console.error(error)
+    logger.error({ action: "GET_GAMES_ERROR", err: error })
 
     return res.status(500).json({
       message:
@@ -98,7 +99,7 @@ export async function getGameAssignedUsers(
 
   } catch (error) {
 
-    console.error(error)
+    logger.error({ action: "GET_GAME_ASSIGNED_USERS_ERROR", gameId: req.params.gameId, err: error })
 
     return res.status(500).json({
       message:

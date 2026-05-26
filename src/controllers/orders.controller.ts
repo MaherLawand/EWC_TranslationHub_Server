@@ -9,6 +9,7 @@ import type {
 import { prisma } from "../lib/prisma.js"
 import { triggerNotifications } from "../lib/socket.js"
 import { notifyTranslatorsSourceReady } from "./notification.controller.js"
+import { logger } from "../lib/logger.js"
 import type { Prisma } from "@prisma/client"
 import {
   DeliveryFormat,
@@ -379,6 +380,12 @@ const limit = Math.min(
       String(
         req.query.search || ""
       )
+
+    if (search.length > 100) {
+      return res.status(400).json({
+        message: "Search query too long",
+      })
+    }
 
 const assignedOnly =
   req.query.assignedOnly ===
@@ -774,10 +781,7 @@ if (
 
   } catch (error) {
 
-    console.error(
-      "GET ORDERS ERROR:",
-      error
-    )
+    logger.error({ action: "GET_ORDERS_ERROR", userId: req.userId, err: error })
 
     return res.status(500).json({
       message:
@@ -813,7 +817,7 @@ export async function getOrderById(
 
     return res.json({ ...order, editHistory })
   } catch (error) {
-    console.error("GET ORDER BY ID ERROR:", error)
+    logger.error({ action: "GET_ORDER_BY_ID_ERROR", userId: req.userId, orderId: req.params.id, err: error })
     return res.status(500).json({ message: "Failed to fetch order" })
   }
 }
@@ -890,7 +894,12 @@ if (
       })
     }
 
-
+    if (deliveryDate && isNaN(new Date(deliveryDate).getTime())) {
+      return res.status(400).json({ message: "Invalid delivery date" })
+    }
+    if (deadline && isNaN(new Date(deadline).getTime())) {
+      return res.status(400).json({ message: "Invalid deadline date" })
+    }
 
     /*
       USER
@@ -1151,17 +1160,16 @@ isOrderPriority(priority)
 
       notifyTranslatorsSourceReady(
         order.id
-      ).catch(console.error)
+      ).catch((e) => logger.error({ action: "NOTIFY_TRANSLATORS_ERROR", orderId: order.id, err: e }))
     }
+
+    logger.info({ action: "CREATE_ORDER", userId: req.userId, orderId: order.id, type: order.type, title: order.title })
 
     return res.json(order)
 
   } catch (error) {
 
-    console.error(
-      "CREATE ORDER ERROR:",
-      error
-    )
+    logger.error({ action: "CREATE_ORDER_ERROR", userId: req.userId, err: error })
 
     return res.status(500).json({
       message:
@@ -1803,17 +1811,16 @@ const sourceWasChanged =
 
       notifyTranslatorsSourceReady(
         orderId
-      ).catch(console.error)
+      ).catch((e) => logger.error({ action: "NOTIFY_TRANSLATORS_ERROR", orderId, err: e }))
     }
+
+    logger.info({ action: "UPDATE_ORDER", userId: req.userId, orderId, title: updatedOrder?.title })
 
     return res.json(updatedOrder)
 
   } catch (error) {
 
-    console.error(
-      "UPDATE ORDER ERROR:",
-      error
-    )
+    logger.error({ action: "UPDATE_ORDER_ERROR", userId: req.userId, orderId: req.params.id, err: error })
 
     return res.status(500).json({
       message:
@@ -1971,12 +1978,14 @@ if (
 
         data: updateData,
 
-        select: orderSelect,
+        select: listOrderSelect,
       })
 
     /*
       RESPOND IMMEDIATELY — notifications fire in the background
     */
+
+    logger.info({ action: "UPDATE_ORDER_STATUS", userId: req.userId, orderId, status: parsedStatus, title: existingOrder.title })
 
     res.json(updatedOrder)
 
@@ -2045,24 +2054,22 @@ if (
               userId,
               orderId: updatedOrder.id,
             })),
+            skipDuplicates: true,
             include: {
               order: { select: { id: true, title: true } },
             },
           })
 
           if (created.length > 0) {
-            triggerNotifications(created).catch(console.error)
+            triggerNotifications(created).catch((e) => logger.error({ action: "TRIGGER_NOTIFICATIONS_ERROR", orderId, err: e }))
           }
-        }).catch(console.error)
+        }).catch((e) => logger.error({ action: "ORDER_COMPLETED_NOTIFICATION_ERROR", orderId, err: e }))
       }
     }
 
   } catch (error) {
 
-    console.error(
-      "UPDATE STATUS ERROR:",
-      error
-    )
+    logger.error({ action: "UPDATE_ORDER_STATUS_ERROR", userId: req.userId, orderId: req.params.id, err: error })
 
     return res.status(500).json({
       message:
@@ -2100,10 +2107,7 @@ export async function markNotificationsAsRead(
 
   } catch (error) {
 
-    console.error(
-      "MARK NOTIFICATIONS READ ERROR:",
-      error
-    )
+    logger.error({ action: "MARK_NOTIFICATIONS_READ_ERROR", userId: req.userId, err: error })
 
     return res.status(500).json({
       message:
@@ -2283,7 +2287,7 @@ export async function assignUsersToMarketingOrder(
 
     // Only emit notifications for users who were actually newly assigned
     if (createdNotifications.length > 0) {
-      triggerNotifications(createdNotifications).catch(console.error)
+      triggerNotifications(createdNotifications).catch((e) => logger.error({ action: "TRIGGER_NOTIFICATIONS_ERROR", orderId, err: e }))
     }
 
     /*
@@ -2296,14 +2300,13 @@ export async function assignUsersToMarketingOrder(
         select: orderSelect,
       })
 
+    logger.info({ action: "ASSIGN_USERS_TO_ORDER", userId: req.userId, orderId, userIds, orderTitle: order.title })
+
     return res.json(updatedOrder)
 
   } catch (error) {
 
-    console.error(
-      "ASSIGN USERS ERROR:",
-      error
-    )
+    logger.error({ action: "ASSIGN_USERS_TO_ORDER_ERROR", userId: req.userId, orderId: req.params.id, err: error })
 
     return res.status(500).json({
       message:
@@ -2370,6 +2373,8 @@ export async function deleteOrder(
       },
     })
 
+    logger.info({ action: "DELETE_ORDER", userId: req.userId, orderId })
+
     return res.json({
       success: true,
     })
@@ -2389,10 +2394,7 @@ export async function deleteOrder(
       })
     }
 
-    console.error(
-      "DELETE ORDER ERROR:",
-      error
-    )
+    logger.error({ action: "DELETE_ORDER_ERROR", userId: req.userId, orderId: req.params.id, err: error })
 
     return res.status(500).json({
       message:
@@ -2401,4 +2403,135 @@ export async function deleteOrder(
   }
 }
 
+/**
+ * GET /orders/counts
+ * Returns { PENDING, IN_PROGRESS, COMPLETED, total } for the current filter set
+ * (intentionally excludes statusFilter so all statuses are always counted).
+ */
+export async function getOrderCounts(
+  req: AuthRequest,
+  res: Response
+) {
+  try {
+    const search = String(req.query.search || "")
+    const priority = String(req.query.priority || "")
+    const type = String(req.query.type || "")
+    const event = String(req.query.event || "")
+    const gameId = String(req.query.gameId || "")
+    const contentTitle = String(req.query.contentTitle || "")
+    const orderId = String(req.query.orderId || "")
+    const assignedOnly = req.query.assignedOnly === "true"
 
+    const formatRaw = req.query.format
+    const formatValues = Array.isArray(formatRaw)
+      ? formatRaw
+      : formatRaw
+      ? [String(formatRaw)]
+      : []
+
+    const [firstNameSearch = "", lastNameSearch = ""] = search.split(" ")
+
+    const where: Prisma.TranslationOrderWhereInput = {}
+
+    if (orderId) {
+      where.id = orderId
+    }
+
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: "insensitive" } },
+        { notes: { contains: search, mode: "insensitive" } },
+        { marketing: { is: { contentTitle: { contains: search, mode: "insensitive" } } } },
+        { createdBy: { is: { firstName: { contains: search, mode: "insensitive" } } } },
+        { createdBy: { is: { lastName: { contains: search, mode: "insensitive" } } } },
+      ]
+      if (firstNameSearch && lastNameSearch) {
+        where.OR.push({
+          createdBy: {
+            is: {
+              AND: [
+                { firstName: { contains: firstNameSearch, mode: "insensitive" } },
+                { lastName: { contains: lastNameSearch, mode: "insensitive" } },
+              ],
+            },
+          },
+        })
+      }
+    }
+
+    if (isEventType(event)) where.event = event
+    if (isOrderPriority(priority)) where.priority = priority
+    if (isOrderType(type)) where.type = type
+
+    const existingAnd: Prisma.TranslationOrderWhereInput[] = []
+
+    const parsedFormats = formatValues.filter(isDeliveryFormat)
+    if (parsedFormats.length > 0) {
+      existingAnd.push({
+        OR: [
+          { broadcast: { is: { deliveryFormats: { some: { format: { in: parsedFormats } } } } } },
+          { marketing: { is: { deliveryFormats: { some: { format: { in: parsedFormats } } } } } },
+        ],
+      })
+    }
+
+    if (existingAnd.length > 0) where.AND = existingAnd
+
+    if (gameId) {
+      where.broadcast = {
+        is: {
+          ...(where.broadcast && typeof where.broadcast === "object" && "is" in where.broadcast && where.broadcast.is
+            ? where.broadcast.is
+            : {}),
+          gameId,
+        },
+      }
+    }
+
+    if (contentTitle) {
+      where.marketing = {
+        is: { contentTitle: { equals: contentTitle, mode: "insensitive" } },
+      }
+    }
+
+    if (assignedOnly && req.userId) {
+      if (type === "MARKETING") {
+        where.marketing = {
+          is: {
+            ...(where.marketing && typeof where.marketing === "object" && "is" in where.marketing && where.marketing.is
+              ? where.marketing.is
+              : {}),
+            assignments: { some: { userId: req.userId } },
+          },
+        }
+      } else {
+        where.broadcast = {
+          is: {
+            ...(where.broadcast && typeof where.broadcast === "object" && "is" in where.broadcast && where.broadcast.is
+              ? where.broadcast.is
+              : {}),
+            game: { assignedUsers: { some: { userId: req.userId } } },
+          },
+        }
+      }
+    }
+
+    const groups = await prisma.translationOrder.groupBy({
+      by: ["status"],
+      _count: { _all: true },
+      where,
+    })
+
+    const counts = { PENDING: 0, IN_PROGRESS: 0, COMPLETED: 0, total: 0 }
+    for (const g of groups) {
+      const key = g.status as keyof Omit<typeof counts, "total">
+      if (key in counts) counts[key] = g._count._all
+      counts.total += g._count._all
+    }
+
+    return res.json(counts)
+  } catch (error) {
+    logger.error({ action: "GET_ORDER_COUNTS_ERROR", userId: req.userId, err: error })
+    return res.status(500).json({ message: "Failed to get order counts" })
+  }
+}

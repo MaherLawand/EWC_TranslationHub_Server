@@ -1,4 +1,5 @@
 import { prisma } from "../lib/prisma.js"
+import { logger } from "../lib/logger.js"
 
 import type {
   AuthRequest,
@@ -27,6 +28,7 @@ export async function requireAdmin(
         where: {
           id: req.userId,
         },
+        select: { role: true },
       })
 
     if (!user) {
@@ -46,7 +48,7 @@ export async function requireAdmin(
     next()
 
   } catch (error) {
-    console.error(error)
+    logger.error({ action: "ADMIN_MIDDLEWARE_ERROR", userId: req.userId, err: error })
 
     return res.status(500).json({
       message:
