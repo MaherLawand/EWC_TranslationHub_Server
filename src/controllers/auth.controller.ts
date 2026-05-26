@@ -315,6 +315,8 @@ lastName: true,
         select: {
           id: true,
           title: true,
+          event: true,
+          type: true,
         },
       },
     },
