@@ -15,6 +15,7 @@ import type { AuthRequest } from "../middleware/auth.middleware.js"
 import type { Request, Response } from "express"
 import { Resend } from "resend"
 import { logger } from "../lib/logger.js"
+import { loginAttempts } from "../lib/loginAttempts.js"
 
 const resend = new Resend(
   process.env.RESEND_API_KEY
@@ -193,10 +194,23 @@ export async function login(
       return res.status(400).json({ message: "Invalid email address" })
     }
 
+    // Check lockout before hitting the DB
+    if (loginAttempts.isLocked(email)) {
+      const remaining = loginAttempts.lockoutRemainingSeconds(email)
+      const minutes = Math.ceil(remaining / 60)
+      logger.warn({ action: "LOGIN_BLOCKED", email, reason: "lockout", remainingSeconds: remaining })
+      return res.status(429).json({
+        message: `Too many failed attempts. Try again in ${minutes} minute${minutes !== 1 ? "s" : ""} or reset your password.`,
+        locked: true,
+        remainingSeconds: remaining,
+      })
+    }
+
     const user = await prisma.user.findUnique({
       where: { email },
     })
     if (!user || !user.password) {
+      loginAttempts.recordFailure(email)
       logger.warn({ action: "LOGIN_FAILED", email, reason: "invalid_credentials" })
       return res.status(401).json({
         message: "Invalid credentials",
@@ -204,11 +218,10 @@ export async function login(
     }
     if (!user.isActive) {
       logger.warn({ action: "LOGIN_FAILED", email, userId: user.id, reason: "account_inactive" })
-  return res.status(403).json({
-    message:
-      "Account not activated yet",
-  })
-}
+      return res.status(403).json({
+        message: "Account not activated yet",
+      })
+    }
 
     const validPassword = await bcrypt.compare(
       password,
@@ -216,9 +229,18 @@ export async function login(
     )
 
     if (!validPassword) {
-      logger.warn({ action: "LOGIN_FAILED", email, userId: user.id, reason: "wrong_password" })
+      const { failures, locked } = loginAttempts.recordFailure(email)
+      logger.warn({ action: "LOGIN_FAILED", email, userId: user.id, reason: "wrong_password", failures })
+      if (locked) {
+        return res.status(429).json({
+          message: "Too many failed attempts. Account locked for 5 minutes. Reset your password to unlock immediately.",
+          locked: true,
+          remainingSeconds: 300,
+        })
+      }
       return res.status(401).json({
         message: "Invalid credentials",
+        attemptsRemaining: 5 - failures,
       })
     }
 
@@ -231,6 +253,7 @@ export async function login(
       maxAge: 1000 * 60 * 60 * 24 * 7,
     })
 
+    loginAttempts.clear(email)
     logger.info({ action: "LOGIN", userId: user.id, email: user.email, role: user.role })
 
     return res.json({
@@ -1505,12 +1528,46 @@ export async function resetPassword(
       },
     })
 
+    loginAttempts.clear(user.email)
     logger.info({ action: "RESET_PASSWORD", userId: user.id, email: user.email })
 
     return res.json({ message: "Password reset successfully" })
   } catch (error) {
     logger.error({ action: "RESET_PASSWORD_ERROR", err: error })
     return res.status(500).json({ message: "Failed to reset password" })
+  }
+}
+
+/** Admin — get all currently locked accounts */
+export async function getLockedUsers(
+  req: AuthRequest,
+  res: Response
+) {
+  try {
+    const locked = loginAttempts.getLockedAccounts()
+    return res.json(locked)
+  } catch (error) {
+    logger.error({ action: "GET_LOCKED_USERS_ERROR", err: error })
+    return res.status(500).json({ message: "Failed to get locked users" })
+  }
+}
+
+/** Admin — clear login lockout for a specific user by email */
+export async function clearLoginLockout(
+  req: AuthRequest,
+  res: Response
+) {
+  try {
+    const { email } = req.body
+    if (!email || typeof email !== "string") {
+      return res.status(400).json({ message: "Email is required" })
+    }
+    loginAttempts.adminClear(email.toLowerCase().trim())
+    logger.info({ action: "CLEAR_LOGIN_LOCKOUT", adminId: req.userId, targetEmail: email })
+    return res.json({ message: "Lockout cleared" })
+  } catch (error) {
+    logger.error({ action: "CLEAR_LOGIN_LOCKOUT_ERROR", err: error })
+    return res.status(500).json({ message: "Failed to clear lockout" })
   }
 }
 

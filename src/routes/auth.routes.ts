@@ -17,22 +17,15 @@ import {
   forgotPassword,
   validateResetToken,
   resetPassword,
+  getLockedUsers,
+  clearLoginLockout,
 } from "../controllers/auth.controller.js"
 import { requireAuth } from "../middleware/auth.middleware.js"
 import {
   requireAdmin,
 } from "../middleware/admin.middleware.js"
 
-// 3 attempts per hour — forgot-password (prevents email spam)
-const forgotPasswordLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000,
-  max: 3,
-  message: { message: "Too many requests, please try again later." },
-  standardHeaders: true,
-  legacyHeaders: false,
-})
-
-// 10 attempts per 15 min — login, set-password, resend-invite
+// 10 attempts per 15 min per IP — login
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
@@ -41,10 +34,19 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
 })
 
-// 30 attempts per 15 min — read-only token check
+// 3 attempts per hour per IP — forgot-password (prevents email spam)
+const forgotPasswordLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 3,
+  message: { message: "Too many requests, please try again later." },
+  standardHeaders: true,
+  legacyHeaders: false,
+})
+
+// 10 attempts per 15 min per IP — validate-invite, reset-password, set-password
 const checkLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 30,
+  max: 10,
   message: { message: "Too many requests, please try again later." },
   standardHeaders: true,
   legacyHeaders: false,
@@ -91,6 +93,22 @@ router.post(
   requireAuth,
   requireAdmin,
   assignGamesToUser
+)
+
+// Admin — get all currently locked accounts
+router.get(
+  "/locked-users",
+  requireAuth,
+  requireAdmin,
+  getLockedUsers
+)
+
+// Admin — clear login lockout for a specific user
+router.post(
+  "/users/clear-lockout",
+  requireAuth,
+  requireAdmin,
+  clearLoginLockout
 )
 
 router.get(

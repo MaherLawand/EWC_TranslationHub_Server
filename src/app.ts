@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser"
 import path from "path"
 import helmet from "helmet"
 import rateLimit from "express-rate-limit"
+import jwt from "jsonwebtoken"
 
 import authRoutes from "./routes/auth.routes.js"
 import userRoutes from "./routes/user.routes.js"
@@ -27,12 +28,23 @@ app.use(express.json({ limit: "1mb" }))
 
 app.use(cookieParser())
 
-// General API rate limiter — 300 requests per 15 min per IP
-// Auth routes have their own tighter limiter (10 req/15 min).
-// ⚠️  LOAD TEST MODE — revert max to 300 after testing and redeploy
+// General API rate limiter — 300 requests per 15 min per authenticated user.
+// Uses userId from JWT cookie as the key so the entire office (shared IP/NAT)
+// doesn't share one bucket. Falls back to IP for unauthenticated requests.
+// Auth routes keep their own tighter IP-based limiter (brute-force protection).
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 50000, // TODO: revert to 300
+  max: 300,
+  keyGenerator: (req) => {
+    try {
+      const token = (req as any).cookies?.token
+      if (token) {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { userId: string }
+        if (decoded?.userId) return decoded.userId
+      }
+    } catch { /* invalid/expired token — fall through to IP */ }
+    return req.ip ?? "unknown"
+  },
   message: { message: "Too many requests, please try again later." },
   standardHeaders: true,
   legacyHeaders: false,
