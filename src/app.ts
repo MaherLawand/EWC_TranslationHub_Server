@@ -14,15 +14,23 @@ import { logger } from "./lib/logger.js"
 
 const app = express()
 
+const corsOptions = {
+  origin: process.env.CLIENT_URL,
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}
+
+// CORS must come before helmet so preflight OPTIONS requests are answered
+// before helmet can add headers that might interfere.
+app.use(cors(corsOptions))
+
+// Explicitly handle all preflight requests so browsers get a proper 204
+// response before attempting the actual request.
+app.options("*", cors(corsOptions))
+
 // Security headers
 app.use(helmet())
-
-app.use(
-  cors({
-    origin: process.env.CLIENT_URL,
-    credentials: true,
-  })
-)
 
 // 1 MB body limit — prevents memory exhaustion from large payloads
 app.use(express.json({ limit: "1mb" }))
