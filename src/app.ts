@@ -27,7 +27,7 @@ app.use(cors(corsOptions))
 
 // Explicitly handle all preflight requests so browsers get a proper 204
 // response before attempting the actual request.
-app.options("*", cors(corsOptions))
+app.options(/(.*)/, cors(corsOptions))
 
 // Security headers
 app.use(helmet())
