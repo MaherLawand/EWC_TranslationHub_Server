@@ -1840,8 +1840,6 @@ export async function updateOrderStatus(
   req: AuthRequest,
   res: Response
 ) {
-      const start = Date.now()
-
   try {
 
     const orderId = String(
@@ -1918,8 +1916,6 @@ export async function updateOrderStatus(
         }),
       ])
 
-      console.log("LOOKUPS", Date.now() - start)
-
     if (!user) {
       return res.status(404).json({
         message: "User not found",
@@ -1982,19 +1978,15 @@ if (
     */
 
     const updatedOrder =
-  await prisma.translationOrder.update({
-    where: { id: orderId },
-    data: updateData,
-    select: {
-      id: true,
-      type: true,
-      status: true,
-      title: true,
-      completedAt: true,
-    },
-  })
+      await prisma.translationOrder.update({
+        where: {
+          id: orderId,
+        },
 
-      console.log("UPDATE", Date.now() - start)
+        data: updateData,
+
+        select: listOrderSelect,
+      })
 
     /*
       RESPOND IMMEDIATELY — notifications fire in the background
@@ -2003,7 +1995,6 @@ if (
     logger.info({ action: "UPDATE_ORDER_STATUS", userId: req.userId, orderId, status: parsedStatus, title: existingOrder.title })
 
     res.json(updatedOrder)
-  console.log("RESPONSE", Date.now() - start)
 
     /*
       NOTIFICATIONS (fire-and-forget — response already sent)
