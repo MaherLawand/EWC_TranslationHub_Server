@@ -1,82 +1,106 @@
 /**
- * In-memory login attempt tracker.
+ * DB-backed login attempt tracker.
+ *
+ * Stores failure count and lockout expiry on the User row so state
+ * survives server restarts and Railway redeploys.
  *
  * Rules:
  * - After 5 failed attempts → account locked for 5 minutes
- * - Lockout clears automatically after 5 min
+ * - Lockout clears automatically on next check after expiry
  * - Lockout also clears on: successful login, password reset, admin clear
  */
 
-interface AttemptRecord {
-  failures: number
-  lockedUntil: number | null
-}
+import { prisma } from "./prisma.js"
+
+const LOCKOUT_THRESHOLD = 5
+const LOCKOUT_DURATION_MS = 5 * 60 * 1000 // 5 minutes
 
 class LoginAttemptsStore {
-  private store = new Map<string, AttemptRecord>()
-
   private key(email: string) {
     return email.toLowerCase().trim()
   }
 
-  private get(email: string): AttemptRecord {
-    return this.store.get(this.key(email)) ?? { failures: 0, lockedUntil: null }
-  }
-
   /** Returns true if the account is currently locked out */
-  isLocked(email: string): boolean {
-    const record = this.get(email)
-    if (!record.lockedUntil) return false
-    if (Date.now() > record.lockedUntil) {
-      this.store.delete(this.key(email))
+  async isLocked(email: string): Promise<boolean> {
+    const user = await prisma.user.findUnique({
+      where: { email: this.key(email) },
+      select: { lockedUntil: true },
+    })
+    if (!user?.lockedUntil) return false
+    if (new Date() > user.lockedUntil) {
+      // Expired — clear it in the background
+      prisma.user
+        .update({
+          where: { email: this.key(email) },
+          data: { lockedUntil: null, loginFailures: 0 },
+        })
+        .catch(() => {})
       return false
     }
     return true
   }
 
   /** Returns seconds remaining on lockout (0 if not locked) */
-  lockoutRemainingSeconds(email: string): number {
-    const record = this.get(email)
-    if (!record.lockedUntil) return 0
-    return Math.max(0, Math.ceil((record.lockedUntil - Date.now()) / 1000))
+  async lockoutRemainingSeconds(email: string): Promise<number> {
+    const user = await prisma.user.findUnique({
+      where: { email: this.key(email) },
+      select: { lockedUntil: true },
+    })
+    if (!user?.lockedUntil) return 0
+    return Math.max(0, Math.ceil((user.lockedUntil.getTime() - Date.now()) / 1000))
   }
 
   /** Call on failed login. Returns updated failure count and whether locked. */
-  recordFailure(email: string): { failures: number; locked: boolean } {
-    const record = this.get(email)
-    record.failures += 1
+  async recordFailure(email: string): Promise<{ failures: number; locked: boolean }> {
+    const user = await prisma.user.findUnique({
+      where: { email: this.key(email) },
+      select: { id: true, loginFailures: true },
+    })
 
-    if (record.failures >= 5) {
-      record.lockedUntil = Date.now() + 5 * 60 * 1000 // 5 min lockout
-    }
+    // No user with this email — don't create phantom records
+    if (!user) return { failures: 0, locked: false }
 
-    this.store.set(this.key(email), record)
-    return { failures: record.failures, locked: !!record.lockedUntil }
+    const newFailures = user.loginFailures + 1
+    const shouldLock = newFailures >= LOCKOUT_THRESHOLD
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        loginFailures: newFailures,
+        ...(shouldLock && { lockedUntil: new Date(Date.now() + LOCKOUT_DURATION_MS) }),
+      },
+    })
+
+    return { failures: newFailures, locked: shouldLock }
   }
 
   /** Call on successful login or password reset — clears all failures */
-  clear(email: string): void {
-    this.store.delete(this.key(email))
+  async clear(email: string): Promise<void> {
+    await prisma.user.updateMany({
+      where: { email: this.key(email) },
+      data: { loginFailures: 0, lockedUntil: null },
+    })
   }
 
   /** Admin endpoint — clear lockout for a specific email */
-  adminClear(email: string): void {
-    this.store.delete(this.key(email))
+  async adminClear(email: string): Promise<void> {
+    await prisma.user.updateMany({
+      where: { email: this.key(email) },
+      data: { loginFailures: 0, lockedUntil: null },
+    })
   }
 
   /** Returns all currently locked accounts with seconds remaining */
-  getLockedAccounts(): { email: string; remainingSeconds: number }[] {
-    const now = Date.now()
-    const results: { email: string; remainingSeconds: number }[] = []
-    for (const [email, record] of this.store.entries()) {
-      if (record.lockedUntil && record.lockedUntil > now) {
-        results.push({
-          email,
-          remainingSeconds: Math.ceil((record.lockedUntil - now) / 1000),
-        })
-      }
-    }
-    return results
+  async getLockedAccounts(): Promise<{ email: string; remainingSeconds: number }[]> {
+    const now = new Date()
+    const users = await prisma.user.findMany({
+      where: { lockedUntil: { gt: now } },
+      select: { email: true, lockedUntil: true },
+    })
+    return users.map((u) => ({
+      email: u.email,
+      remainingSeconds: Math.ceil((u.lockedUntil!.getTime() - now.getTime()) / 1000),
+    }))
   }
 }
 

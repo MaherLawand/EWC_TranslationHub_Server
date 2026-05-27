@@ -198,8 +198,8 @@ export async function login(
     }
 
     // Check lockout before hitting the DB
-    if (loginAttempts.isLocked(email)) {
-      const remaining = loginAttempts.lockoutRemainingSeconds(email)
+    if (await loginAttempts.isLocked(email)) {
+      const remaining = await loginAttempts.lockoutRemainingSeconds(email)
       const minutes = Math.ceil(remaining / 60)
       logger.warn({ action: "LOGIN_BLOCKED", email, reason: "lockout", remainingSeconds: remaining })
       return res.status(429).json({
@@ -213,7 +213,7 @@ export async function login(
       where: { email },
     })
     if (!user || !user.password) {
-      loginAttempts.recordFailure(email)
+      await loginAttempts.recordFailure(email)
       logger.warn({ action: "LOGIN_FAILED", email, reason: "invalid_credentials" })
       return res.status(401).json({
         message: "Invalid credentials",
@@ -232,7 +232,7 @@ export async function login(
     )
 
     if (!validPassword) {
-      const { failures, locked } = loginAttempts.recordFailure(email)
+      const { failures, locked } = await loginAttempts.recordFailure(email)
       logger.warn({ action: "LOGIN_FAILED", email, userId: user.id, reason: "wrong_password", failures })
       if (locked) {
         logger.info({ action: "LOCKOUT_EMAIL_SENDING", email: user.email })
@@ -262,7 +262,7 @@ export async function login(
       maxAge: 1000 * 60 * 60 * 24 * 7,
     })
 
-    loginAttempts.clear(email)
+    await loginAttempts.clear(email)
     logger.info({ action: "LOGIN", userId: user.id, email: user.email, role: user.role })
 
     return res.json({
@@ -1537,7 +1537,7 @@ export async function resetPassword(
       },
     })
 
-    loginAttempts.clear(user.email)
+    await loginAttempts.clear(user.email)
     logger.info({ action: "RESET_PASSWORD", userId: user.id, email: user.email })
 
     return res.json({ message: "Password reset successfully" })
@@ -1553,7 +1553,7 @@ export async function getLockedUsers(
   res: Response
 ) {
   try {
-    const locked = loginAttempts.getLockedAccounts()
+    const locked = await loginAttempts.getLockedAccounts()
     return res.json(locked)
   } catch (error) {
     logger.error({ action: "GET_LOCKED_USERS_ERROR", err: error })
@@ -1571,7 +1571,7 @@ export async function clearLoginLockout(
     if (!email || typeof email !== "string") {
       return res.status(400).json({ message: "Email is required" })
     }
-    loginAttempts.adminClear(email.toLowerCase().trim())
+    await loginAttempts.adminClear(email.toLowerCase().trim())
     logger.info({ action: "CLEAR_LOGIN_LOCKOUT", adminId: req.userId, targetEmail: email })
     return res.json({ message: "Lockout cleared" })
   } catch (error) {
