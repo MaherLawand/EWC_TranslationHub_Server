@@ -11,6 +11,9 @@ import {
 import {
   sendResetEmail,
 } from "../utils/sendResetEmail.js"
+import {
+  sendLockoutEmail,
+} from "../utils/sendLockoutEmail.js"
 import type { AuthRequest } from "../middleware/auth.middleware.js"
 import type { Request, Response } from "express"
 import { Resend } from "resend"
@@ -232,6 +235,10 @@ export async function login(
       const { failures, locked } = loginAttempts.recordFailure(email)
       logger.warn({ action: "LOGIN_FAILED", email, userId: user.id, reason: "wrong_password", failures })
       if (locked) {
+        // Fire-and-forget — don't delay the response waiting for the email
+        sendLockoutEmail(user.email).catch((err) =>
+          logger.error({ action: "LOCKOUT_EMAIL_FAILED", email: user.email, err })
+        )
         return res.status(429).json({
           message: "Too many failed attempts. Account locked for 5 minutes. Reset your password to unlock immediately.",
           locked: true,
