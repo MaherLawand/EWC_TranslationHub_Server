@@ -61,7 +61,7 @@ ewctranslations.org
 
       <div style="text-align:center; margin-bottom:32px;">
         <img
-          src="https://ewctranslations.org/EWCLOGO.svg"
+          src="https://ewctranslations.org/EWCLOGO.png"
           alt="EWC Translation Hub"
           width="180"
           style="display:block; margin:0 auto 16px auto;"
