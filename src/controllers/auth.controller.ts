@@ -213,8 +213,17 @@ export async function login(
       where: { email },
     })
     if (!user || !user.password) {
-      await loginAttempts.recordFailure(email)
+      const { locked } = await loginAttempts.recordFailure(email)
       logger.warn({ action: "LOGIN_FAILED", email, reason: "invalid_credentials" })
+      // If a real user exists and just got locked, send the notification email.
+      // Pass activated=false so the email tells them to contact admin
+      // rather than reset a password they've never set.
+      if (locked && user) {
+        logger.info({ action: "LOCKOUT_EMAIL_SENDING", email: user.email })
+        sendLockoutEmail(user.email, false)
+          .then(() => logger.info({ action: "LOCKOUT_EMAIL_SENT", email: user.email }))
+          .catch((err) => logger.error({ action: "LOCKOUT_EMAIL_FAILED", email: user.email, err }))
+      }
       return res.status(401).json({
         message: "Invalid credentials",
       })

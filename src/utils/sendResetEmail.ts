@@ -59,66 +59,30 @@ ewctranslations.org
       "
     >
 
-      <div
-        style="
-          text-align:center;
-          margin-bottom:32px;
-        "
-      >
-
-        <h1
-          style="
-            margin:0;
-            font-size:32px;
-            color:#D6B36A;
-          "
-        >
-          EWC Translation Hub
-        </h1>
-
-        <p
-          style="
-            color:#888;
-            margin-top:10px;
-            font-size:14px;
-          "
-        >
+      <div style="text-align:center; margin-bottom:32px;">
+        <img
+          src="https://ewctranslations.org/EWCLOGO.png"
+          alt="EWC Translation Hub"
+          width="120"
+          style="display:block; margin:0 auto 16px auto;"
+        />
+        <p style="color:#888; margin:0; font-size:14px;">
           Password Reset
         </p>
-
       </div>
 
-      <h2
-        style="
-          margin-top:0;
-          color:white;
-          font-size:24px;
-        "
-      >
+      <h2 style="margin-top:0; color:white; font-size:24px;">
         Reset your password
       </h2>
 
-      <p
-        style="
-          color:#B0B0B0;
-          line-height:1.7;
-          font-size:15px;
-        "
-      >
+      <p style="color:#B0B0B0; line-height:1.7; font-size:15px;">
         We received a request to reset the password for your account.
         Click the button below to set a new password.
         This link expires in
         <strong style="color:#F5F1E8;">1 hour</strong>.
       </p>
 
-      <div
-        style="
-          margin-top:35px;
-          margin-bottom:35px;
-          text-align:center;
-        "
-      >
-
+      <div style="margin-top:35px; margin-bottom:35px; text-align:center;">
         <a
           href="${resetUrl}"
           style="
@@ -134,36 +98,21 @@ ewctranslations.org
         >
           Reset Password
         </a>
-
       </div>
 
       <div
         style="
-          background:#1a0a0a;
-          border:1px solid #3a1a1a;
+          background:#161616;
+          border:1px solid #2A2A2A;
           border-radius:16px;
           padding:18px;
           margin-top:10px;
         "
       >
-        <p
-          style="
-            margin:0 0 6px 0;
-            color:#f87171;
-            font-weight:bold;
-            font-size:14px;
-          "
-        >
+        <p style="margin:0 0 6px 0; color:#f87171; font-weight:bold; font-size:14px;">
           Didn't request this?
         </p>
-        <p
-          style="
-            margin:0;
-            color:#8E8E8E;
-            font-size:13px;
-            line-height:1.6;
-          "
-        >
+        <p style="margin:0; color:#8E8E8E; font-size:13px; line-height:1.6;">
           Do <strong style="color:#f87171;">not</strong> click the button above.
           Someone may have entered your email address by mistake.
           Your password will <strong style="color:#F5F1E8;">not</strong> change
@@ -177,38 +126,17 @@ ewctranslations.org
           border:1px solid #2A2A2A;
           border-radius:16px;
           padding:18px;
-          margin-top:25px;
+          margin-top:16px;
         "
       >
-
-        <p
-          style="
-            margin:0 0 10px 0;
-            color:#D6B36A;
-            font-weight:bold;
-            font-size:14px;
-          "
-        >
+        <p style="margin:0 0 10px 0; color:#D6B36A; font-weight:bold; font-size:14px;">
           Security Notice
         </p>
-
-        <p
-          style="
-            margin:0;
-            color:#8E8E8E;
-            font-size:13px;
-            line-height:1.6;
-          "
-        >
-          EWC Translation Hub will never
-          ask for your password by email.
-          Only use the official button above
-          and verify that the website domain is:
-          <strong style="color:#F5F1E8;">
-            ewctranslations.org
-          </strong>
+        <p style="margin:0; color:#8E8E8E; font-size:13px; line-height:1.6;">
+          EWC Translation Hub will never ask for your password by email.
+          Only use the official button above and verify that the website domain is:
+          <strong style="color:#F5F1E8;">ewctranslations.org</strong>
         </p>
-
       </div>
 
       <div

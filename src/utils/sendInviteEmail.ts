@@ -73,33 +73,16 @@ ewctranslations.org
       "
     >
 
-      <div
-        style="
-          text-align:center;
-          margin-bottom:32px;
-        "
-      >
-
-        <h1
-          style="
-            margin:0;
-            font-size:32px;
-            color:#D6B36A;
-          "
-        >
-          EWC Translation Hub
-        </h1>
-
-        <p
-          style="
-            color:#888;
-            margin-top:10px;
-            font-size:14px;
-          "
-        >
+      <div style="text-align:center; margin-bottom:32px;">
+        <img
+          src="https://ewctranslations.org/EWCLOGO.png"
+          alt="EWC Translation Hub"
+          width="120"
+          style="display:block; margin:0 auto 16px auto;"
+        />
+        <p style="color:#888; margin:0; font-size:14px;">
           Official Invitation
         </p>
-
       </div>
 
       <h2
