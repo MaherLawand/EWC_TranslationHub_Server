@@ -4,7 +4,7 @@ import cors from "cors"
 import cookieParser from "cookie-parser"
 import path from "path"
 import helmet from "helmet"
-import rateLimit from "express-rate-limit"
+import rateLimit, { ipKeyGenerator } from "express-rate-limit"
 import jwt from "jsonwebtoken"
 
 import authRoutes from "./routes/auth.routes.js"
@@ -14,6 +14,10 @@ import gameRoutes from "./routes/games.routes.js"
 import { logger } from "./lib/logger.js"
 
 const app = express()
+
+// Railway (and most cloud platforms) sit behind a reverse proxy that sets
+// X-Forwarded-For. Tell Express to trust it so req.ip is the real client IP.
+app.set("trust proxy", 1)
 
 app.use(cors({
   origin: process.env.CLIENT_URL,
@@ -43,7 +47,7 @@ const apiLimiter = rateLimit({
         if (decoded?.userId) return decoded.userId
       }
     } catch { /* invalid/expired token — fall through to IP */ }
-    return req.ip ?? "unknown"
+    return ipKeyGenerator(req.ip ?? "unknown")
   },
   message: { message: "Too many requests, please try again later." },
   standardHeaders: true,
