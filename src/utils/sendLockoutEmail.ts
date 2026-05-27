@@ -93,9 +93,9 @@ Official domain: ewctranslations.org
 
       <div style="text-align:center; margin-bottom:32px;">
         <img
-          src="https://ewctranslations.org/EWCLOGO.png"
+          src="https://ewctranslations.org/EWCLOGO.svg"
           alt="EWC Translation Hub"
-          width="120"
+          width="180"
           style="display:block; margin:0 auto 16px auto;"
         />
         <p style="color:#888; margin:0; font-size:14px;">
