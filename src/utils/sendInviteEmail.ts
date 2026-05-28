@@ -75,10 +75,10 @@ ewctranslations.org
 
       <div style="text-align:center; margin-bottom:32px;">
         <img
-          src="https://ewctranslations.org/EWCLOGO.png"
+          src="https://ewctranslations.org/EWCLOGOEMAIL.png"
           alt="EWC Translation Hub"
-          width="180"
-          style="display:block; margin:0 auto 16px auto;"
+          width="260"
+          style="display:block; margin:0 auto 6px auto; width:400px; height:auto;"
         />
         <p style="color:#888; margin:0; font-size:14px;">
           Official Invitation

@@ -200,226 +200,74 @@ ${orderLink}
               `New Translation Source Available — ${order.title}`,
 
             html: `
-<div
-  style="
-    margin:0;
-    padding:0;
-    background:#0a0a0a;
-    font-family:Arial,sans-serif;
-  "
->
-  <table
-    width="100%"
-    cellpadding="0"
-    cellspacing="0"
-    style="
-      background:#0a0a0a;
-      padding:40px 20px;
-    "
-  >
-    <tr>
-      <td align="center">
+  <div style="background:#0B0B0B; padding:40px; font-family:Arial,sans-serif; color:#F5F1E8;">
 
-        <table
-          width="100%"
-          cellpadding="0"
-          cellspacing="0"
-          style="
-            max-width:600px;
-            background:#111111;
-            border:1px solid #242424;
-            border-radius:24px;
-            overflow:hidden;
-          "
+    <div style="max-width:600px; margin:auto; background:#111111; border:1px solid #242424; border-radius:24px; padding:40px;">
+
+      <div style="text-align:center; margin-bottom:32px;">
+        <img
+          src="https://ewctranslations.org/EWCLOGOEMAIL.png"
+          alt="EWC Translation Hub"
+          width="260"
+          style="display:block; margin:0 auto 6px auto; width:400px; height:auto;"
+        />
+        <p style="color:#888; margin:0; font-size:14px;">New Translation Task</p>
+      </div>
+
+      <h2 style="margin-top:0; color:white; font-size:24px;">Source File Added</h2>
+
+      <p style="color:#B0B0B0; line-height:1.7; font-size:15px;">
+        A new source file has been added for translation. Click the button below to view the order and get started.
+      </p>
+
+      <div style="background:#161616; border:1px solid #2A2A2A; border-radius:16px; padding:18px; margin-top:25px;">
+        <p style="margin:0 0 10px 0; color:#D6B36A; font-weight:bold; font-size:14px;">Order Details</p>
+
+        <p style="margin:0 0 8px 0; color:#8E8E8E; font-size:13px; line-height:1.6;">
+          <strong style="color:#F5F1E8;">Order:</strong> ${order.title}
+        </p>
+
+        <p style="margin:0 0 8px 0; color:#8E8E8E; font-size:13px; line-height:1.6;">
+          <strong style="color:#F5F1E8;">Department:</strong> ${order.type === "BROADCAST" ? "Broadcast" : "Marketing"}
+        </p>
+
+        ${order.type === "BROADCAST"
+          ? `<p style="margin:0 0 8px 0; color:#8E8E8E; font-size:13px; line-height:1.6;"><strong style="color:#F5F1E8;">Game:</strong> ${order.broadcast?.game?.name}</p>`
+          : `<p style="margin:0 0 8px 0; color:#8E8E8E; font-size:13px; line-height:1.6;"><strong style="color:#F5F1E8;">Content:</strong> ${order.marketing?.contentTitle || "Marketing Content"}</p>`
+        }
+
+        <p style="margin:0 0 8px 0; color:#8E8E8E; font-size:13px; line-height:1.6;">
+          <strong style="color:#F5F1E8;">Delivery Format:</strong>
+          ${order.type === "BROADCAST"
+            ? order.broadcast?.deliveryFormats?.map((f) => f.format).join(", ")
+            : order.marketing?.deliveryFormats?.map((f) => f.format).join(", ")
+          }
+        </p>
+
+        <p style="margin:0; color:#8E8E8E; font-size:13px; line-height:1.6;">
+          <strong style="color:#F5F1E8;">Priority:</strong>
+          <strong style="color:${order.priority === "HIGH" ? "#f87171" : order.priority === "MEDIUM" ? "#facc15" : "#4ade80"};">
+            ${order.priority}
+          </strong>
+        </p>
+      </div>
+
+      <div style="margin-top:35px; margin-bottom:35px; text-align:center;">
+        <a
+          href="${orderLink}"
+          style="display:inline-block; background:#D6B36A; color:black; text-decoration:none; padding:16px 32px; border-radius:14px; font-weight:bold; font-size:15px;"
         >
+          View Order
+        </a>
+      </div>
 
-          <!-- HEADER -->
-          <tr>
-            <td
-              style="
-                padding:40px 40px 24px;
-                text-align:center;
-                border-bottom:1px solid #1f1f1f;
-              "
-            >
+      <div style="margin-top:40px; padding-top:20px; border-top:1px solid #242424; text-align:center; color:#666; font-size:12px;">
+        © 2026 EWC Translation Hub
+      </div>
 
-              <p
-                style="
-                  margin:0;
-                  color:#D6B36A;
-                  font-size:12px;
-                  letter-spacing:4px;
-                  font-weight:700;
-                  text-transform:uppercase;
-                "
-              >
-                EWC TRANSLATIONS
-              </p>
+    </div>
 
-              <h1
-                style="
-                  margin:18px 0 0;
-                  color:white;
-                  font-size:30px;
-                  line-height:1.1;
-                "
-              >
-                New Translation Task
-              </h1>
-
-            </td>
-          </tr>
-
-          <!-- BODY -->
-          <tr>
-            <td
-              style="
-                padding:40px;
-                color:#d4d4d4;
-                font-size:15px;
-                line-height:1.7;
-              "
-            >
-
-              <p style="margin-top:0;">
-                A new source file has been added for translation.
-              </p>
-
-              <div
-                style="
-                  background:#181818;
-                  border:1px solid #2A2A2A;
-                  border-radius:16px;
-                  padding:20px;
-                  margin:28px 0;
-                "
-              >
-
-                <p style="margin:0 0 10px;">
-                  <strong style="color:white;">
-                    Order:
-                  </strong>
-                  ${order.title}
-                </p>
-
-                <p style="margin:0 0 10px;">
-                  <strong style="color:white;">
-                    Department:
-                  </strong>
-                  ${order.type === "BROADCAST" ? "Broadcast" : "Marketing"}
-                </p>
-
-                ${
-                  order.type ===
-                  "BROADCAST"
-                    ? `
-<p style="margin:0 0 10px;">
-  <strong style="color:white;">
-    Game:
-  </strong>
-  ${order.broadcast?.game?.name}
-</p>
-`
-                    : `
-<p style="margin:0 0 10px;">
-  <strong style="color:white;">
-    Content:
-  </strong>
-  ${order.marketing?.contentTitle || "Marketing Content"}
-</p>
-`
-                }
-
-                <p style="margin:0;">
-                  <strong style="color:white;">
-                    Delivery Format:
-                  </strong>
-                  ${
-  order.type === "BROADCAST"
-    ? order.broadcast?.deliveryFormats
-        ?.map((f) => f.format)
-        .join(", ")
-    : order.marketing?.deliveryFormats
-        ?.map((f) => f.format)
-        .join(", ")
-}
-                </p>
-
-                <p style="margin:14px 0 0;">
-  <strong style="color:white;">
-    Priority:
-  </strong>
-
-  <span
-    style="
-      font-weight:700;
-
-      ${
-        order.priority === "HIGH"
-          ? "color:#F87171;"
-          : order.priority === "MEDIUM"
-          ? "color:#FACC15;"
-          : "color:#4ADE80;"
-      }
-    "
-  >
-    ${order.priority}
-  </span>
-</p>
-
-              </div>
-
-              <div
-                style="
-                  text-align:center;
-                  margin:40px 0;
-                "
-              >
-
-                <a
-                  href="${orderLink}"
-                  target="_blank"
-                  style="
-                    display:inline-block;
-                    background:#D6B36A;
-                    color:#000000;
-                    text-decoration:none;
-                    padding:16px 28px;
-                    border-radius:14px;
-                    font-size:15px;
-                    font-weight:700;
-                  "
-                >
-                  View Order
-                </a>
-
-              </div>
-
-
-            </td>
-          </tr>
-
-          <!-- FOOTER -->
-          <tr>
-            <td
-              style="
-                padding:24px 40px;
-                border-top:1px solid #1f1f1f;
-                color:#777777;
-                font-size:13px;
-                text-align:center;
-              "
-            >
-              © 2026 EWC Translations
-            </td>
-          </tr>
-
-        </table>
-
-      </td>
-    </tr>
-  </table>
-</div>
+  </div>
 `,
           })
         }

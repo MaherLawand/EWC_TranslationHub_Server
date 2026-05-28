@@ -11,6 +11,7 @@ import authRoutes from "./routes/auth.routes.js"
 import userRoutes from "./routes/user.routes.js"
 import orderRoutes from "./routes/orders.js"
 import gameRoutes from "./routes/games.routes.js"
+import devRoutes from "./routes/dev.routes.js"
 import { logger } from "./lib/logger.js"
 
 const app = express()
@@ -77,6 +78,11 @@ app.use(
     )
   )
 )
+
+// Dev-only email previews — never exposed in production
+if (process.env.NODE_ENV !== "production") {
+  app.use("/dev", devRoutes)
+}
 
 app.get("/", (_, res) => {
   res.send("API WORKING")
