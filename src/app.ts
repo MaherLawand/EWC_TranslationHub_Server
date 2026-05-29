@@ -39,7 +39,7 @@ app.use(cookieParser())
 // Auth routes keep their own tighter IP-based limiter (brute-force protection).
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 300,
+  max: 1000,
   keyGenerator: (req) => {
     try {
       const token = (req as any).cookies?.token
