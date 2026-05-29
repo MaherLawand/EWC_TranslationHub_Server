@@ -7,7 +7,7 @@ import type {
 } from "../middleware/auth.middleware.js"
 
 import { prisma } from "../lib/prisma.js"
-import { triggerNotifications } from "../lib/socket.js"
+import { triggerNotifications, getIo } from "../lib/socket.js"
 import { notifyTranslatorsSourceReady } from "./notification.controller.js"
 import { logger } from "../lib/logger.js"
 import { ordersCache } from "../lib/ordersCache.js"
@@ -1172,6 +1172,7 @@ isOrderPriority(priority)
     logger.info({ action: "CREATE_ORDER", userId: req.userId, orderId: order.id, type: order.type, title: order.title })
 
     ordersCache.invalidate()
+    try { getIo()?.emit("order-created", { type: order.type }) } catch {}
     return res.json(order)
 
   } catch (error) {
@@ -1831,6 +1832,7 @@ const sourceWasChanged =
     logger.info({ action: "UPDATE_ORDER", userId: req.userId, orderId, title: updatedOrder?.title })
 
     ordersCache.invalidate()
+    try { getIo()?.emit("order-patched", { id: orderId, type: updatedOrder?.type }) } catch {}
     return res.json(updatedOrder)
 
   } catch (error) {
@@ -1972,6 +1974,7 @@ if (
     logger.info({ action: "UPDATE_ORDER_STATUS", userId: req.userId, orderId, status: parsedStatus, title: existingOrder.title })
 
     ordersCache.invalidate()
+    try { getIo()?.emit("order-patched", { id: updatedOrder.id, type: updatedOrder.type, status: updatedOrder.status }) } catch {}
     res.json(updatedOrder)
 
     /*
@@ -2287,6 +2290,7 @@ export async function assignUsersToMarketingOrder(
     logger.info({ action: "ASSIGN_USERS_TO_ORDER", userId: req.userId, orderId, userIds, orderTitle: order.title })
 
     ordersCache.invalidate()
+    try { getIo()?.emit("order-patched", { id: orderId, type: order.type }) } catch {}
     return res.json(updatedOrder)
 
   } catch (error) {
@@ -2352,15 +2356,17 @@ export async function deleteOrder(
       (single query)
     */
 
-    await prisma.translationOrder.delete({
+    const deleted = await prisma.translationOrder.delete({
       where: {
         id: orderId,
       },
+      select: { id: true, type: true },
     })
 
     logger.info({ action: "DELETE_ORDER", userId: req.userId, orderId })
 
     ordersCache.invalidate()
+    try { getIo()?.emit("order-deleted", { id: deleted.id, type: deleted.type }) } catch {}
     return res.json({
       success: true,
     })

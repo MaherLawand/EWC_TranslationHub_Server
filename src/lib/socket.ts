@@ -8,6 +8,10 @@ export function setIo(instance: Server) {
   io = instance
 }
 
+export function getIo(): Server | undefined {
+  return io
+}
+
 export async function triggerNotifications(
   notifications: {
     id: string
