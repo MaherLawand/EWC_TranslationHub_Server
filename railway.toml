@@ -1,5 +1,7 @@
 [build]
 builder = "RAILPACK"
+buildCommand = "npm run build"
 
 [deploy]
 healthcheckPath = "/health"
+startCommand = "node dist/src/index.js"
