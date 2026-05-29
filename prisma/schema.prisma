@@ -125,10 +125,10 @@ model User {
 
   isActive Boolean @default(true)
 
-  inviteToken  String?
+  inviteToken  String?   @unique
   inviteExpiry DateTime?
 
-  resetToken  String?
+  resetToken  String?   @unique
   resetExpiry DateTime?
 
   loginFailures Int       @default(0)

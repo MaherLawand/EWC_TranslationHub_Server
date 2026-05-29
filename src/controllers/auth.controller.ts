@@ -85,7 +85,7 @@ export async function setPassword(
     }
 
     const hashedPassword =
-      await bcrypt.hash(password, 10)
+      await bcrypt.hash(password, 12)
 
     await prisma.user.update({
       where: {
@@ -268,7 +268,7 @@ export async function login(
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 1000 * 60 * 60 * 24 * 7,
+      maxAge: 1000 * 60 * 60 * 24 * 365,
     })
 
     await loginAttempts.clear(email)
@@ -1380,25 +1380,15 @@ export async function assignGamesToUser(
       return res.status(400).json({ message: "gameIds must be an array of up to 50 IDs" })
     }
 
-    await prisma.gameAssignment.deleteMany({
-      where: {
-        userId,
-      },
-    })
-
-    if (
-      gameIds &&
-      gameIds.length > 0
-    ) {
-      await prisma.gameAssignment.createMany({
-        data: gameIds.map(
-          (gameId: string) => ({
-            userId,
-            gameId,
-          })
-        ),
-      })
-    }
+    await prisma.$transaction([
+      prisma.gameAssignment.deleteMany({ where: { userId } }),
+      ...(gameIds && gameIds.length > 0
+        ? [prisma.gameAssignment.createMany({
+            data: gameIds.map((gameId: string) => ({ userId, gameId })),
+          })]
+        : []
+      ),
+    ])
 
     logger.info({ action: "ASSIGN_GAMES_TO_USER", byUserId: req.userId, targetUserId: userId, gameIds: gameIds ?? [] })
 
@@ -1535,7 +1525,7 @@ export async function resetPassword(
       return res.status(400).json({ message: "Reset link expired" })
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10)
+    const hashedPassword = await bcrypt.hash(password, 12)
 
     await prisma.user.update({
       where: { id: user.id },

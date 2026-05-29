@@ -52,26 +52,30 @@ class LoginAttemptsStore {
 
   /** Call on failed login. Returns updated failure count and whether locked. */
   async recordFailure(email: string): Promise<{ failures: number; locked: boolean }> {
-    const user = await prisma.user.findUnique({
+    // Check user exists first — don't create phantom records
+    const exists = await prisma.user.findUnique({
       where: { email: this.key(email) },
-      select: { id: true, loginFailures: true },
+      select: { id: true },
+    })
+    if (!exists) return { failures: 0, locked: false }
+
+    // Atomic increment — no read-then-write race condition
+    const updated = await prisma.user.update({
+      where: { id: exists.id },
+      data: { loginFailures: { increment: 1 } },
+      select: { loginFailures: true },
     })
 
-    // No user with this email — don't create phantom records
-    if (!user) return { failures: 0, locked: false }
+    const shouldLock = updated.loginFailures >= LOCKOUT_THRESHOLD
 
-    const newFailures = user.loginFailures + 1
-    const shouldLock = newFailures >= LOCKOUT_THRESHOLD
+    if (shouldLock) {
+      await prisma.user.update({
+        where: { id: exists.id },
+        data: { lockedUntil: new Date(Date.now() + LOCKOUT_DURATION_MS) },
+      })
+    }
 
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        loginFailures: newFailures,
-        ...(shouldLock && { lockedUntil: new Date(Date.now() + LOCKOUT_DURATION_MS) }),
-      },
-    })
-
-    return { failures: newFailures, locked: shouldLock }
+    return { failures: updated.loginFailures, locked: shouldLock }
   }
 
   /** Call on successful login or password reset — clears all failures */
