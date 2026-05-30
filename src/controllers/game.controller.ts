@@ -1,7 +1,10 @@
+import fs from "fs"
 import path from "path"
 import { prisma } from "../lib/prisma.js"
 import type { Request, Response } from "express"
 import { logger } from "../lib/logger.js"
+
+const GAME_LOGOS_DIR = path.resolve("src/uploads/games")
 
 export async function getGames(
   req: Request,
@@ -19,12 +22,24 @@ export async function getGames(
     // Rewrite the logo to always point at the current server so logos load in
     // every environment without re-seeding.
     const base = `${req.protocol}://${req.get("host")}`
-    const mapped = games.map((g) => ({
-      ...g,
-      logo: g.logo
-        ? `${base}/game-logos/${path.basename(g.logo)}`
-        : null,
-    }))
+    const mapped = games.map((g) => {
+      if (!g.logo) return { ...g, logo: null }
+
+      const filename = path.basename(g.logo)
+
+      // Append the file's modification time as a version query so the URL
+      // changes whenever the image bytes are replaced. This busts browser/CDN
+      // caches automatically on every deploy — no manual version bumps needed.
+      let version = ""
+      try {
+        const { mtimeMs } = fs.statSync(path.join(GAME_LOGOS_DIR, filename))
+        version = `?v=${Math.floor(mtimeMs)}`
+      } catch {
+        // File not found on disk — serve the plain URL.
+      }
+
+      return { ...g, logo: `${base}/game-logos/${filename}${version}` }
+    })
 
     return res.json(mapped)
 
