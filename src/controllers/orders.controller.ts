@@ -6,6 +6,7 @@ import type {
   AuthRequest,
 } from "../middleware/auth.middleware.js"
 
+import { randomUUID } from "node:crypto"
 import { prisma } from "../lib/prisma.js"
 import { triggerNotifications, getIo } from "../lib/socket.js"
 import { notifyTranslatorsSourceReady } from "./notification.controller.js"
@@ -23,13 +24,16 @@ import {
   UserDepartment,
 } from "@prisma/client"
 
-const listOrderSelect = {
+// Shared per-row fields used for both top-level rows and nested sub-orders.
+const orderRowFields = {
   id: true,
   type: true,
   title: true,
   status: true,
   priority: true,
   dateAdded: true,
+  isParent: true,
+  parentId: true,
   broadcast: {
     select: {
       id: true,
@@ -81,6 +85,23 @@ const listOrderSelect = {
   },
 } satisfies Prisma.TranslationOrderSelect
 
+// Sub-orders are rendered with the same shape as top-level rows.
+const subOrderSelect = orderRowFields
+
+// Grouped mode (default): top-level rows carry only a sub-order COUNT badge.
+// Sub-orders are lazy-fetched on expand via getSubOrders — never eagerly nested.
+const listOrderSelectGrouped = {
+  ...orderRowFields,
+  _count: { select: { subOrders: true } },
+} satisfies Prisma.TranslationOrderSelect
+
+// Flat mode (search/filter active): sub-orders appear as their own rows, each
+// annotated with a lightweight reference to its parent for the breadcrumb.
+const listOrderSelectFlat = {
+  ...orderRowFields,
+  parent: { select: { id: true, title: true } },
+} satisfies Prisma.TranslationOrderSelect
+
 // Core order fields — no editHistory so this query is leaner.
 // Used by getOrderById (parallel fetch) and as the base for orderSelect.
 const orderSelectCore = {
@@ -103,6 +124,23 @@ const orderSelectCore = {
   completedAt: true,
 
   lastEditedAt: true,
+
+  // Sub-order relations
+  isParent: true,
+  parentId: true,
+  parent: {
+    select: { id: true, title: true, type: true },
+  },
+  subOrders: {
+    orderBy: { dateAdded: "asc" as const },
+    select: {
+      id: true,
+      title: true,
+      type: true,
+      status: true,
+      priority: true,
+    },
+  },
 
   createdBy: {
     select: {
@@ -454,6 +492,8 @@ const where: Prisma.TranslationOrderWhereInput = {}
     if (orderId) {
       where.id = orderId
     }
+    // NOTE: when no orderId, the grouped/flat decision (whether to restrict to
+    // top-level rows via parentId = null) is made below, once parsedFormats is known.
 
     /*
       SEARCH
@@ -736,10 +776,37 @@ if (
 }
 
     /*
+      LIST MODE — grouped (default) vs flat (search/filter active)
+
+      Grouped: restrict to top-level rows (parentId = null), each parent carries
+               only a sub-order count badge; sub-orders are lazy-fetched on expand.
+      Flat:    a narrowing filter/search is active, so drop the parentId = null
+               restriction and let matching sub-orders surface as their own rows,
+               each annotated with its parent for a breadcrumb.
+    */
+
+    const narrowing = !!(
+      search ||
+      isOrderStatus(status) ||
+      isOrderPriority(priority) ||
+      parsedFormats.length ||
+      gameId ||
+      contentTitle
+    )
+
+    // Only constrain to top-level rows when NOT narrowing and not an exact-id lookup.
+    if (!orderId && !narrowing) {
+      where.parentId = null
+    }
+
+    const listSelect = narrowing ? listOrderSelectFlat : listOrderSelectGrouped
+    const mode = narrowing ? "flat" : "grouped"
+
+    /*
       CACHE CHECK
     */
 
-    const cacheKey = `orders:${JSON.stringify({ page, limit, skip, where, orderBy })}:${assignedOnly ? req.userId : "all"}`
+    const cacheKey = `orders:${JSON.stringify({ page, limit, skip, where, orderBy, mode })}:${assignedOnly ? req.userId : "all"}`
     const cached = ordersCache.get(cacheKey)
     if (cached) return res.json(cached)
 
@@ -761,7 +828,7 @@ if (
 
         take: limit,
 
-        select: listOrderSelect,
+        select: listSelect,
       }),
 
       prisma.translationOrder.count({
@@ -779,6 +846,7 @@ if (
       page,
       limit,
       totalPages: Math.ceil(total / limit),
+      mode,
     }
 
     ordersCache.set(cacheKey, result, 3_000) // 3s TTL
@@ -828,108 +896,213 @@ export async function getOrderById(
   }
 }
 
+/*
+  Recompute a parent order's status from its sub-orders.
+  All COMPLETED -> COMPLETED; all PENDING -> PENDING; otherwise IN_PROGRESS.
+  A parent with no sub-orders is left untouched.
+*/
+export async function recomputeParentStatus(
+  parentId: string | null | undefined
+) {
+  if (!parentId) return
+
+  const subs = await prisma.translationOrder.findMany({
+    where: { parentId },
+    select: { status: true },
+  })
+
+  if (subs.length === 0) return undefined
+
+  const allCompleted = subs.every((s) => s.status === OrderStatus.COMPLETED)
+  const allPending = subs.every((s) => s.status === OrderStatus.PENDING)
+
+  const newStatus = allCompleted
+    ? OrderStatus.COMPLETED
+    : allPending
+    ? OrderStatus.PENDING
+    : OrderStatus.IN_PROGRESS
+
+  await prisma.translationOrder.update({
+    where: { id: parentId },
+    data: {
+      status: newStatus,
+      ...(newStatus === OrderStatus.COMPLETED
+        ? { completedAt: new Date() }
+        : { completedAt: null, completedById: null }),
+    },
+  })
+
+  return newStatus
+}
+
+/*
+  Build the Prisma create-data object for a single order (standalone, parent,
+  or sub-order). Shared by createOrder and createSubOrders so the broadcast /
+  marketing detail shape stays in one place.
+
+  Leniency: estimatedMinutes / source / target languages default to 0 / []
+  when missing, so a "big order" (parent) carrying only shared fields
+  (game + deadline) can still be created.
+*/
+function buildOrderData(
+  body: any,
+  userId: string
+): { data?: any; error?: string } {
+  const {
+    title,
+    notes,
+    type,
+    event,
+    status,
+    priority,
+    game,
+    estimatedMinutes,
+    sourceLanguage,
+    targetLanguages,
+    contentTitle,
+    deliveryFormats,
+    deliveries,
+    sourceFileLink,
+    srtAvailableLink,
+    deliveryDate,
+    deadline,
+  } = body
+
+  if (!title?.trim()) {
+    return { error: "Title is required" }
+  }
+
+  if (deliveryFormats && !Array.isArray(deliveryFormats)) {
+    return { error: "Delivery formats must be an array" }
+  }
+
+  const srcLang = isStringArray(sourceLanguage) ? sourceLanguage : []
+  const tgtLang = isStringArray(targetLanguages) ? targetLanguages : []
+
+  const parsedEstimatedMinutes = Number.isNaN(Number(estimatedMinutes))
+    ? 0
+    : Number(estimatedMinutes)
+
+  if (deliveryDate && isNaN(new Date(deliveryDate).getTime())) {
+    return { error: "Invalid delivery date" }
+  }
+  if (deadline && isNaN(new Date(deadline).getTime())) {
+    return { error: "Invalid deadline date" }
+  }
+
+  const orderType: OrderType =
+    type === OrderType.MARKETING ? OrderType.MARKETING : OrderType.BROADCAST
+
+  const normalizedGame = typeof game === "string" ? game.trim() : ""
+
+  if (orderType === OrderType.BROADCAST && !normalizedGame) {
+    return { error: "Game is required" }
+  }
+
+  if (event && !isEventType(event)) {
+    return { error: "Invalid event" }
+  }
+
+  const parsedDeliveries = Array.isArray(deliveries)
+    ? deliveries
+        .filter((delivery) => typeof delivery?.language === "string")
+        .map((delivery: any) => ({
+          language: delivery.language,
+          deliveryLink: delivery.deliveryLink || "",
+        }))
+    : []
+
+  const formatsCreate = Array.isArray(deliveryFormats)
+    ? deliveryFormats.map((item: any) => ({
+        format: isDeliveryFormat(item.format)
+          ? item.format
+          : DeliveryFormat.SRT,
+        deliveryLink: item.deliveryLink || "",
+      }))
+    : []
+
+  const data: any = {
+    title: title.trim(),
+
+    notes: typeof notes === "string" ? notes.trim() || null : undefined,
+
+    type: orderType,
+
+    event: isEventType(event) ? event : EventType.EWC,
+
+    status: isOrderStatus(status) ? status : OrderStatus.PENDING,
+
+    priority: isOrderPriority(priority) ? priority : OrderPriority.MEDIUM,
+
+    createdById: userId,
+
+    ...(orderType === "BROADCAST"
+      ? {
+          broadcast: {
+            create: {
+              estimatedMinutes: parsedEstimatedMinutes,
+              sourceLanguage: srcLang,
+              targetLanguages: tgtLang,
+              deliveryFormats: { create: formatsCreate },
+              sourceFileLink: sourceFileLink || "",
+              srtAvailableLink:
+                typeof srtAvailableLink === "string"
+                  ? srtAvailableLink.trim() || null
+                  : null,
+              deliveryDate: deliveryDate ? new Date(deliveryDate) : new Date(),
+              deadlineDate: deadline ? new Date(deadline) : new Date(),
+              deliveries: { create: parsedDeliveries },
+              game: { connect: { id: normalizedGame } },
+            },
+          },
+        }
+      : {
+          marketing: {
+            create: {
+              contentTitle:
+                typeof contentTitle === "string"
+                  ? contentTitle.trim() || null
+                  : undefined,
+              sourceLanguage: srcLang,
+              targetLanguages: tgtLang,
+              sourceFileLink:
+                typeof sourceFileLink === "string" ? sourceFileLink : undefined,
+              srtAvailableLink:
+                typeof srtAvailableLink === "string"
+                  ? srtAvailableLink.trim() || null
+                  : null,
+              deadlineDate: deadline ? new Date(deadline) : null,
+              deliveryFormats: { create: formatsCreate },
+              deliveries: { create: parsedDeliveries },
+            },
+          },
+        }),
+  }
+
+  return { data }
+}
+
 export async function createOrder(
   req: AuthRequest,
   res: Response
 ) {
   try {
 
-    const {
-      title,
-      notes,
-      type,
-      event,
-      status,
-      priority,
-      game,
-      estimatedMinutes,
-      sourceLanguage,
-      targetLanguages,
-      contentTitle,
-      deliveryFormats,
-      deliveries,
-      sourceFileLink,
-      srtAvailableLink,
-      deliveryDate,
-      deadline,
-    } = req.body
-
-    /*
-      BASIC VALIDATION
-    */
-
-    if (!title?.trim()) {
-      return res.status(400).json({
-        message: "Title is required",
-      })
-    }
-
-    if (!isStringArray(sourceLanguage)) {
-      return res.status(400).json({
-        message:
-          "Source language must be an array",
-      })
-    }
-    if (
-  deliveryFormats &&
-  !Array.isArray(
-    deliveryFormats
-  )
-) {
-  return res.status(400).json({
-    message:
-      "Delivery formats must be an array",
-  })
-}
-
-const parsedEstimatedMinutes =
-  Number(estimatedMinutes)
-if (
-  Number.isNaN(parsedEstimatedMinutes)
-) {
-  return res.status(400).json({
-    message:
-      "Estimated minutes must be a number",
-  })
-}
-
-    if (!isStringArray(targetLanguages)){
-      return res.status(400).json({
-        message:
-          "Target languages must be an array",
-      })
-    }
-
-    if (deliveryDate && isNaN(new Date(deliveryDate).getTime())) {
-      return res.status(400).json({ message: "Invalid delivery date" })
-    }
-    if (deadline && isNaN(new Date(deadline).getTime())) {
-      return res.status(400).json({ message: "Invalid deadline date" })
+    if (!req.userId) {
+      return res.status(401).json({ message: "Unauthorized" })
     }
 
     /*
       USER
     */
 
-    const user =
-      await prisma.user.findUnique({
-        where: {
-          id: req.userId,
-        },
-
-        select: {
-          id: true,
-
-          role: true,
-
-          position: true,
-        },
-      })
+    const user = await prisma.user.findUnique({
+      where: { id: req.userId },
+      select: { id: true, role: true, position: true },
+    })
 
     if (!user) {
-      return res.status(404).json({
-        message: "User not found",
-      })
+      return res.status(404).json({ message: "User not found" })
     }
 
     /*
@@ -937,236 +1110,52 @@ if (
     */
 
     if (!canManageOrders(user)) {
-      return res.status(403).json({
-        message: "Unauthorized",
-      })
+      return res.status(403).json({ message: "Unauthorized" })
     }
 
     /*
-      ORDER TYPE
+      SUB-ORDER FLAGS
     */
 
-const orderType: OrderType =
-  type === OrderType.MARKETING
-    ? OrderType.MARKETING
-    : OrderType.BROADCAST
-
-
-const normalizedGame =
-  typeof game === "string"
-    ? game.trim()
-    : ""
-
-if (
-  orderType === OrderType.BROADCAST &&
-  !normalizedGame
-) {
-  return res.status(400).json({
-    message: "Game is required",
-  })
-}
-
-if (event && !isEventType(event)){
-  return res.status(400).json({
-    message: "Invalid event",
-  })
-}
+    const isParent = req.body.isParent === true
+    const parentId =
+      typeof req.body.parentId === "string" && req.body.parentId.trim()
+        ? req.body.parentId.trim()
+        : null
 
     /*
-      CLEAN DELIVERIES
+      BUILD + CREATE
     */
 
-    const parsedDeliveries =
-  Array.isArray(deliveries)
-    ? deliveries
-        .filter(
-          (delivery) =>
-            typeof delivery?.language ===
-            "string"
-        )
-        .map(
-            (delivery: any) => ({
-              language:
-                delivery.language,
+    const built = buildOrderData(req.body, user.id)
+    if (built.error || !built.data) {
+      return res
+        .status(400)
+        .json({ message: built.error || "Invalid order data" })
+    }
 
-              deliveryLink:
-                delivery.deliveryLink ||
-                "",
-            })
-          )
-        : []
-
-    /*
-      CREATE ORDER
-    */
-
-    const order =
-      await prisma.translationOrder.create({
-        data: {
-          title: title.trim(),
-
-          notes:
-  typeof notes === "string"
-    ? notes.trim() || null
-    : undefined,
-
-          type: orderType,
-
-          event:
-  isEventType(event)
-    ? event
-    : EventType.EWC,
-
-          status:
-isOrderStatus(status)
-    ? status
-    : OrderStatus.PENDING,
-
-          priority:
-isOrderPriority(priority)
-    ? priority
-    : OrderPriority.MEDIUM,
-
-          createdById: user.id,
-
-          ...(orderType ===
-          "BROADCAST"
-            ? {
-                broadcast: {
-                  create: {
-                    estimatedMinutes:parsedEstimatedMinutes,
-
-                    sourceLanguage,
-
-                    targetLanguages,
-
-                    deliveryFormats: {
-  create:
-    Array.isArray(
-      deliveryFormats
-    )
-      ? deliveryFormats.map(
-          (item: any) => ({
-            format: isDeliveryFormat(
-  item.format
-)
-  ? item.format
-  : DeliveryFormat.SRT,
-
-            deliveryLink:
-              item.deliveryLink ||
-              "",
-          })
-        )
-      : [],
-},
-
-                    sourceFileLink:
-                      sourceFileLink ||
-                      "",
-
-                    srtAvailableLink:
-                      typeof srtAvailableLink === "string"
-                        ? srtAvailableLink.trim() || null
-                        : null,
-
-                    deliveryDate:
-                      deliveryDate
-                        ? new Date(
-                            deliveryDate
-                          )
-                        : new Date(),
-
-                    deadlineDate:
-                      deadline
-                        ? new Date(
-                            deadline
-                          )
-                        : new Date(),
-
-                    deliveries: {
-                      create:
-                        parsedDeliveries,
-                    },
-
-                    game: {
-                      connect: {
-                        id: normalizedGame,
-                      },
-                    }
-                  },
-                },
-              }
-            : {
-                marketing: {
-                  create: {
-                    contentTitle:
-  typeof contentTitle ===
-  "string"
-    ? contentTitle.trim() ||
-      null
-    : undefined,
-
-                    sourceLanguage,
-
-                    targetLanguages,
-
-                    sourceFileLink:typeof sourceFileLink === "string"
-  ? sourceFileLink
-  : undefined,
-
-                    srtAvailableLink:
-                      typeof srtAvailableLink === "string"
-                        ? srtAvailableLink.trim() || null
-                        : null,
-
-                    deadlineDate:
-                      deadline
-                        ? new Date(deadline)
-                        : null,
-
-                   deliveryFormats: {
-  create:
-    Array.isArray(
-      deliveryFormats
-    )
-      ? deliveryFormats.map(
-          (item: any) => ({
-            format: isDeliveryFormat(
-  item.format
-)
-  ? item.format
-  : DeliveryFormat.SRT,
-
-            deliveryLink:
-              item.deliveryLink ||
-              "",
-          })
-        )
-      : [],
-},
-
-                    deliveries: {
-                      create:
-                        parsedDeliveries,
-                    },
-                  },
-                },
-              }),
-        },
-
-        select:orderSelect,
-      })
+    const order = await prisma.translationOrder.create({
+      data: {
+        ...built.data,
+        isParent,
+        parentId,
+      },
+      select: orderSelect,
+    })
 
     /*
       NOTIFICATIONS
     */
 
-    if (sourceFileLink) {
+    if (req.body.sourceFileLink) {
+      notifyTranslatorsSourceReady(order.id).catch((e) =>
+        logger.error({ action: "NOTIFY_TRANSLATORS_ERROR", orderId: order.id, err: e })
+      )
+    }
 
-      notifyTranslatorsSourceReady(
-        order.id
-      ).catch((e) => logger.error({ action: "NOTIFY_TRANSLATORS_ERROR", orderId: order.id, err: e }))
+    // Adding a sub-order may change the parent's rolled-up status.
+    if (parentId) {
+      await recomputeParentStatus(parentId)
     }
 
     logger.info({ action: "CREATE_ORDER", userId: req.userId, orderId: order.id, type: order.type, title: order.title })
@@ -1183,6 +1172,258 @@ isOrderPriority(priority)
       message:
         "Failed to create order",
     })
+  }
+}
+
+/*
+  Bulk-create sub-orders under an existing parent ("big order").
+  Body: { items: [...] } or a raw array. Created atomically; parent status
+  is recomputed once and a single socket event is emitted.
+*/
+export async function createSubOrders(
+  req: AuthRequest,
+  res: Response
+) {
+  try {
+    if (!req.userId) {
+      return res.status(401).json({ message: "Unauthorized" })
+    }
+
+    const parentId = String(req.params.id)
+    const items = Array.isArray(req.body?.items) ? req.body.items : req.body
+
+    if (!Array.isArray(items) || items.length === 0) {
+      return res
+        .status(400)
+        .json({ message: "Sub-orders must be a non-empty array" })
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: req.userId },
+      select: { id: true, role: true, position: true },
+    })
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" })
+    }
+
+    if (!canManageOrders(user)) {
+      return res.status(403).json({ message: "Unauthorized" })
+    }
+
+    const parent = await prisma.translationOrder.findUnique({
+      where: { id: parentId },
+      select: { id: true, isParent: true, type: true, event: true },
+    })
+
+    if (!parent) {
+      return res.status(404).json({ message: "Parent order not found" })
+    }
+
+    /*
+      Sub-orders inherit type/event from the parent unless explicitly provided.
+
+      Instead of issuing one nested `create` per sub-order (each of which
+      expands into several sequential INSERTs — order + detail + N deliveries +
+      M formats — that add up to dozens of round-trips over the network), we
+      pre-generate the row ids and flatten everything into a handful of bulk
+      `createMany` calls. The whole thing runs in a single transaction, turning
+      ~N×5 statements into ~5 statements total regardless of how many
+      sub-orders are added.
+    */
+    const orderRows: any[] = []
+    const broadcastRows: any[] = []
+    const marketingRows: any[] = []
+    const broadcastDeliveryRows: any[] = []
+    const marketingDeliveryRows: any[] = []
+    const broadcastFormatRows: any[] = []
+    const marketingFormatRows: any[] = []
+
+    for (const item of items) {
+      const merged = {
+        ...item,
+        type: item?.type ?? parent.type,
+        event: item?.event ?? parent.event,
+      }
+      const built = buildOrderData(merged, user.id)
+      if (built.error || !built.data) {
+        return res
+          .status(400)
+          .json({ message: built.error || "Invalid sub-order data" })
+      }
+
+      const d = built.data
+      const orderId = randomUUID()
+
+      orderRows.push({
+        id: orderId,
+        title: d.title,
+        notes: d.notes ?? null,
+        type: d.type,
+        event: d.event,
+        status: d.status,
+        priority: d.priority,
+        createdById: d.createdById,
+        isParent: false,
+        parentId,
+      })
+
+      if (d.broadcast) {
+        const b = d.broadcast.create
+        const broadcastId = randomUUID()
+        broadcastRows.push({
+          id: broadcastId,
+          orderId,
+          gameId: b.game.connect.id,
+          estimatedMinutes: b.estimatedMinutes,
+          sourceLanguage: b.sourceLanguage,
+          targetLanguages: b.targetLanguages,
+          sourceFileLink: b.sourceFileLink,
+          srtAvailableLink: b.srtAvailableLink,
+          deliveryDate: b.deliveryDate,
+          deadlineDate: b.deadlineDate,
+        })
+        for (const dl of b.deliveries.create) {
+          broadcastDeliveryRows.push({
+            broadcastId,
+            language: dl.language,
+            deliveryLink: dl.deliveryLink,
+          })
+        }
+        for (const f of b.deliveryFormats.create) {
+          broadcastFormatRows.push({
+            broadcastId,
+            format: f.format,
+            deliveryLink: f.deliveryLink,
+          })
+        }
+      } else if (d.marketing) {
+        const m = d.marketing.create
+        const marketingId = randomUUID()
+        marketingRows.push({
+          id: marketingId,
+          orderId,
+          contentTitle: m.contentTitle ?? null,
+          sourceLanguage: m.sourceLanguage,
+          targetLanguages: m.targetLanguages,
+          sourceFileLink: m.sourceFileLink ?? null,
+          srtAvailableLink: m.srtAvailableLink,
+          deadlineDate: m.deadlineDate,
+        })
+        for (const dl of m.deliveries.create) {
+          marketingDeliveryRows.push({
+            marketingId,
+            language: dl.language,
+            deliveryLink: dl.deliveryLink,
+          })
+        }
+        for (const f of m.deliveryFormats.create) {
+          marketingFormatRows.push({
+            marketingId,
+            format: f.format,
+            deliveryLink: f.deliveryLink,
+          })
+        }
+      }
+    }
+
+    await prisma.$transaction([
+      ...(parent.isParent
+        ? []
+        : [
+            prisma.translationOrder.update({
+              where: { id: parentId },
+              data: { isParent: true },
+            }),
+          ]),
+      prisma.translationOrder.createMany({ data: orderRows }),
+      ...(broadcastRows.length
+        ? [prisma.broadcastDetails.createMany({ data: broadcastRows })]
+        : []),
+      ...(marketingRows.length
+        ? [prisma.marketingDetails.createMany({ data: marketingRows })]
+        : []),
+      ...(broadcastDeliveryRows.length
+        ? [prisma.broadcastDelivery.createMany({ data: broadcastDeliveryRows })]
+        : []),
+      ...(broadcastFormatRows.length
+        ? [prisma.broadcastDeliveryFormat.createMany({ data: broadcastFormatRows })]
+        : []),
+      ...(marketingDeliveryRows.length
+        ? [prisma.marketingDelivery.createMany({ data: marketingDeliveryRows })]
+        : []),
+      ...(marketingFormatRows.length
+        ? [prisma.marketingDeliveryFormat.createMany({ data: marketingFormatRows })]
+        : []),
+    ])
+
+    const builts = orderRows
+
+    await recomputeParentStatus(parentId)
+
+    const updatedParent = await prisma.translationOrder.findUnique({
+      where: { id: parentId },
+      select: listOrderSelectGrouped,
+    })
+
+    logger.info({ action: "CREATE_SUB_ORDERS", userId: req.userId, parentId, count: builts.length })
+
+    ordersCache.invalidate()
+    try { getIo()?.emit("order-created", { type: parent.type }) } catch {}
+
+    return res.json(updatedParent)
+  } catch (error) {
+    logger.error({ action: "CREATE_SUB_ORDERS_ERROR", userId: req.userId, parentId: req.params.id, err: error })
+    return res.status(500).json({ message: "Failed to create sub-orders" })
+  }
+}
+
+/*
+  GET SUB-ORDERS — lazy-loaded when a big-order parent row is expanded.
+  Paginated; rows use the same shape as top-level list rows (orderRowFields).
+*/
+export async function getSubOrders(
+  req: AuthRequest,
+  res: Response
+) {
+  try {
+    const parentId = String(req.params.id)
+
+    const page = Math.max(Number(req.query.page) || 1, 1)
+    const limit = Math.min(Math.max(Number(req.query.limit) || 50, 1), 100)
+    const skip = (page - 1) * limit
+
+    const where: Prisma.TranslationOrderWhereInput = { parentId }
+
+    const cacheKey = `sub-orders:${parentId}:${page}:${limit}`
+    const cached = ordersCache.get(cacheKey)
+    if (cached) return res.json(cached)
+
+    const [subOrders, total] = await Promise.all([
+      prisma.translationOrder.findMany({
+        where,
+        orderBy: { dateAdded: "asc" },
+        skip,
+        take: limit,
+        select: orderRowFields,
+      }),
+      prisma.translationOrder.count({ where }),
+    ])
+
+    const result = {
+      subOrders,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    }
+
+    ordersCache.set(cacheKey, result, 3_000) // 3s TTL; invalidated on every write
+
+    return res.json(result)
+  } catch (error) {
+    logger.error({ action: "GET_SUB_ORDERS_ERROR", userId: req.userId, parentId: req.params.id, err: error })
+    return res.status(500).json({ message: "Failed to fetch sub-orders" })
   }
 }
 
@@ -1241,6 +1482,8 @@ export async function updateOrder(
           id: true,
           type: true,
           event: true,
+          isParent: true,
+          parentId: true,
           broadcast: { select: { id: true, sourceFileLink: true } },
           marketing: { select: { id: true } },
         },
@@ -1368,7 +1611,7 @@ const updatedOrder = await prisma.$transaction(async (tx) => {
       }
     : {}),
 
-        ...(isOrderStatus(status)
+        ...(isOrderStatus(status) && !existingOrder.isParent
   ? { status }
   : {}),
 
@@ -1833,7 +2076,19 @@ const sourceWasChanged =
 
     ordersCache.invalidate()
     try { getIo()?.emit("order-patched", { id: orderId, type: updatedOrder?.type }) } catch {}
-    return res.json(updatedOrder)
+    res.json(updatedOrder)
+
+    // If a sub-order's status changed, roll it up into the parent.
+    if (existingOrder.parentId && isOrderStatus(status)) {
+      recomputeParentStatus(existingOrder.parentId)
+        .then((parentStatus) => {
+          ordersCache.invalidate()
+          try { getIo()?.emit("order-patched", { id: existingOrder.parentId, type: updatedOrder?.type, status: parentStatus }) } catch {}
+        })
+        .catch((e) => logger.error({ action: "RECOMPUTE_PARENT_ERROR", parentId: existingOrder.parentId, err: e }))
+    }
+
+    return
 
   } catch (error) {
 
@@ -1891,6 +2146,8 @@ export async function updateOrderStatus(
             id: true,
             title: true,
             type: true,
+            isParent: true,
+            parentId: true,
           },
         }),
       ])
@@ -1915,6 +2172,13 @@ export async function updateOrderStatus(
       return res.status(404).json({
         message:
           "Order not found",
+      })
+    }
+
+    // A parent ("big order") status is derived from its sub-orders, not set manually.
+    if (existingOrder.isParent) {
+      return res.status(400).json({
+        message: "Parent order status is derived from its sub-orders",
       })
     }
 
@@ -1976,6 +2240,16 @@ if (
     ordersCache.invalidate()
     try { getIo()?.emit("order-patched", { id: updatedOrder.id, type: updatedOrder.type, status: updatedOrder.status }) } catch {}
     res.json(updatedOrder)
+
+    // If this is a sub-order, roll its status up into the parent.
+    if (existingOrder.parentId) {
+      recomputeParentStatus(existingOrder.parentId)
+        .then((parentStatus) => {
+          ordersCache.invalidate()
+          try { getIo()?.emit("order-patched", { id: existingOrder.parentId, type: updatedOrder.type, status: parentStatus }) } catch {}
+        })
+        .catch((e) => logger.error({ action: "RECOMPUTE_PARENT_ERROR", parentId: existingOrder.parentId, err: e }))
+    }
 
     /*
       NOTIFICATIONS (fire-and-forget — response already sent)
@@ -2360,13 +2634,23 @@ export async function deleteOrder(
       where: {
         id: orderId,
       },
-      select: { id: true, type: true },
+      // parentId captured so a deleted sub-order can roll up into its parent.
+      // Deleting a parent cascades to its sub-orders (onDelete: Cascade).
+      select: { id: true, type: true, parentId: true },
     })
 
     logger.info({ action: "DELETE_ORDER", userId: req.userId, orderId })
 
     ordersCache.invalidate()
     try { getIo()?.emit("order-deleted", { id: deleted.id, type: deleted.type }) } catch {}
+
+    // If a sub-order was deleted, recompute the parent's rolled-up status.
+    if (deleted.parentId) {
+      const parentStatus = await recomputeParentStatus(deleted.parentId)
+      ordersCache.invalidate()
+      try { getIo()?.emit("order-patched", { id: deleted.parentId, type: deleted.type, status: parentStatus }) } catch {}
+    }
+
     return res.json({
       success: true,
     })
@@ -2427,6 +2711,9 @@ export async function getOrderCounts(
 
     if (orderId) {
       where.id = orderId
+    } else {
+      // Count only top-level rows so badge counts match the list.
+      where.parentId = null
     }
 
     if (search) {

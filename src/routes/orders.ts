@@ -7,10 +7,12 @@ import {
 import {
   assignUsersToMarketingOrder,
   createOrder,
+  createSubOrders,
   deleteOrder,
   getOrderById,
   getOrderCounts,
   getOrders,
+  getSubOrders,
   markNotificationsAsRead,
   updateOrder,
   updateOrderStatus,
@@ -35,6 +37,20 @@ router.post(
   "/",
   requireAuth,
   createOrder
+)
+
+// Bulk-create sub-orders under an existing parent ("big order")
+router.post(
+  "/:id/sub-orders",
+  requireAuth,
+  createSubOrders
+)
+
+// Lazy-load a parent's sub-orders (paginated) when its row is expanded
+router.get(
+  "/:id/sub-orders",
+  requireAuth,
+  getSubOrders
 )
 
 router.get(

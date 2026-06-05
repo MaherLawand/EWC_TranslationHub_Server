@@ -249,9 +249,25 @@ model TranslationOrder {
 
   marketing MarketingDetails?
 
+  /**
+   * SUB-ORDERS (self-relation)
+   * A "big order" (isParent=true) groups multiple sub-orders.
+   * A sub-order has parentId set and carries its own full details.
+   * A standalone order has isParent=false and parentId=null.
+   */
+
+  isParent Boolean @default(false)
+
+  parentId String?
+
+  parent TranslationOrder? @relation("OrderSubOrders", fields: [parentId], references: [id], onDelete: Cascade)
+
+  subOrders TranslationOrder[] @relation("OrderSubOrders")
+
   @@index([event])
   @@index([type])
   @@index([status])
+  @@index([parentId])
   @@index([priority])
   @@index([createdById])
   @@index([completedById])
