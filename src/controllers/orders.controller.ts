@@ -1455,6 +1455,7 @@ export async function updateOrder(
       deliveryDate,
       deadline,
       deliveries,
+      clientLastEditedAt, // ISO string | null | undefined — optimistic concurrency token
     } = req.body
 
     /*
@@ -1591,7 +1592,26 @@ if (
     /*
       UPDATE ORDER
     */
-const updatedOrder = await prisma.$transaction(async (tx) => {
+let updatedOrder: any
+try {
+  updatedOrder = await prisma.$transaction(async (tx) => {
+
+    // OPTIMISTIC CONCURRENCY — if the client sent a lastEditedAt token,
+    // verify it still matches the DB before writing. Mismatches mean
+    // another user saved between when this user opened the modal and
+    // submitted, so we abort with a conflict signal rather than silently
+    // overwriting their work.
+    if (clientLastEditedAt !== undefined) {
+      const current = await tx.translationOrder.findUnique({
+        where: { id: orderId },
+        select: { lastEditedAt: true },
+      })
+      const clientTs = clientLastEditedAt ? new Date(clientLastEditedAt).getTime() : null
+      const serverTs = current?.lastEditedAt?.getTime() ?? null
+      if (clientTs !== serverTs) {
+        throw { __conflict: true }
+      }
+    }
 
   await tx.translationOrder.update({
       where: {
@@ -2052,7 +2072,16 @@ if (
     where: { id: orderId },
     select: orderSelect,
   })
-})
+  }) // end prisma.$transaction
+} catch (txError: any) {
+  if (txError?.__conflict === true) {
+    logger.warn({ action: "UPDATE_ORDER_CONFLICT", userId: req.userId, orderId })
+    return res.status(409).json({
+      message: "This order was recently modified by someone else. Please refresh and try again.",
+    })
+  }
+  throw txError // re-throw anything else to the outer catch → 500
+}
 
 
     /*
@@ -2148,6 +2177,7 @@ export async function updateOrderStatus(
             type: true,
             isParent: true,
             parentId: true,
+            status: true,
           },
         }),
       ])
@@ -2186,10 +2216,14 @@ export async function updateOrderStatus(
       UPDATE DATA
     */
 
-    const parsedStatus =
- isOrderStatus(status)
-    ? status
-    : OrderStatus.PENDING
+    const parsedStatus = isOrderStatus(status) ? status : OrderStatus.PENDING
+
+    // IDEMPOTENCY — skip the write entirely if the status hasn't changed.
+    // This prevents double socket-emit when two users set the same status
+    // simultaneously (the second request becomes a no-op).
+    if (parsedStatus === existingOrder.status) {
+      return res.json({ id: orderId, type: existingOrder.type, status: existingOrder.status })
+    }
 
 const updateData:
   Prisma.TranslationOrderUpdateInput =
