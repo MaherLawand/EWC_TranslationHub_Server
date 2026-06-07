@@ -12,8 +12,8 @@ import { triggerNotifications, getIo } from "../lib/socket.js"
 import { notifyTranslatorsSourceReady } from "./notification.controller.js"
 import { logger } from "../lib/logger.js"
 import { ordersCache } from "../lib/ordersCache.js"
-import type { Prisma } from "@prisma/client"
 import {
+  Prisma,
   DeliveryFormat,
   OrderStatus,
   OrderPriority,
@@ -2072,10 +2072,26 @@ if (
     where: { id: orderId },
     select: orderSelect,
   })
+  }, {
+    // REPEATABLE READ ensures that if two users submit edits at the exact same
+    // millisecond, PostgreSQL detects the concurrent write on the second
+    // transaction and aborts it (error P2034 / PG code 40001) rather than
+    // silently overwriting the first user's changes.
+    isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead,
   }) // end prisma.$transaction
 } catch (txError: any) {
   if (txError?.__conflict === true) {
     logger.warn({ action: "UPDATE_ORDER_CONFLICT", userId: req.userId, orderId })
+    return res.status(409).json({
+      message: "This order was recently modified by someone else. Please refresh and try again.",
+    })
+  }
+  if (
+    txError instanceof Prisma.PrismaClientKnownRequestError &&
+    txError.code === "P2034"
+  ) {
+    // PostgreSQL serialization failure — two writers hit the exact same row concurrently
+    logger.warn({ action: "UPDATE_ORDER_SERIALIZATION_CONFLICT", userId: req.userId, orderId })
     return res.status(409).json({
       message: "This order was recently modified by someone else. Please refresh and try again.",
     })
