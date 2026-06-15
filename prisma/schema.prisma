@@ -52,6 +52,10 @@ enum DeliveryFormat {
   TEXT
   SRT
   BURNED_IN
+  EMBEDDED_SUBS
+  ON_SCREEN_TEXT
+  GRAPHIC_TEXT
+  VO_TRANSLATIONS
 }
 
 enum OrderPriority {

@@ -704,18 +704,12 @@ If you did not expect this email, you can safely ignore it.
               "
             >
 
-              <p
-                style="
-                  margin:0;
-                  color:#D6B36A;
-                  font-size:12px;
-                  letter-spacing:4px;
-                  font-weight:700;
-                  text-transform:uppercase;
-                "
-              >
-                EWC TRANSLATIONS
-              </p>
+              <img
+                src="https://ewctranslations.org/EWCLOGOEMAIL.png"
+                alt="EWC Translation Hub"
+                width="260"
+                style="display:block; margin:0 auto; width:260px; height:auto;"
+              />
 
               <h1
                 style="
@@ -1058,18 +1052,12 @@ If you did not expect this invitation, you can safely ignore this email.
               "
             >
 
-              <p
-                style="
-                  margin:0;
-                  color:#D6B36A;
-                  font-size:12px;
-                  letter-spacing:4px;
-                  font-weight:700;
-                  text-transform:uppercase;
-                "
-              >
-                EWC TRANSLATIONS
-              </p>
+              <img
+                src="https://ewctranslations.org/EWCLOGOEMAIL.png"
+                alt="EWC Translation Hub"
+                width="260"
+                style="display:block; margin:0 auto; width:260px; height:auto;"
+              />
 
               <h1
                 style="
