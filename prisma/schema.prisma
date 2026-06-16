@@ -68,6 +68,7 @@ enum NotificationType {
   ORDER_COMPLETED
   STATUS_ADDED
   ASSIGNED_TO_ORDER
+  FEEDBACK_ADDED
 }
 
 enum EventType {
@@ -147,6 +148,8 @@ model User {
   editedOrders TranslationOrderEdit[]
 
   lastEditedOrders TranslationOrder[] @relation("LastEditedBy")
+
+  orderFeedback OrderFeedback[] @relation("FeedbackAuthor")
 
   createdAt DateTime @default(now())
 
@@ -248,6 +251,8 @@ model TranslationOrder {
   editHistory TranslationOrderEdit[]
 
   notifications Notification[]
+
+  feedback OrderFeedback[]
 
   broadcast BroadcastDetails?
 
@@ -437,4 +442,24 @@ model MarketingOrderAssignment {
   @@unique([userId, marketingId])
   @@index([userId])
   @@index([marketingId])
+}
+
+// Translator feedback / comments on an order. Shared thread (everyone who can
+// view the order sees all entries); only the author can edit or delete theirs.
+model OrderFeedback {
+  id String @id @default(cuid())
+
+  orderId String
+  order   TranslationOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  authorId String
+  author   User   @relation("FeedbackAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+
+  message String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([authorId])
 }

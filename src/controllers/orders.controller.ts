@@ -92,7 +92,7 @@ const subOrderSelect = orderRowFields
 // Sub-orders are lazy-fetched on expand via getSubOrders — never eagerly nested.
 const listOrderSelectGrouped = {
   ...orderRowFields,
-  _count: { select: { subOrders: true } },
+  _count: { select: { subOrders: true, feedback: true } },
 } satisfies Prisma.TranslationOrderSelect
 
 // Flat mode (search/filter active): sub-orders appear as their own rows, each
@@ -100,6 +100,7 @@ const listOrderSelectGrouped = {
 const listOrderSelectFlat = {
   ...orderRowFields,
   parent: { select: { id: true, title: true } },
+  _count: { select: { feedback: true } },
 } satisfies Prisma.TranslationOrderSelect
 
 // Core order fields — no editHistory so this query is leaner.
@@ -124,6 +125,8 @@ const orderSelectCore = {
   completedAt: true,
 
   lastEditedAt: true,
+
+  _count: { select: { feedback: true } },
 
   // Sub-order relations
   isParent: true,

@@ -18,6 +18,13 @@ import {
   updateOrderStatus,
 } from "../controllers/orders.controller.js"
 
+import {
+  getOrderFeedback,
+  createOrderFeedback,
+  updateOrderFeedback,
+  deleteOrderFeedback,
+} from "../controllers/feedback.controller.js"
+
 const router = express.Router()
 
 router.get(
@@ -81,6 +88,31 @@ router.post(
   "/:id/assign",
   requireAuth,
   assignUsersToMarketingOrder
+)
+
+// ── Order feedback (translator comments) ──────────────────────────────────
+router.get(
+  "/:id/feedback",
+  requireAuth,
+  getOrderFeedback
+)
+
+router.post(
+  "/:id/feedback",
+  requireAuth,
+  createOrderFeedback
+)
+
+router.patch(
+  "/feedback/:feedbackId",
+  requireAuth,
+  updateOrderFeedback
+)
+
+router.delete(
+  "/feedback/:feedbackId",
+  requireAuth,
+  deleteOrderFeedback
 )
 
 router.delete(
