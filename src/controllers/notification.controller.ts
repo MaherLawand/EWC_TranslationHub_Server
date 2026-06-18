@@ -1,10 +1,6 @@
 import { prisma } from "../lib/prisma.js"
-import { Resend } from "resend"
 import { logger } from "../lib/logger.js"
-
-const resend = new Resend(
-  process.env.RESEND_API_KEY
-)
+import { sendEmail } from "../lib/mailer.js"
 
 export async function notifyTranslatorsSourceReady(
   orderId: string
@@ -150,7 +146,7 @@ export async function notifyTranslatorsSourceReady(
       uniqueTranslators.map(
         async (translator) => {
 
-          await resend.emails.send({
+          await sendEmail({
             from:
   "EWC Translations <translations@ewctranslations.org>",
 

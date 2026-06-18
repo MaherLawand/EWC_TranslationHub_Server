@@ -12,6 +12,44 @@ import { prisma } from "./lib/prisma.js"
 if (!process.env.JWT_SECRET) throw new Error("Missing env var: JWT_SECRET")
 if (!process.env.CLIENT_URL) throw new Error("Missing env var: CLIENT_URL")
 
+// Environment banner — prints the DB host (NEVER the password) on every boot so
+// you can always confirm at a glance which database this process is pointed at.
+;(() => {
+  let dbHost = "unknown"
+  let dbName = "unknown"
+  try {
+    const u = new URL(process.env.DATABASE_URL ?? "")
+    dbHost = u.host
+    dbName = u.pathname.replace(/^\//, "") || "unknown"
+  } catch {
+    /* malformed or missing DATABASE_URL — leave as "unknown" */
+  }
+  // Source of truth: an explicit APP_ENV label set per environment.
+  //   local server/.env   → APP_ENV=dev
+  //   Railway dashboard   → APP_ENV=prod
+  // Neon endpoint IDs are random (e.g. "ep-purple-bar-...") so the host name
+  // can't be trusted to tell dev from prod — the label can.
+  const label = (process.env.APP_ENV ?? "").toLowerCase()
+  const tag =
+    label === "dev" || label === "development"
+      ? "🟢 DEV"
+      : label === "prod" || label === "production"
+        ? "🔴 PROD"
+        : "⚠️  UNLABELED (set APP_ENV=dev in server/.env)"
+  // eslint-disable-next-line no-console
+  console.log(
+    "\n" +
+      "────────────────────────────────────────────\n" +
+      ` ENVIRONMENT CHECK\n` +
+      ` APP_ENV  : ${process.env.APP_ENV ?? "(unset)"}\n` +
+      ` NODE_ENV : ${process.env.NODE_ENV ?? "(unset)"}\n` +
+      ` DB host  : ${dbHost}\n` +
+      ` DB name  : ${dbName}\n` +
+      ` Target   : ${tag}\n` +
+      "────────────────────────────────────────────\n"
+  )
+})()
+
 const httpServer = createServer(app)
 
 const io = new Server(httpServer, {
