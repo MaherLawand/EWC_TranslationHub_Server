@@ -175,6 +175,9 @@ model Game {
 
   logo String?
 
+  // Production tier: 1 = highest, 3 = lowest. New games default to 3.
+  tier Int @default(3)
+
   broadcasts BroadcastDetails[]
 
   assignedUsers GameAssignment[]
@@ -182,6 +185,7 @@ model Game {
   createdAt DateTime @default(now())
 
   @@index([name])
+  @@index([tier])
 }
 
 model GameAssignment {

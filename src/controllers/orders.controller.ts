@@ -51,6 +51,7 @@ const orderRowFields = {
           id: true,
           name: true,
           logo: true,
+          tier: true,
         },
       },
     },
@@ -195,6 +196,7 @@ const orderSelectCore = {
           id: true,
           name: true,
           logo: true,
+          tier: true,
           assignedUsers: {
             select: {
               id: true,
@@ -465,6 +467,11 @@ const assignedOnly =
         req.query.gameId || ""
       )
 
+    const tier =
+      String(
+        req.query.tier || ""
+      )
+
     const contentTitle =
       String(
         req.query.contentTitle || ""
@@ -473,6 +480,11 @@ const assignedOnly =
     const deadlineSort =
       String(
         req.query.deadlineSort || ""
+      )
+
+    const tierSort =
+      String(
+        req.query.tierSort || ""
       )
 
     const orderId =
@@ -682,6 +694,23 @@ if (gameId) {
   }
 }
 
+/*
+  TIER FILTER (Broadcast only) — isolate orders whose game is a given tier.
+*/
+if (tier) {
+  const tierNum = Number(tier)
+  if (!Number.isNaN(tierNum)) {
+    const prevIs =
+      where.broadcast &&
+      typeof where.broadcast === "object" &&
+      "is" in where.broadcast &&
+      where.broadcast.is
+        ? where.broadcast.is
+        : {}
+    where.broadcast = { is: { ...prevIs, game: { is: { tier: tierNum } } } }
+  }
+}
+
     /*
       CONTENT TITLE
     */
@@ -727,6 +756,24 @@ if (gameId) {
         broadcast: {
           deadlineDate: "desc" as const,
         },
+      }
+    }
+
+    /*
+      TIER SORT (Broadcast only — sorts by the order's game tier).
+      Mutually exclusive with deadline sort on the client, but tier wins here
+      if both are somehow present.
+    */
+
+    if (tierSort === "ASC") {
+      orderBy = {
+        broadcast: { game: { tier: "asc" as const } },
+      }
+    }
+
+    if (tierSort === "DESC") {
+      orderBy = {
+        broadcast: { game: { tier: "desc" as const } },
       }
     }
 
