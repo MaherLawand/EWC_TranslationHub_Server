@@ -23,6 +23,8 @@ import {
   createOrderFeedback,
   updateOrderFeedback,
   deleteOrderFeedback,
+  markFeedbackRead,
+  getUnreadFeedbackCounts,
 } from "../controllers/feedback.controller.js"
 
 const router = express.Router()
@@ -101,6 +103,19 @@ router.post(
   "/:id/feedback",
   requireAuth,
   createOrderFeedback
+)
+
+// Static feedback sub-routes must precede "/feedback/:feedbackId".
+router.post(
+  "/feedback/read",
+  requireAuth,
+  markFeedbackRead
+)
+
+router.post(
+  "/feedback/unread-counts",
+  requireAuth,
+  getUnreadFeedbackCounts
 )
 
 router.patch(

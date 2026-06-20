@@ -77,6 +77,15 @@ async function notifyFeedback(orderId: string, authorId: string, authorName: str
         .filter((u) => u && u.isActive)
     }
 
+    // Also notify everyone who already participated in this thread, so a
+    // manager's reply reaches the translator who commented (and vice-versa).
+    const priorAuthors = await prisma.orderFeedback.findMany({
+      where: { orderId },
+      select: { authorId: true },
+      distinct: ["authorId"],
+    })
+    recipients = [...recipients, ...priorAuthors.map((p) => ({ id: p.authorId }))]
+
     // De-duplicate and never notify the author.
     const seen = new Set<string>()
     recipients = recipients.filter(
@@ -126,7 +135,8 @@ async function notifyFeedback(orderId: string, authorId: string, authorName: str
   }
 }
 
-/* GET /orders/:id/feedback — list all feedback for an order (shared thread). */
+/* GET /orders/:id/feedback — list all feedback for an order (shared thread).
+   Each item carries `readByMe` so the client can highlight unread messages. */
 export async function getOrderFeedback(req: AuthRequest, res: Response) {
   try {
     if (!req.userId) return res.status(401).json({ message: "Unauthorized" })
@@ -135,13 +145,73 @@ export async function getOrderFeedback(req: AuthRequest, res: Response) {
     const feedback = await prisma.orderFeedback.findMany({
       where: { orderId },
       orderBy: { createdAt: "asc" },
-      select: feedbackSelect,
+      select: {
+        ...feedbackSelect,
+        reads: { where: { userId: req.userId }, select: { id: true } },
+      },
     })
 
-    return res.json(feedback)
+    const mapped = feedback.map(({ reads, ...f }) => ({
+      ...f,
+      readByMe: reads.length > 0,
+    }))
+
+    return res.json(mapped)
   } catch (error) {
     logger.error({ action: "GET_FEEDBACK_ERROR", userId: req.userId, orderId: req.params.id, err: error })
     return res.status(500).json({ message: "Failed to load feedback" })
+  }
+}
+
+/* POST /orders/feedback/read — mark a batch of feedback messages as read for
+   the current user (called when messages scroll into view). Idempotent. */
+export async function markFeedbackRead(req: AuthRequest, res: Response) {
+  try {
+    if (!req.userId) return res.status(401).json({ message: "Unauthorized" })
+    const ids = Array.isArray(req.body.feedbackIds)
+      ? req.body.feedbackIds.filter((x: unknown) => typeof x === "string")
+      : []
+    if (ids.length === 0) return res.json({ marked: 0 })
+
+    const result = await prisma.feedbackRead.createMany({
+      data: ids.map((feedbackId: string) => ({ feedbackId, userId: req.userId! })),
+      skipDuplicates: true,
+    })
+
+    return res.json({ marked: result.count })
+  } catch (error) {
+    logger.error({ action: "MARK_FEEDBACK_READ_ERROR", userId: req.userId, err: error })
+    return res.status(500).json({ message: "Failed to mark feedback read" })
+  }
+}
+
+/* POST /orders/feedback/unread-counts — for the given order ids, return how many
+   feedback messages the current user hasn't authored and hasn't read yet.
+   Returns { [orderId]: count }. */
+export async function getUnreadFeedbackCounts(req: AuthRequest, res: Response) {
+  try {
+    if (!req.userId) return res.status(401).json({ message: "Unauthorized" })
+    const ids = Array.isArray(req.body.orderIds)
+      ? req.body.orderIds.filter((x: unknown) => typeof x === "string")
+      : []
+    if (ids.length === 0) return res.json({})
+
+    const grouped = await prisma.orderFeedback.groupBy({
+      by: ["orderId"],
+      where: {
+        orderId: { in: ids },
+        authorId: { not: req.userId },
+        reads: { none: { userId: req.userId } },
+      },
+      _count: { _all: true },
+    })
+
+    const counts: Record<string, number> = {}
+    for (const g of grouped) counts[g.orderId] = g._count._all
+    return res.json(counts)
+  } catch (error) {
+    logger.error({ action: "UNREAD_FEEDBACK_COUNTS_ERROR", userId: req.userId, err: error })
+    return res.status(500).json({ message: "Failed to load unread counts" })
   }
 }
 
@@ -157,12 +227,18 @@ export async function createOrderFeedback(req: AuthRequest, res: Response) {
 
     const user = await prisma.user.findUnique({
       where: { id: req.userId },
-      select: { id: true, position: true, firstName: true, lastName: true },
+      select: { id: true, role: true, position: true, firstName: true, lastName: true },
     })
     if (!user) return res.status(404).json({ message: "User not found" })
-    // Only translators may create feedback.
-    if (user.position !== "TRANSLATOR") {
-      return res.status(403).json({ message: "Only translators can add feedback" })
+    // Translators AND the order's managers (Producers / PPMs / Admin) may post —
+    // feedback is a back-and-forth thread between them.
+    const canPostFeedback =
+      user.role === "ADMIN" ||
+      user.position === "TRANSLATOR" ||
+      user.position === "PRODUCER" ||
+      user.position === "POST_PRODUCTION_MANAGER"
+    if (!canPostFeedback) {
+      return res.status(403).json({ message: "You are not allowed to add feedback" })
     }
 
     const order = await prisma.translationOrder.findUnique({

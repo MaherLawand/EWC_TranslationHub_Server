@@ -2426,6 +2426,79 @@ if (
           }
         }).catch((e) => logger.error({ action: "ORDER_COMPLETED_NOTIFICATION_ERROR", orderId, err: e }))
       }).catch((e) => logger.error({ action: "ORDER_COMPLETED_NOTIFICATION_ERROR", orderId, err: e }))
+    } else if (existingOrder.status === OrderStatus.COMPLETED) {
+      // REOPENED: status moved away from COMPLETED → notify the same recipients
+      // who were told it was completed, that it has changed back.
+      const newLabel = parsedStatus === OrderStatus.IN_PROGRESS ? "In Progress" : "Pending"
+
+      Promise.all([
+        prisma.translationOrder.findUnique({
+          where: { id: orderId },
+          select: {
+            createdById: true,
+            broadcast: {
+              select: {
+                game: {
+                  select: {
+                    assignedUsers: { select: { user: { select: { id: true } } } },
+                  },
+                },
+              },
+            },
+            marketing: {
+              select: { assignments: { select: { userId: true } } },
+            },
+          },
+        }),
+        prisma.user.findUnique({
+          where: { id: req.userId },
+          select: { firstName: true, lastName: true },
+        }),
+      ]).then(([notifOrder, actor]) => {
+        if (!notifOrder || !actor) return
+
+        let notifyUserIds: string[] = []
+        if (existingOrder.type === "BROADCAST" && notifOrder.broadcast?.game) {
+          notifyUserIds = notifOrder.broadcast.game.assignedUsers.map((a) => a.user.id)
+        } else if (existingOrder.type === "MARKETING") {
+          notifyUserIds = notifOrder.marketing?.assignments.map((a) => a.userId) ?? []
+        }
+        if (notifOrder.createdById) notifyUserIds.push(notifOrder.createdById)
+
+        const uniqueUserIds = [...new Set(notifyUserIds)]
+        if (uniqueUserIds.length === 0) return
+
+        const title = "Order Reopened"
+        const message = `Changed from Completed to ${newLabel} by ${actor.firstName} ${actor.lastName}`
+
+        ;(async () => {
+          // Clear the prior "completed" notifications so a later re-completion
+          // notifies again (the completed-flow guards on an existing one).
+          await prisma.notification.deleteMany({
+            where: { orderId: updatedOrder.id, type: "ORDER_COMPLETED" },
+          })
+
+          const created = []
+          for (const userId of uniqueUserIds) {
+            const n = await prisma.notification.upsert({
+              where: {
+                orderId_userId_type: {
+                  orderId: updatedOrder.id,
+                  userId,
+                  type: "ORDER_REOPENED",
+                },
+              },
+              update: { title, message, isRead: false, createdAt: new Date() },
+              create: { title, message, type: "ORDER_REOPENED", userId, orderId: updatedOrder.id },
+              include: { order: { select: { id: true, title: true } } },
+            })
+            created.push(n)
+          }
+          if (created.length > 0) {
+            await triggerNotifications(created)
+          }
+        })().catch((e) => logger.error({ action: "ORDER_REOPENED_NOTIFICATION_ERROR", orderId, err: e }))
+      }).catch((e) => logger.error({ action: "ORDER_REOPENED_NOTIFICATION_ERROR", orderId, err: e }))
     }
 
   } catch (error) {

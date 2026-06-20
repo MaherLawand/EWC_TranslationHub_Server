@@ -66,6 +66,7 @@ enum OrderPriority {
 
 enum NotificationType {
   ORDER_COMPLETED
+  ORDER_REOPENED
   STATUS_ADDED
   ASSIGNED_TO_ORDER
   FEEDBACK_ADDED
@@ -150,6 +151,8 @@ model User {
   lastEditedOrders TranslationOrder[] @relation("LastEditedBy")
 
   orderFeedback OrderFeedback[] @relation("FeedbackAuthor")
+
+  feedbackReads FeedbackRead[]
 
   createdAt DateTime @default(now())
 
@@ -461,9 +464,30 @@ model OrderFeedback {
 
   message String
 
+  reads FeedbackRead[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([orderId])
   @@index([authorId])
+}
+
+// Per-user read receipt for a feedback message. A row exists once a user has
+// "seen" that message (it scrolled into view for a few seconds). The unread
+// badge counts feedback the viewer didn't author and has no read receipt for.
+model FeedbackRead {
+  id String @id @default(cuid())
+
+  feedbackId String
+  feedback   OrderFeedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  readAt DateTime @default(now())
+
+  @@unique([feedbackId, userId])
+  @@index([userId])
+  @@index([feedbackId])
 }
