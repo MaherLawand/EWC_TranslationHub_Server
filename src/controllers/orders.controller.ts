@@ -1536,7 +1536,7 @@ export async function updateOrder(
           isParent: true,
           parentId: true,
           broadcast: { select: { id: true, sourceFileLink: true } },
-          marketing: { select: { id: true } },
+          marketing: { select: { id: true, sourceFileLink: true } },
         },
       }),
     ])
@@ -2154,11 +2154,17 @@ if (
       SOURCE FILE CHANGED
     */
 
+// Notify when a (non-empty) source file link is set/changed — for BOTH
+// broadcast and marketing orders.
+const prevSourceLink =
+  orderType === "BROADCAST"
+    ? existingOrder.broadcast?.sourceFileLink
+    : existingOrder.marketing?.sourceFileLink
+
 const sourceWasChanged =
-  orderType === "BROADCAST" &&
-  existingOrder.broadcast
-    ?.sourceFileLink !==
-  sourceFileLink
+  typeof sourceFileLink === "string" &&
+  sourceFileLink.trim() !== "" &&
+  sourceFileLink !== prevSourceLink
 
     if (sourceWasChanged) {
 

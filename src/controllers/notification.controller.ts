@@ -65,6 +65,7 @@ export async function notifyTranslatorsSourceReady(
         : order.marketing?.sourceFileLink
 
     if (!sourceFileLink) {
+      logger.info({ action: "NOTIFY_SOURCE_READY_SKIP", orderId, reason: "no_source_link", type: order.type })
       return
     }
 
@@ -72,24 +73,20 @@ export async function notifyTranslatorsSourceReady(
       GET TRANSLATORS
     */
 
+    // Every active translator is notified when a source file is added,
+    // regardless of department.
     const translators =
       await prisma.user.findMany({
         where: {
           position: "TRANSLATOR",
-
           isActive: true,
-
-          department:
-            order.type ===
-            "BROADCAST"
-              ? "BROADCAST"
-              : "MARKETING",
         },
       })
 
     if (
       translators.length === 0
     ) {
+      logger.info({ action: "NOTIFY_SOURCE_READY_SKIP", orderId, reason: "no_active_translators" })
       return
     }
 
@@ -141,6 +138,8 @@ export async function notifyTranslatorsSourceReady(
         : "marketing"
 
     const orderLink = `${process.env.CLIENT_URL}?page=${orderPage}&orderId=${order.id}`
+
+    logger.info({ action: "NOTIFY_SOURCE_READY_SENDING", orderId, recipients: uniqueTranslators.length })
 
     await Promise.all(
       uniqueTranslators.map(
