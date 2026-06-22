@@ -209,8 +209,11 @@ export async function login(
       })
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email },
+    // Case-insensitive lookup: stored emails keep their original casing, but
+    // login matches regardless of how the user types it. (`email` is already
+    // lowercased and used as the stable lockout key.)
+    const user = await prisma.user.findFirst({
+      where: { email: { equals: email, mode: "insensitive" } },
     })
     if (!user || !user.password) {
       const { locked } = await loginAttempts.recordFailure(email)
