@@ -136,7 +136,7 @@ const orderSelectCore = {
     select: { id: true, title: true, type: true },
   },
   subOrders: {
-    orderBy: { dateAdded: "asc" as const },
+    orderBy: { title: "asc" as const },
     select: {
       id: true,
       title: true,
@@ -731,10 +731,12 @@ if (tier) {
       ORDER BY
     */
 
+    // Default ordering: alphabetical by title (A→Z). The deadline / tier sort
+    // buttons below override this when the user activates them.
     let orderBy:
   Prisma.TranslationOrderOrderByWithRelationInput =
 {
-  dateAdded: "desc",
+  title: "asc",
 }
 
     /*
@@ -835,22 +837,20 @@ if (
                each annotated with its parent for a breadcrumb.
     */
 
-    const narrowing = !!(
-      search ||
-      isOrderStatus(status) ||
-      isOrderPriority(priority) ||
-      parsedFormats.length ||
-      gameId ||
-      contentTitle
-    )
+    // Only a TEXT SEARCH flattens the list (so a matching sub-order surfaces as
+    // its own row even if its parent doesn't match). Structured filters
+    // (status / priority / format / game / content title) keep the grouped,
+    // collapsible view so parents still show their expand/collapse chevron and
+    // sub-orders stay tucked under them.
+    const flatten = !!search
 
-    // Only constrain to top-level rows when NOT narrowing and not an exact-id lookup.
-    if (!orderId && !narrowing) {
+    // Only constrain to top-level rows when NOT flattening and not an exact-id lookup.
+    if (!orderId && !flatten) {
       where.parentId = null
     }
 
-    const listSelect = narrowing ? listOrderSelectFlat : listOrderSelectGrouped
-    const mode = narrowing ? "flat" : "grouped"
+    const listSelect = flatten ? listOrderSelectFlat : listOrderSelectGrouped
+    const mode = flatten ? "flat" : "grouped"
 
     /*
       CACHE CHECK
@@ -1452,7 +1452,7 @@ export async function getSubOrders(
     const [subOrders, total] = await Promise.all([
       prisma.translationOrder.findMany({
         where,
-        orderBy: { dateAdded: "asc" },
+        orderBy: { title: "asc" },
         skip,
         take: limit,
         select: orderRowFields,
