@@ -854,7 +854,7 @@ lastName: true,
     },
   })
 
-    logger.info({ action: "CREATE_USER", byUserId: req.userId, newUserId: user.id, email: user.email, role: user.role, department: user.department })
+    logger.info({ action: "CREATE_USER", byUserId: req.userId, newUserId: user.id, email: user.email, role: user.role, department: user.department, position: user.position })
 
     return res.json({
   ...user,
@@ -1204,7 +1204,10 @@ lastName: true,
         },
       })
 
-    logger.info({ action: "UPDATE_USER", byUserId: req.userId, targetUserId: updatedUser.id, email: updatedUser.email, role: updatedUser.role })
+    const userChangedFields = Object.entries({ firstName, lastName, email, role, department, position })
+      .filter(([, v]) => v !== undefined)
+      .map(([k]) => k)
+    logger.info({ action: "UPDATE_USER", byUserId: req.userId, targetUserId: updatedUser.id, email: updatedUser.email, role: updatedUser.role, changedFields: userChangedFields })
 
     return res.json({
   ...updatedUser,

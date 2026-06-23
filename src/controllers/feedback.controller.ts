@@ -253,7 +253,7 @@ export async function createOrderFeedback(req: AuthRequest, res: Response) {
       select: feedbackSelect,
     })
 
-    logger.info({ action: "CREATE_FEEDBACK", userId: req.userId, orderId, feedbackId: feedback.id })
+    logger.info({ action: "CREATE_FEEDBACK", userId: req.userId, orderId, feedbackId: feedback.id, length: message.length })
 
     res.json(feedback)
 
@@ -293,7 +293,7 @@ export async function updateOrderFeedback(req: AuthRequest, res: Response) {
       select: feedbackSelect,
     })
 
-    logger.info({ action: "UPDATE_FEEDBACK", userId: req.userId, feedbackId })
+    logger.info({ action: "UPDATE_FEEDBACK", userId: req.userId, feedbackId, orderId: existing.orderId })
     res.json(feedback)
     try { getIo()?.emit("order-feedback", { orderId: existing.orderId }) } catch {}
     return
@@ -320,7 +320,7 @@ export async function deleteOrderFeedback(req: AuthRequest, res: Response) {
 
     await prisma.orderFeedback.delete({ where: { id: feedbackId } })
 
-    logger.info({ action: "DELETE_FEEDBACK", userId: req.userId, feedbackId })
+    logger.info({ action: "DELETE_FEEDBACK", userId: req.userId, feedbackId, orderId: existing.orderId })
     res.json({ message: "Feedback deleted" })
     try { getIo()?.emit("order-feedback", { orderId: existing.orderId }) } catch {}
     return

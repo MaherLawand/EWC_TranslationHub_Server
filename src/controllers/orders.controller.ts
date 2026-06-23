@@ -1208,7 +1208,7 @@ export async function createOrder(
       await recomputeParentStatus(parentId)
     }
 
-    logger.info({ action: "CREATE_ORDER", userId: req.userId, orderId: order.id, type: order.type, title: order.title })
+    logger.info({ action: "CREATE_ORDER", userId: req.userId, orderId: order.id, type: order.type, title: order.title, event: order.event, priority: order.priority })
 
     ordersCache.invalidate()
     try { getIo()?.emit("order-created", { type: order.type }) } catch {}
@@ -2173,7 +2173,19 @@ const sourceWasChanged =
       ).catch((e) => logger.error({ action: "NOTIFY_TRANSLATORS_ERROR", orderId, err: e }))
     }
 
-    logger.info({ action: "UPDATE_ORDER", userId: req.userId, orderId, title: updatedOrder?.title })
+    const submittedFields = {
+      title, notes, status, priority, type, event, game, estimatedMinutes,
+      sourceLanguage, targetLanguages, contentTitle, deliveryFormats,
+      sourceFileLink, srtAvailableLink, deliveryDate, deadline, deliveries,
+    }
+    const changedFields = Object.entries(submittedFields)
+      .filter(([, v]) => v !== undefined)
+      .map(([k]) => k)
+    logger.info({
+      action: "UPDATE_ORDER", userId: req.userId, orderId,
+      type: updatedOrder?.type, title: updatedOrder?.title,
+      status, priority, changedFields, sourceChanged: sourceWasChanged,
+    })
 
     ordersCache.invalidate()
     try { getIo()?.emit("order-patched", { id: orderId, type: updatedOrder?.type }) } catch {}
@@ -2341,7 +2353,7 @@ if (
       RESPOND IMMEDIATELY — notifications fire in the background
     */
 
-    logger.info({ action: "UPDATE_ORDER_STATUS", userId: req.userId, orderId, status: parsedStatus, title: existingOrder.title })
+    logger.info({ action: "UPDATE_ORDER_STATUS", userId: req.userId, orderId, title: existingOrder.title, from: existingOrder.status, to: parsedStatus })
 
     ordersCache.invalidate()
     try { getIo()?.emit("order-patched", { id: updatedOrder.id, type: updatedOrder.type, status: updatedOrder.status }) } catch {}
@@ -2740,7 +2752,7 @@ export async function assignUsersToMarketingOrder(
         select: orderSelect,
       })
 
-    logger.info({ action: "ASSIGN_USERS_TO_ORDER", userId: req.userId, orderId, userIds, orderTitle: order.title })
+    logger.info({ action: "ASSIGN_USERS_TO_ORDER", userId: req.userId, orderId, orderTitle: order.title, count: userIds.length, userIds })
 
     ordersCache.invalidate()
     try { getIo()?.emit("order-patched", { id: orderId, type: order.type }) } catch {}
@@ -2815,10 +2827,10 @@ export async function deleteOrder(
       },
       // parentId captured so a deleted sub-order can roll up into its parent.
       // Deleting a parent cascades to its sub-orders (onDelete: Cascade).
-      select: { id: true, type: true, parentId: true },
+      select: { id: true, type: true, parentId: true, title: true },
     })
 
-    logger.info({ action: "DELETE_ORDER", userId: req.userId, orderId })
+    logger.info({ action: "DELETE_ORDER", userId: req.userId, orderId, type: deleted.type, title: deleted.title })
 
     ordersCache.invalidate()
     try { getIo()?.emit("order-deleted", { id: deleted.id, type: deleted.type }) } catch {}
