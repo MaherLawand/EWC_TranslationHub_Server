@@ -236,7 +236,8 @@ export async function createOrderFeedback(req: AuthRequest, res: Response) {
       user.role === "ADMIN" ||
       user.position === "TRANSLATOR" ||
       user.position === "PRODUCER" ||
-      user.position === "POST_PRODUCTION_MANAGER"
+      user.position === "POST_PRODUCTION_MANAGER" ||
+      user.position === "EDITOR"
     if (!canPostFeedback) {
       return res.status(403).json({ message: "You are not allowed to add feedback" })
     }

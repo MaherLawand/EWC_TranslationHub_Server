@@ -369,8 +369,8 @@ function canUpdateStatus(
 ) {
   return (
     canManageOrders(user) ||
-    user.position ===
-      "TRANSLATOR"
+    user.position === "TRANSLATOR" ||
+    user.position === "EDITOR"
   )
 }
 
