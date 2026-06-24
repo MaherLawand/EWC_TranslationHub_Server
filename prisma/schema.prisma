@@ -56,6 +56,7 @@ enum DeliveryFormat {
   ON_SCREEN_TEXT
   GRAPHIC_TEXT
   VO_TRANSLATIONS
+  GOOGLE_SHEET
 }
 
 enum OrderPriority {
@@ -349,6 +350,9 @@ model MarketingDetails {
   id String @id @default(cuid())
 
   contentTitle String?
+
+  // Aspect ratios / sizes for the asset (marketing only): "1x1", "4x5", "9x16", "16x9".
+  aspectRatios String[]
 
   sourceLanguage String[]
 

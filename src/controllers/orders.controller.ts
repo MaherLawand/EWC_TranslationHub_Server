@@ -230,6 +230,7 @@ const orderSelectCore = {
     select: {
       id: true,
       contentTitle: true,
+      aspectRatios: true,
       sourceLanguage: true,
       targetLanguages: true,
       sourceFileLink: true,
@@ -293,6 +294,59 @@ const orderSelect = {
   ...orderSelectCore,
   editHistory: editHistorySelect,
 } satisfies Prisma.TranslationOrderSelect
+
+// ── Audit helpers (for rich logging) ────────────────────────────────────────
+// Flatten an order (orderSelect/orderSelectCore shape) into comparable values.
+function orderAuditFields(o: any): Record<string, any> {
+  if (!o) return {}
+  const d = o.type === "BROADCAST" ? o.broadcast : o.marketing
+  return {
+    title: o.title ?? null,
+    notes: o.notes ?? null,
+    status: o.status ?? null,
+    priority: o.priority ?? null,
+    event: o.event ?? null,
+    game: o.broadcast?.game?.name ?? o.broadcast?.gameId ?? null,
+    contentTitle: o.marketing?.contentTitle ?? null,
+    aspectRatios: o.marketing?.aspectRatios ?? null,
+    sourceLanguage: d?.sourceLanguage ?? null,
+    targetLanguages: d?.targetLanguages ?? null,
+    sourceFileLink: d?.sourceFileLink ?? null,
+    srtAvailableLink: d?.srtAvailableLink ?? null,
+    estimatedMinutes: o.broadcast?.estimatedMinutes ?? null,
+    deliveryDate: o.broadcast?.deliveryDate ? new Date(o.broadcast.deliveryDate).toISOString() : null,
+    deadline: d?.deadlineDate ? new Date(d.deadlineDate).toISOString() : null,
+    deliveryFormats: (d?.deliveryFormats ?? []).map((f: any) => f.format),
+    deliveries: (d?.deliveries ?? []).map((x: any) => ({ language: x.language, link: x.deliveryLink ?? "" })),
+  }
+}
+
+// from→to diff between two orders of the same shape; returns only changed fields.
+function diffOrders(before: any, after: any): Record<string, { from: any; to: any }> {
+  const b = orderAuditFields(before)
+  const a = orderAuditFields(after)
+  const changes: Record<string, { from: any; to: any }> = {}
+  for (const key of Object.keys(a)) {
+    if (JSON.stringify(b[key]) !== JSON.stringify(a[key])) {
+      changes[key] = { from: b[key], to: a[key] }
+    }
+  }
+  return changes
+}
+
+// Full snapshot of an order's data (for delete logs).
+function orderSnapshot(o: any) {
+  if (!o) return null
+  return {
+    id: o.id,
+    type: o.type,
+    isParent: o.isParent,
+    parentId: o.parentId,
+    createdBy: o.createdBy ? `${o.createdBy.firstName} ${o.createdBy.lastName}`.trim() : null,
+    subOrders: (o.subOrders ?? []).map((s: any) => s.title),
+    ...orderAuditFields(o),
+  }
+}
 
 function isStringArray(
   value: unknown
@@ -1010,6 +1064,7 @@ function buildOrderData(
     sourceLanguage,
     targetLanguages,
     contentTitle,
+    aspectRatios,
     deliveryFormats,
     deliveries,
     sourceFileLink,
@@ -1113,6 +1168,7 @@ function buildOrderData(
                 typeof contentTitle === "string"
                   ? contentTitle.trim() || null
                   : undefined,
+              aspectRatios: isStringArray(aspectRatios) ? aspectRatios : [],
               sourceLanguage: srcLang,
               targetLanguages: tgtLang,
               sourceFileLink:
@@ -1499,6 +1555,7 @@ export async function updateOrder(
       sourceLanguage,
       targetLanguages,
       contentTitle,
+      aspectRatios,
       deliveryFormats,
       sourceFileLink,
       srtAvailableLink,
@@ -1529,15 +1586,8 @@ export async function updateOrder(
       }),
       prisma.translationOrder.findUnique({
         where: { id: orderId },
-        select: {
-          id: true,
-          type: true,
-          event: true,
-          isParent: true,
-          parentId: true,
-          broadcast: { select: { id: true, sourceFileLink: true } },
-          marketing: { select: { id: true, sourceFileLink: true } },
-        },
+        // Full shape so we can log an exact from→to diff after the update.
+        select: orderSelectCore,
       }),
     ])
 
@@ -1783,6 +1833,8 @@ try {
     ? contentTitle.trim() ||
       null
     : undefined,
+
+                  ...(isStringArray(aspectRatios) ? { aspectRatios } : {}),
 
                   sourceLanguage,
 
@@ -2173,18 +2225,11 @@ const sourceWasChanged =
       ).catch((e) => logger.error({ action: "NOTIFY_TRANSLATORS_ERROR", orderId, err: e }))
     }
 
-    const submittedFields = {
-      title, notes, status, priority, type, event, game, estimatedMinutes,
-      sourceLanguage, targetLanguages, contentTitle, deliveryFormats,
-      sourceFileLink, srtAvailableLink, deliveryDate, deadline, deliveries,
-    }
-    const changedFields = Object.entries(submittedFields)
-      .filter(([, v]) => v !== undefined)
-      .map(([k]) => k)
+    const changes = diffOrders(existingOrder, updatedOrder)
     logger.info({
       action: "UPDATE_ORDER", userId: req.userId, orderId,
       type: updatedOrder?.type, title: updatedOrder?.title,
-      status, priority, changedFields, sourceChanged: sourceWasChanged,
+      changes, sourceChanged: sourceWasChanged,
     })
 
     ordersCache.invalidate()
@@ -2821,6 +2866,12 @@ export async function deleteOrder(
       (single query)
     */
 
+    // Capture the full order data BEFORE deleting so it can be logged.
+    const fullOrder = await prisma.translationOrder.findUnique({
+      where: { id: orderId },
+      select: orderSelectCore,
+    })
+
     const deleted = await prisma.translationOrder.delete({
       where: {
         id: orderId,
@@ -2830,7 +2881,7 @@ export async function deleteOrder(
       select: { id: true, type: true, parentId: true, title: true },
     })
 
-    logger.info({ action: "DELETE_ORDER", userId: req.userId, orderId, type: deleted.type, title: deleted.title })
+    logger.info({ action: "DELETE_ORDER", userId: req.userId, orderId, deleted: orderSnapshot(fullOrder) })
 
     ordersCache.invalidate()
     try { getIo()?.emit("order-deleted", { id: deleted.id, type: deleted.type }) } catch {}
