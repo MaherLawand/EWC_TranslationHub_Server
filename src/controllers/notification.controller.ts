@@ -1,9 +1,11 @@
 import { prisma } from "../lib/prisma.js"
 import { logger } from "../lib/logger.js"
 import { sendEmail } from "../lib/mailer.js"
+import { triggerNotifications } from "../lib/socket.js"
 
 export async function notifyTranslatorsSourceReady(
-  orderId: string
+  orderId: string,
+  changed = false
 ) {
   try {
 
@@ -103,30 +105,33 @@ export async function notifyTranslatorsSourceReady(
       CREATE NOTIFICATIONS
     */
 
-    await prisma.notification.createMany(
-      {
-        data:
-          uniqueTranslators.map(
-            (translator) => ({
-              title:
-                "Source File Added",
+    const notifTitle = changed ? "Source File Updated" : "Source File Added"
+    const notifMessage = changed
+      ? `The source file for "${order.title}" was changed — your previous copy may be out of date`
+      : `A source file was added for "${order.title}"`
 
-              message: `A source file was added for "${order.title}"`,
+    // Upsert so a CHANGE re-raises (unreads + refreshes) the existing
+    // notification rather than being skipped as a duplicate.
+    const raisedNotifs = []
+    for (const translator of uniqueTranslators) {
+      const n = await prisma.notification.upsert({
+        where: {
+          orderId_userId_type: { orderId: order.id, userId: translator.id, type: "STATUS_ADDED" },
+        },
+        update: { title: notifTitle, message: notifMessage, isRead: false, createdAt: new Date() },
+        create: { title: notifTitle, message: notifMessage, type: "STATUS_ADDED", userId: translator.id, orderId: order.id },
+        include: { order: { select: { id: true, title: true } } },
+      })
+      raisedNotifs.push(n)
+    }
 
-              type:
-                "STATUS_ADDED",
-
-              userId:
-                translator.id,
-
-              orderId:
-                order.id,
-            })
-          ),
-
-        skipDuplicates: true,
-      }
-    )
+    triggerNotifications(
+      raisedNotifs.map((n) => ({
+        id: n.id, userId: n.userId, title: n.title, message: n.message,
+        type: n.type, isRead: n.isRead, createdAt: n.createdAt,
+        order: { id: order.id, title: order.title },
+      }))
+    ).catch(() => {})
 
     /*
       SEND EMAILS
@@ -139,7 +144,20 @@ export async function notifyTranslatorsSourceReady(
 
     const orderLink = `${process.env.CLIENT_URL}?page=${orderPage}&orderId=${order.id}`
 
-    logger.info({ action: "NOTIFY_SOURCE_READY_SENDING", orderId, recipients: uniqueTranslators.length })
+    // Wording differs for a brand-new source vs a replaced/changed one.
+    const emailKicker = changed ? "Source File Updated" : "New Translation Task"
+    const emailHeading = changed ? "Source File Updated" : "Source File Added"
+    const emailIntro = changed
+      ? "The source file for this order has been changed. Please use the updated source below — your previous copy may be out of date."
+      : "A new source file has been added for translation. Click the button below to view the order and get started."
+    const emailSubject = changed
+      ? `Translation Source Updated — ${order.title}`
+      : `New Translation Source Available — ${order.title}`
+    const emailTextLead = changed
+      ? "The source file for this order has been CHANGED. Please use the updated source."
+      : "A new source file is available for translation."
+
+    logger.info({ action: "NOTIFY_SOURCE_READY_SENDING", orderId, recipients: uniqueTranslators.length, changed })
 
     await Promise.all(
       uniqueTranslators.map(
@@ -155,9 +173,9 @@ export async function notifyTranslatorsSourceReady(
   "translations@ewctranslations.org",
 
 text: `
-Translation Source Ready
+${emailHeading}
 
-A new source file is available for translation.
+${emailTextLead}
 
 Order:
 ${order.title}
@@ -191,8 +209,7 @@ ${orderLink}
 © 2026 EWC Translations
 `,
 
-            subject:
-              `New Translation Source Available — ${order.title}`,
+            subject: emailSubject,
 
             html: `
   <div style="background:#0B0B0B; padding:40px; font-family:Arial,sans-serif; color:#F5F1E8;">
@@ -206,13 +223,13 @@ ${orderLink}
           width="260"
           style="display:block; margin:0 auto 6px auto; width:400px; height:auto;"
         />
-        <p style="color:#888; margin:0; font-size:14px;">New Translation Task</p>
+        <p style="color:#888; margin:0; font-size:14px;">${emailKicker}</p>
       </div>
 
-      <h2 style="margin-top:0; color:white; font-size:24px;">Source File Added</h2>
+      <h2 style="margin-top:0; color:white; font-size:24px;">${emailHeading}</h2>
 
       <p style="color:#B0B0B0; line-height:1.7; font-size:15px;">
-        A new source file has been added for translation. Click the button below to view the order and get started.
+        ${emailIntro}
       </p>
 
       <div style="background:#161616; border:1px solid #2A2A2A; border-radius:16px; padding:18px; margin-top:25px;">

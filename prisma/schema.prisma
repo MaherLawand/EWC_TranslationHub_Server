@@ -252,6 +252,11 @@ model TranslationOrder {
 
   lastEditedAt DateTime?
 
+  // Set when the source file is CHANGED (replaced) on an existing order, so a
+  // caution flag can warn translators who may be working off the old source.
+  // Cleared when the order is opened.
+  sourceChangedAt DateTime?
+
   /**
    * HISTORY
    */

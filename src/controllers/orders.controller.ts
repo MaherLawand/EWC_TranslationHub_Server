@@ -32,6 +32,7 @@ const orderRowFields = {
   status: true,
   priority: true,
   dateAdded: true,
+  sourceChangedAt: true,
   isParent: true,
   parentId: true,
   broadcast: {
@@ -126,6 +127,8 @@ const orderSelectCore = {
   completedAt: true,
 
   lastEditedAt: true,
+
+  sourceChangedAt: true,
 
   _count: { select: { feedback: true } },
 
@@ -991,6 +994,22 @@ export async function getOrderById(
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" })
+    }
+
+    // A TRANSLATOR opening the order clears the "source changed" caution (they've
+    // seen the update). Managers viewing it — including the one who just made the
+    // change — must NOT clear it, or the flag would vanish before translators see it.
+    if ((order as any).sourceChangedAt && req.userId) {
+      prisma.user
+        .findUnique({ where: { id: req.userId }, select: { position: true } })
+        .then((u) => {
+          if (u?.position === "TRANSLATOR") {
+            return prisma.translationOrder
+              .update({ where: { id }, data: { sourceChangedAt: null } })
+              .then(() => ordersCache.invalidate())
+          }
+        })
+        .catch(() => {})
     }
 
     return res.json({ ...order, editHistory })
@@ -2218,10 +2237,23 @@ const sourceWasChanged =
   sourceFileLink.trim() !== "" &&
   sourceFileLink !== prevSourceLink
 
+// A CHANGE = there was already a source and it was replaced (vs. a first-time add).
+const sourceIsChange = sourceWasChanged && !!(prevSourceLink && prevSourceLink.trim())
+
     if (sourceWasChanged) {
 
+      // Flag the order so the table shows a caution icon for translators who may
+      // be working off the old source. Only for real changes, not first-time adds.
+      if (sourceIsChange) {
+        prisma.translationOrder
+          .update({ where: { id: orderId }, data: { sourceChangedAt: new Date() } })
+          .then(() => ordersCache.invalidate())
+          .catch((e) => logger.error({ action: "SET_SOURCE_CHANGED_ERROR", orderId, err: e }))
+      }
+
       notifyTranslatorsSourceReady(
-        orderId
+        orderId,
+        sourceIsChange
       ).catch((e) => logger.error({ action: "NOTIFY_TRANSLATORS_ERROR", orderId, err: e }))
     }
 
@@ -2371,6 +2403,9 @@ if (
   }
   updateData.completedAt =
     new Date()
+  // Completing the order resolves the "source changed" caution for good, so it
+  // won't reappear if the order is later reopened.
+  updateData.sourceChangedAt = null
 } else {
   updateData.completedBy = {
     disconnect: true,
