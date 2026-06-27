@@ -117,21 +117,37 @@ ewctranslations.org
         "
       >
 
-        <a
-          href="${inviteUrl}"
-          style="
-            display:inline-block;
-            background:#D6B36A;
-            color:black;
-            text-decoration:none;
-            padding:16px 32px;
-            border-radius:14px;
-            font-weight:bold;
-            font-size:15px;
-          "
-        >
-          Set Your Password
-        </a>
+        <!-- Bulletproof table-based button: the whole padded cell is clickable,
+             which fixes Apple Mail not registering inline-block button clicks. -->
+        <table role="presentation" border="0" cellspacing="0" cellpadding="0" align="center" style="margin:0 auto;">
+          <tr>
+            <td align="center" bgcolor="#D6B36A" style="border-radius:14px;">
+              <a
+                href="${inviteUrl}"
+                target="_blank"
+                style="
+                  display:inline-block;
+                  background:#D6B36A;
+                  color:#000000;
+                  text-decoration:none;
+                  padding:16px 32px;
+                  border-radius:14px;
+                  font-weight:bold;
+                  font-size:15px;
+                  font-family:Arial,sans-serif;
+                  mso-padding-alt:16px 32px;
+                "
+              >
+                Set Your Password
+              </a>
+            </td>
+          </tr>
+        </table>
+
+        <p style="color:#777; font-size:12px; line-height:1.7; margin-top:22px;">
+          If the button doesn't work, copy and paste this link into your browser:<br/>
+          <a href="${inviteUrl}" style="color:#D6B36A; word-break:break-all;">${inviteUrl}</a>
+        </p>
 
       </div>
 

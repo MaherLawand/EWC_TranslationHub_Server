@@ -755,24 +755,37 @@ If you did not expect this email, you can safely ignore it.
                 "
               >
 
-                <a
-                  href="${inviteLink}"
-                  target="_blank"
-                  style="
-                    display:inline-block;
-                    background:#D6B36A;
-                    color:#000000;
-                    text-decoration:none;
-                    padding:16px 28px;
-                    border-radius:14px;
-                    font-size:15px;
-                    font-weight:700;
-                  "
-                >
-                  Set Up Account
-                </a>
+                <table role="presentation" border="0" cellspacing="0" cellpadding="0" align="center" style="margin:0 auto;">
+                  <tr>
+                    <td align="center" bgcolor="#D6B36A" style="border-radius:14px;">
+                      <a
+                        href="${inviteLink}"
+                        target="_blank"
+                        style="
+                          display:inline-block;
+                          background:#D6B36A;
+                          color:#000000;
+                          text-decoration:none;
+                          padding:16px 28px;
+                          border-radius:14px;
+                          font-size:15px;
+                          font-weight:700;
+                          font-family:Arial,sans-serif;
+                          mso-padding-alt:16px 28px;
+                        "
+                      >
+                        Set Up Account
+                      </a>
+                    </td>
+                  </tr>
+                </table>
 
               </div>
+
+              <p style="color:#777; font-size:12px; line-height:1.7; text-align:center;">
+                If the button doesn't work, copy and paste this link into your browser:<br/>
+                <a href="${inviteLink}" style="color:#D6B36A; word-break:break-all;">${inviteLink}</a>
+              </p>
 
               <p>
                 For security reasons, this invitation link will expire in 72 hours.
@@ -1103,24 +1116,37 @@ If you did not expect this invitation, you can safely ignore this email.
                 "
               >
 
-                <a
-                  href="${inviteLink}"
-                  target="_blank"
-                  style="
-                    display:inline-block;
-                    background:#D6B36A;
-                    color:#000000;
-                    text-decoration:none;
-                    padding:16px 28px;
-                    border-radius:14px;
-                    font-size:15px;
-                    font-weight:700;
-                  "
-                >
-                  Set Up Account
-                </a>
+                <table role="presentation" border="0" cellspacing="0" cellpadding="0" align="center" style="margin:0 auto;">
+                  <tr>
+                    <td align="center" bgcolor="#D6B36A" style="border-radius:14px;">
+                      <a
+                        href="${inviteLink}"
+                        target="_blank"
+                        style="
+                          display:inline-block;
+                          background:#D6B36A;
+                          color:#000000;
+                          text-decoration:none;
+                          padding:16px 28px;
+                          border-radius:14px;
+                          font-size:15px;
+                          font-weight:700;
+                          font-family:Arial,sans-serif;
+                          mso-padding-alt:16px 28px;
+                        "
+                      >
+                        Set Up Account
+                      </a>
+                    </td>
+                  </tr>
+                </table>
 
               </div>
+
+              <p style="color:#777; font-size:12px; line-height:1.7; text-align:center;">
+                If the button doesn't work, copy and paste this link into your browser:<br/>
+                <a href="${inviteLink}" style="color:#D6B36A; word-break:break-all;">${inviteLink}</a>
+              </p>
 
               <p>
                 For security reasons, this invitation link will expire in 72 hours.
