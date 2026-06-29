@@ -64,6 +64,7 @@ const orderRowFields = {
       sourceLanguage: true,
       targetLanguages: true,
       deadlineDate: true,
+      deadlineHasTime: true,
       deliveryFormats: {
         select: {
           id: true,
@@ -239,6 +240,7 @@ const orderSelectCore = {
       sourceFileLink: true,
       srtAvailableLink: true,
       deadlineDate: true,
+      deadlineHasTime: true,
       deliveryFormats: {
         select: {
           id: true,
@@ -1117,6 +1119,10 @@ function buildOrderData(
   const orderType: OrderType =
     type === OrderType.MARKETING ? OrderType.MARKETING : OrderType.BROADCAST
 
+  // A deadline string with a time component (full ISO) means a real time-of-day
+  // deadline; a bare "YYYY-MM-DD" is date-only. (Marketing only.)
+  const deadlineHasTime = typeof deadline === "string" && /T\d{2}:\d{2}/.test(deadline)
+
   const normalizedGame = typeof game === "string" ? game.trim() : ""
 
   if (orderType === OrderType.BROADCAST && !normalizedGame) {
@@ -1197,6 +1203,7 @@ function buildOrderData(
                   ? srtAvailableLink.trim() || null
                   : null,
               deadlineDate: deadline ? new Date(deadline) : null,
+              deadlineHasTime,
               deliveryFormats: { create: formatsCreate },
               deliveries: { create: parsedDeliveries },
             },
@@ -1871,8 +1878,8 @@ try {
                     : {}),
 
                   ...(deadline
-                    ? { deadlineDate: new Date(deadline) }
-                    : { deadlineDate: null }),
+                    ? { deadlineDate: new Date(deadline), deadlineHasTime: /T\d{2}:\d{2}/.test(String(deadline)) }
+                    : { deadlineDate: null, deadlineHasTime: false }),
                 },
               },
             }),

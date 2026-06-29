@@ -367,7 +367,12 @@ model MarketingDetails {
 
   srtAvailableLink String?
 
+  // Deadline as an absolute instant. deadlineHasTime distinguishes a real
+  // time-of-day deadline (true) from a date-only deadline (false → stored at
+  // UTC midnight, displayed without a time).
   deadlineDate DateTime?
+
+  deadlineHasTime Boolean @default(false)
 
   orderId String @unique
 
