@@ -21,9 +21,12 @@ const feedbackSelect = {
 } as const
 
 /*
-  Notify the order's assigned managers that feedback was added.
+  Notify the order's assigned managers + ALL active translators that feedback
+  was added.
   Broadcast → PPMs/Producers assigned to the order's game.
-  Marketing → users assigned to the order. The author is never notified.
+  Marketing → users assigned to the order.
+  Plus every active translator (so they always see new feedback threads).
+  The author is never notified.
   Uses upsert because Notification has @@unique([orderId, userId, type]) —
   a new feedback re-raises (unreads + bumps) the existing notification.
 */
@@ -76,6 +79,14 @@ async function notifyFeedback(orderId: string, authorId: string, authorName: str
         .map((a) => a.user)
         .filter((u) => u && u.isActive)
     }
+
+    // Always notify every active translator, so they see new feedback threads
+    // even on orders they aren't assigned to / haven't commented on yet.
+    const translators = await prisma.user.findMany({
+      where: { isActive: true, position: "TRANSLATOR" },
+      select: { id: true },
+    })
+    recipients = [...recipients, ...translators]
 
     // Also notify everyone who already participated in this thread, so a
     // manager's reply reaches the translator who commented (and vice-versa).
