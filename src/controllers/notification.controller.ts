@@ -271,6 +271,11 @@ ${orderLink}
         >
           View Order
         </a>
+
+        <p style="color:#777; font-size:12px; line-height:1.7; margin-top:22px;">
+          If the button doesn't work, copy and paste this link into your browser:<br/>
+          <a href="${orderLink}" style="color:#D6B36A; word-break:break-all;">${orderLink}</a>
+        </p>
       </div>
 
       <div style="margin-top:40px; padding-top:20px; border-top:1px solid #242424; text-align:center; color:#666; font-size:12px;">

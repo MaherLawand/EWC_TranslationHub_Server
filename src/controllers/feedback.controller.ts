@@ -3,6 +3,7 @@ import type { AuthRequest } from "../middleware/auth.middleware.js"
 import { prisma } from "../lib/prisma.js"
 import { triggerNotifications, getIo } from "../lib/socket.js"
 import { logger } from "../lib/logger.js"
+import { sendFeedbackEmail } from "../utils/sendFeedbackEmail.js"
 
 const feedbackSelect = {
   id: true,
@@ -30,7 +31,12 @@ const feedbackSelect = {
   Uses upsert because Notification has @@unique([orderId, userId, type]) —
   a new feedback re-raises (unreads + bumps) the existing notification.
 */
-async function notifyFeedback(orderId: string, authorId: string, authorName: string) {
+async function notifyFeedback(
+  orderId: string,
+  authorId: string,
+  authorName: string,
+  message: string
+) {
   try {
     const order = await prisma.translationOrder.findUnique({
       where: { id: orderId },
@@ -84,9 +90,26 @@ async function notifyFeedback(orderId: string, authorId: string, authorName: str
     // even on orders they aren't assigned to / haven't commented on yet.
     const translators = await prisma.user.findMany({
       where: { isActive: true, position: "TRANSLATOR" },
-      select: { id: true },
+      select: { id: true, email: true },
     })
-    recipients = [...recipients, ...translators]
+    recipients = [...recipients, ...translators.map((t) => ({ id: t.id }))]
+
+    // Email the translators (only) every time feedback is added — never the
+    // author of this comment. Fire-and-forget; suppressed outside production.
+    const page = order.type === "BROADCAST" ? "Broadcast" : "marketing"
+    const feedbackUrl = `${process.env.CLIENT_URL ?? ""}/?page=${page}&orderId=${order.id}`
+    const translatorEmails = translators
+      .filter((t) => t.id !== authorId && t.email)
+      .map((t) => t.email)
+    if (translatorEmails.length > 0) {
+      sendFeedbackEmail({
+        to: translatorEmails,
+        authorName,
+        orderTitle: order.title,
+        message,
+        feedbackUrl,
+      }).catch((err) => logger.error({ action: "FEEDBACK_EMAIL_ERROR", orderId, err }))
+    }
 
     // Also notify everyone who already participated in this thread, so a
     // manager's reply reaches the translator who commented (and vice-versa).
@@ -105,7 +128,7 @@ async function notifyFeedback(orderId: string, authorId: string, authorName: str
     if (recipients.length === 0) return
 
     const title = "New Feedback"
-    const message = `${authorName} left feedback on "${order.title}"`
+    const notifMessage = `${authorName} left feedback on "${order.title}"`
 
     const created = []
     for (const r of recipients) {
@@ -117,10 +140,10 @@ async function notifyFeedback(orderId: string, authorId: string, authorName: str
             type: "FEEDBACK_ADDED",
           },
         },
-        update: { title, message, isRead: false, createdAt: new Date() },
+        update: { title, message: notifMessage, isRead: false, createdAt: new Date() },
         create: {
           title,
-          message,
+          message: notifMessage,
           type: "FEEDBACK_ADDED",
           userId: r.id,
           orderId: order.id,
@@ -270,7 +293,7 @@ export async function createOrderFeedback(req: AuthRequest, res: Response) {
 
     // Fire-and-forget: notify assigned managers + nudge open panels to refresh.
     const authorName = `${user.firstName} ${user.lastName}`.trim()
-    notifyFeedback(orderId, user.id, authorName).catch(() => {})
+    notifyFeedback(orderId, user.id, authorName, message).catch(() => {})
     try { getIo()?.emit("order-feedback", { orderId }) } catch {}
     return
   } catch (error) {
