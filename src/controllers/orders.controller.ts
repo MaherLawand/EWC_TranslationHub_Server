@@ -41,6 +41,7 @@ const orderRowFields = {
       sourceLanguage: true,
       targetLanguages: true,
       deadlineDate: true,
+      deadlineHasTime: true,
       deliveryFormats: {
         select: {
           id: true,
@@ -195,6 +196,7 @@ const orderSelectCore = {
       srtAvailableLink: true,
       deliveryDate: true,
       deadlineDate: true,
+      deadlineHasTime: true,
       game: {
         select: {
           id: true,
@@ -1181,6 +1183,7 @@ function buildOrderData(
                   : null,
               deliveryDate: deliveryDate ? new Date(deliveryDate) : new Date(),
               deadlineDate: deadline ? new Date(deadline) : new Date(),
+              deadlineHasTime,
               deliveries: { create: parsedDeliveries },
               game: { connect: { id: normalizedGame } },
             },
@@ -1835,6 +1838,7 @@ try {
       ? {
           deadlineDate:
             new Date(deadline),
+          deadlineHasTime: /T\d{2}:\d{2}/.test(String(deadline)),
         }
       : {}),
 

@@ -338,6 +338,10 @@ model BroadcastDetails {
 
   deadlineDate DateTime
 
+  // Whether deadlineDate carries a specific time-of-day (true) or is date-only
+  // (false → stored at UTC midnight, displayed without a time).
+  deadlineHasTime Boolean @default(false)
+
   orderId String @unique
 
   order TranslationOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
