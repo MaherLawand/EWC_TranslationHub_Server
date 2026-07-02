@@ -97,6 +97,17 @@ const subOrderSelect = orderRowFields
 const listOrderSelectGrouped = {
   ...orderRowFields,
   _count: { select: { subOrders: true, feedback: true } },
+  // Lightweight pull of non-completed sub-order deadlines so a collapsed parent
+  // can display the NEAREST upcoming sub-order deadline (computed below, then
+  // stripped from the response). Avoids the confusion of a parent showing its
+  // own far-off deadline while a sub-order is due in hours.
+  subOrders: {
+    where: { status: { not: OrderStatus.COMPLETED } },
+    select: {
+      broadcast: { select: { deadlineDate: true, deadlineHasTime: true } },
+      marketing: { select: { deadlineDate: true, deadlineHasTime: true } },
+    },
+  },
 } satisfies Prisma.TranslationOrderSelect
 
 // Flat mode (search/filter active): sub-orders appear as their own rows, each
@@ -948,6 +959,29 @@ if (
     ])
 
     /*
+      NEAREST SUB-ORDER DEADLINE (grouped mode)
+      For each parent, surface the soonest non-completed sub-order deadline so
+      the collapsed parent row reflects the most urgent work beneath it. Then
+      drop the raw subOrders payload (only needed for this computation).
+    */
+    if (!flatten) {
+      for (const o of orders as any[]) {
+        if (o.isParent && Array.isArray(o.subOrders)) {
+          let nearest: { deadlineDate: Date; deadlineHasTime: boolean } | null = null
+          for (const s of o.subOrders) {
+            const det = s.broadcast ?? s.marketing
+            if (!det?.deadlineDate) continue
+            if (!nearest || det.deadlineDate < nearest.deadlineDate) {
+              nearest = { deadlineDate: det.deadlineDate, deadlineHasTime: !!det.deadlineHasTime }
+            }
+          }
+          o.nearestSubDeadline = nearest
+        }
+        delete o.subOrders
+      }
+    }
+
+    /*
       RESPONSE
     */
 
@@ -1060,6 +1094,30 @@ export async function recomputeParentStatus(
   })
 
   return newStatus
+}
+
+// Soonest non-completed sub-order deadline for a parent (or null if none) — used
+// to keep a collapsed parent's displayed deadline fresh after a sub-order's
+// status changes. Mirrors the computation in the grouped list query.
+export async function nearestSubDeadlineFor(
+  parentId: string
+): Promise<{ deadlineDate: Date; deadlineHasTime: boolean } | null> {
+  const subs = await prisma.translationOrder.findMany({
+    where: { parentId, status: { not: OrderStatus.COMPLETED } },
+    select: {
+      broadcast: { select: { deadlineDate: true, deadlineHasTime: true } },
+      marketing: { select: { deadlineDate: true, deadlineHasTime: true } },
+    },
+  })
+  let nearest: { deadlineDate: Date; deadlineHasTime: boolean } | null = null
+  for (const s of subs) {
+    const det = s.broadcast ?? s.marketing
+    if (!det?.deadlineDate) continue
+    if (!nearest || det.deadlineDate < nearest.deadlineDate) {
+      nearest = { deadlineDate: det.deadlineDate, deadlineHasTime: !!det.deadlineHasTime }
+    }
+  }
+  return nearest
 }
 
 /*
@@ -2279,14 +2337,17 @@ const sourceIsChange = sourceWasChanged && !!(prevSourceLink && prevSourceLink.t
     try { getIo()?.emit("order-patched", { id: orderId, type: updatedOrder?.type }) } catch {}
     res.json(updatedOrder)
 
-    // If a sub-order's status changed, roll it up into the parent.
-    if (existingOrder.parentId && isOrderStatus(status)) {
-      recomputeParentStatus(existingOrder.parentId)
-        .then((parentStatus) => {
+    // If a sub-order changed, roll its status up into the parent and refresh the
+    // parent's nearest-sub-order deadline (a status OR deadline edit can change it).
+    if (existingOrder.parentId) {
+      const pid = existingOrder.parentId
+      recomputeParentStatus(pid)
+        .then(async (parentStatus) => {
+          const nearestSubDeadline = await nearestSubDeadlineFor(pid)
           ordersCache.invalidate()
-          try { getIo()?.emit("order-patched", { id: existingOrder.parentId, type: updatedOrder?.type, status: parentStatus }) } catch {}
+          try { getIo()?.emit("order-patched", { id: pid, type: updatedOrder?.type, status: parentStatus, nearestSubDeadline }) } catch {}
         })
-        .catch((e) => logger.error({ action: "RECOMPUTE_PARENT_ERROR", parentId: existingOrder.parentId, err: e }))
+        .catch((e) => logger.error({ action: "RECOMPUTE_PARENT_ERROR", parentId: pid, err: e }))
     }
 
     return
@@ -2450,14 +2511,17 @@ if (
     try { getIo()?.emit("order-patched", { id: updatedOrder.id, type: updatedOrder.type, status: updatedOrder.status }) } catch {}
     res.json(updatedOrder)
 
-    // If this is a sub-order, roll its status up into the parent.
+    // If this is a sub-order, roll its status up into the parent and refresh the
+    // parent's nearest-sub-order deadline (the completed sub may no longer be it).
     if (existingOrder.parentId) {
-      recomputeParentStatus(existingOrder.parentId)
-        .then((parentStatus) => {
+      const pid = existingOrder.parentId
+      recomputeParentStatus(pid)
+        .then(async (parentStatus) => {
+          const nearestSubDeadline = await nearestSubDeadlineFor(pid)
           ordersCache.invalidate()
-          try { getIo()?.emit("order-patched", { id: existingOrder.parentId, type: updatedOrder.type, status: parentStatus }) } catch {}
+          try { getIo()?.emit("order-patched", { id: pid, type: updatedOrder.type, status: parentStatus, nearestSubDeadline }) } catch {}
         })
-        .catch((e) => logger.error({ action: "RECOMPUTE_PARENT_ERROR", parentId: existingOrder.parentId, err: e }))
+        .catch((e) => logger.error({ action: "RECOMPUTE_PARENT_ERROR", parentId: pid, err: e }))
     }
 
     /*
@@ -2932,11 +2996,13 @@ export async function deleteOrder(
     ordersCache.invalidate()
     try { getIo()?.emit("order-deleted", { id: deleted.id, type: deleted.type }) } catch {}
 
-    // If a sub-order was deleted, recompute the parent's rolled-up status.
+    // If a sub-order was deleted, recompute the parent's rolled-up status and
+    // its nearest-sub-order deadline.
     if (deleted.parentId) {
       const parentStatus = await recomputeParentStatus(deleted.parentId)
+      const nearestSubDeadline = await nearestSubDeadlineFor(deleted.parentId)
       ordersCache.invalidate()
-      try { getIo()?.emit("order-patched", { id: deleted.parentId, type: deleted.type, status: parentStatus }) } catch {}
+      try { getIo()?.emit("order-patched", { id: deleted.parentId, type: deleted.type, status: parentStatus, nearestSubDeadline }) } catch {}
     }
 
     return res.json({
