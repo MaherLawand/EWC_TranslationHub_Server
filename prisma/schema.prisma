@@ -44,6 +44,7 @@ enum OrderType {
 
 enum OrderStatus {
   PENDING
+  READY_FOR_TRANSLATION
   IN_PROGRESS
   COMPLETED
 }

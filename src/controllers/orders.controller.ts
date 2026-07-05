@@ -1076,17 +1076,19 @@ export async function recomputeParentStatus(
 
   if (subs.length === 0) return undefined
 
-  // A parent is IN_PROGRESS only while a sub-order is actively being worked on.
-  // If every sub is completed → COMPLETED. Otherwise (all pending, or a mix of
-  // completed + pending with none in progress) → PENDING, so completing the last
-  // in-progress sub doesn't leave the parent stuck "In Progress".
+  // Roll the sub-orders up by "most advanced active" state:
+  //   all completed → COMPLETED; any in progress → IN_PROGRESS;
+  //   else any ready for translation → READY_FOR_TRANSLATION; else PENDING.
   const allCompleted = subs.every((s) => s.status === OrderStatus.COMPLETED)
   const anyInProgress = subs.some((s) => s.status === OrderStatus.IN_PROGRESS)
+  const anyReady = subs.some((s) => s.status === OrderStatus.READY_FOR_TRANSLATION)
 
   const newStatus = allCompleted
     ? OrderStatus.COMPLETED
     : anyInProgress
     ? OrderStatus.IN_PROGRESS
+    : anyReady
+    ? OrderStatus.READY_FOR_TRANSLATION
     : OrderStatus.PENDING
 
   await prisma.translationOrder.update({
@@ -1222,6 +1224,15 @@ function buildOrderData(
       }))
     : []
 
+  // A source file present at creation → auto-advance from PENDING to
+  // READY_FOR_TRANSLATION (an explicitly-set status still wins).
+  const resolvedStatus = isOrderStatus(status) ? status : OrderStatus.PENDING
+  const hasSourceAtCreate = typeof sourceFileLink === "string" && sourceFileLink.trim() !== ""
+  const initialStatus =
+    resolvedStatus === OrderStatus.PENDING && hasSourceAtCreate
+      ? OrderStatus.READY_FOR_TRANSLATION
+      : resolvedStatus
+
   const data: any = {
     title: title.trim(),
 
@@ -1231,7 +1242,7 @@ function buildOrderData(
 
     event: isEventType(event) ? event : EventType.EWC,
 
-    status: isOrderStatus(status) ? status : OrderStatus.PENDING,
+    status: initialStatus,
 
     priority: isOrderPriority(priority) ? priority : OrderPriority.MEDIUM,
 
@@ -2505,6 +2516,24 @@ const sourceWasRemoved =
           .catch((e) => logger.error({ action: "SET_SOURCE_CHANGED_ERROR", orderId, err: e }))
       }
 
+      // First-time source add on a still-PENDING order → advance it to
+      // READY_FOR_TRANSLATION and roll it up if it's a sub-order.
+      if (!sourceIsChange && updatedOrder?.status === OrderStatus.PENDING) {
+        prisma.translationOrder
+          .update({ where: { id: orderId }, data: { status: OrderStatus.READY_FOR_TRANSLATION } })
+          .then(async () => {
+            ordersCache.invalidate()
+            try { getIo()?.emit("order-patched", { id: orderId, type: updatedOrder?.type, status: OrderStatus.READY_FOR_TRANSLATION }) } catch {}
+            if (existingOrder.parentId) {
+              const parentStatus = await recomputeParentStatus(existingOrder.parentId)
+              const nearestSubDeadline = await nearestSubDeadlineFor(existingOrder.parentId)
+              ordersCache.invalidate()
+              try { getIo()?.emit("order-patched", { id: existingOrder.parentId, type: updatedOrder?.type, status: parentStatus, nearestSubDeadline }) } catch {}
+            }
+          })
+          .catch((e) => logger.error({ action: "SET_READY_FOR_TRANSLATION_ERROR", orderId, err: e }))
+      }
+
       notifyTranslatorsSourceReady(
         orderId,
         sourceIsChange
@@ -3353,7 +3382,7 @@ export async function getOrderCounts(
       where,
     })
 
-    const counts = { PENDING: 0, IN_PROGRESS: 0, COMPLETED: 0, total: 0 }
+    const counts = { PENDING: 0, READY_FOR_TRANSLATION: 0, IN_PROGRESS: 0, COMPLETED: 0, total: 0 }
     for (const g of groups) {
       const key = g.status as keyof Omit<typeof counts, "total">
       if (key in counts) counts[key] = g._count._all
