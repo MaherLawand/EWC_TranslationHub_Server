@@ -295,3 +295,308 @@ ${orderLink}
     logger.error({ action: "NOTIFY_TRANSLATORS_ERROR", orderId, err: error })
   }
 }
+
+/*
+  Notify every active translator that an order which HAD a source file was
+  deleted, so they stop any in-flight translation work on it. Same branded
+  template as the source-ready email, minus the "View Order" button (the order
+  no longer exists). `order` is the pre-deletion snapshot (orderSelectCore shape).
+  Fire-and-forget; suppressed outside production by the mailer guard.
+*/
+export async function notifyTranslatorsOrderDeleted(order: any) {
+  try {
+    if (!order) return
+
+    const sourceFileLink =
+      order.type === "BROADCAST"
+        ? order.broadcast?.sourceFileLink
+        : order.marketing?.sourceFileLink
+
+    // Only notify when the deleted order actually had a source file.
+    if (!sourceFileLink) return
+
+    const translators = await prisma.user.findMany({
+      where: { position: "TRANSLATOR", isActive: true },
+      select: { id: true, email: true },
+    })
+    const recipients = translators.filter((t) => t.email)
+    if (recipients.length === 0) return
+
+    const kicker = "Order Removed"
+    const heading = "Order Deleted"
+    const intro =
+      "The order below which had a source file for translation has been deleted. Please stop any work on it as it is no longer active."
+    const subject = `Translation Order Removed — ${order.title}`
+
+    const gameOrContentLabel = order.type === "BROADCAST" ? "Game" : "Content"
+    const gameOrContentValue =
+      order.type === "BROADCAST"
+        ? order.broadcast?.game?.name ?? "-"
+        : order.marketing?.contentTitle || "Marketing Content"
+    const formats =
+      (order.type === "BROADCAST"
+        ? order.broadcast?.deliveryFormats
+        : order.marketing?.deliveryFormats
+      )?.map((f: any) => f.format).join(", ") || "-"
+
+    logger.info({ action: "NOTIFY_ORDER_DELETED_SENDING", orderId: order.id, recipients: recipients.length })
+
+    await Promise.all(
+      recipients.map(async (translator) => {
+        await sendEmail({
+          from: "EWC Translations <translations@ewctranslations.org>",
+          to: translator.email,
+          replyTo: "translations@ewctranslations.org",
+          subject,
+          text: `
+${heading}
+
+${intro}
+
+Order:
+${order.title}
+
+Department:
+${order.type === "BROADCAST" ? "Broadcast" : "Marketing"}
+
+${gameOrContentLabel}:
+${gameOrContentValue}
+
+Delivery Format:
+${formats}
+
+Priority:
+${order.priority}
+
+© 2026 EWC Translation Hub
+`,
+          html: `
+  <div style="background:#0B0B0B; padding:40px; font-family:Arial,sans-serif; color:#F5F1E8;">
+
+    <div style="max-width:600px; margin:auto; background:#111111; border:1px solid #242424; border-radius:24px; padding:40px;">
+
+      <div style="text-align:center; margin-bottom:32px;">
+        <img
+          src="https://ewctranslations.org/EWCLOGOEMAIL.png"
+          alt="EWC Translation Hub"
+          width="260"
+          style="display:block; margin:0 auto 6px auto; width:400px; height:auto;"
+        />
+        <p style="color:#888; margin:0; font-size:14px;">${kicker}</p>
+      </div>
+
+      <h2 style="margin-top:0; color:white; font-size:24px;">${heading}</h2>
+
+      <p style="color:#B0B0B0; line-height:1.7; font-size:15px;">
+        ${intro}
+      </p>
+
+      <div style="background:#161616; border:1px solid #2A2A2A; border-radius:16px; padding:18px; margin-top:25px;">
+        <p style="margin:0 0 10px 0; color:#D6B36A; font-weight:bold; font-size:14px;">Order Details</p>
+
+        <p style="margin:0 0 8px 0; color:#8E8E8E; font-size:13px; line-height:1.6;">
+          <strong style="color:#F5F1E8;">Order:</strong> ${order.title}
+        </p>
+
+        <p style="margin:0 0 8px 0; color:#8E8E8E; font-size:13px; line-height:1.6;">
+          <strong style="color:#F5F1E8;">Department:</strong> ${order.type === "BROADCAST" ? "Broadcast" : "Marketing"}
+        </p>
+
+        <p style="margin:0 0 8px 0; color:#8E8E8E; font-size:13px; line-height:1.6;">
+          <strong style="color:#F5F1E8;">${gameOrContentLabel}:</strong> ${gameOrContentValue}
+        </p>
+
+        <p style="margin:0 0 8px 0; color:#8E8E8E; font-size:13px; line-height:1.6;">
+          <strong style="color:#F5F1E8;">Delivery Format:</strong> ${formats}
+        </p>
+
+        <p style="margin:0; color:#8E8E8E; font-size:13px; line-height:1.6;">
+          <strong style="color:#F5F1E8;">Priority:</strong>
+          <strong style="color:${order.priority === "HIGH" ? "#f87171" : order.priority === "MEDIUM" ? "#facc15" : "#4ade80"};">
+            ${order.priority}
+          </strong>
+        </p>
+      </div>
+
+      <div style="background:#2A1616; border:1px solid #4A2020; border-left:3px solid #f87171; border-radius:14px; padding:16px 18px; margin-top:22px;">
+        <p style="margin:0; color:#F0B4B4; font-size:14px; line-height:1.6;">
+          Please stop any translation work on this order — it has been removed and can no longer be opened.
+        </p>
+      </div>
+
+      <div style="margin-top:40px; padding-top:20px; border-top:1px solid #242424; text-align:center; color:#666; font-size:12px;">
+        © 2026 EWC Translation Hub
+      </div>
+
+    </div>
+
+  </div>
+`,
+        })
+      })
+    )
+  } catch (error) {
+    logger.error({ action: "NOTIFY_ORDER_DELETED_ERROR", orderId: order?.id, err: error })
+  }
+}
+
+/*
+  Notify every active translator that an order's source file was REMOVED (the
+  order itself still exists). Same branded template as the source-ready email.
+  Fire-and-forget; suppressed outside production by the mailer guard.
+*/
+export async function notifyTranslatorsSourceRemoved(orderId: string) {
+  try {
+    const order = await prisma.translationOrder.findUnique({
+      where: { id: orderId },
+      include: {
+        broadcast: { include: { game: true, deliveryFormats: true } },
+        marketing: { include: { deliveryFormats: true } },
+      },
+    })
+    if (!order) return
+
+    const translators = await prisma.user.findMany({
+      where: { position: "TRANSLATOR", isActive: true },
+      select: { id: true, email: true },
+    })
+    const recipients = translators.filter((t) => t.email)
+    if (recipients.length === 0) return
+
+    const orderPage = order.type === "BROADCAST" ? "Broadcast" : "marketing"
+    const orderLink = `${process.env.CLIENT_URL}?page=${orderPage}&orderId=${order.id}`
+
+    const kicker = "Source File Removed"
+    const heading = "Source File Removed"
+    const intro =
+      "The source file for this order has been removed. Please stop using the previous source — there is currently no source available for translation on this order."
+    const subject = `Translation Source Removed — ${order.title}`
+
+    const gameOrContentLabel = order.type === "BROADCAST" ? "Game" : "Content"
+    const gameOrContentValue =
+      order.type === "BROADCAST"
+        ? order.broadcast?.game?.name ?? "-"
+        : order.marketing?.contentTitle || "Marketing Content"
+    const formats =
+      (order.type === "BROADCAST"
+        ? order.broadcast?.deliveryFormats
+        : order.marketing?.deliveryFormats
+      )?.map((f) => f.format).join(", ") || "-"
+
+    logger.info({ action: "NOTIFY_SOURCE_REMOVED_SENDING", orderId, recipients: recipients.length })
+
+    await Promise.all(
+      recipients.map(async (translator) => {
+        await sendEmail({
+          from: "EWC Translations <translations@ewctranslations.org>",
+          to: translator.email,
+          replyTo: "translations@ewctranslations.org",
+          subject,
+          text: `
+${heading}
+
+${intro}
+
+Order:
+${order.title}
+
+Department:
+${order.type === "BROADCAST" ? "Broadcast" : "Marketing"}
+
+${gameOrContentLabel}:
+${gameOrContentValue}
+
+Delivery Format:
+${formats}
+
+Priority:
+${order.priority}
+
+View Order:
+${orderLink}
+
+© 2026 EWC Translation Hub
+`,
+          html: `
+  <div style="background:#0B0B0B; padding:40px; font-family:Arial,sans-serif; color:#F5F1E8;">
+
+    <div style="max-width:600px; margin:auto; background:#111111; border:1px solid #242424; border-radius:24px; padding:40px;">
+
+      <div style="text-align:center; margin-bottom:32px;">
+        <img
+          src="https://ewctranslations.org/EWCLOGOEMAIL.png"
+          alt="EWC Translation Hub"
+          width="260"
+          style="display:block; margin:0 auto 6px auto; width:400px; height:auto;"
+        />
+        <p style="color:#888; margin:0; font-size:14px;">${kicker}</p>
+      </div>
+
+      <h2 style="margin-top:0; color:white; font-size:24px;">${heading}</h2>
+
+      <p style="color:#B0B0B0; line-height:1.7; font-size:15px;">
+        ${intro}
+      </p>
+
+      <div style="background:#161616; border:1px solid #2A2A2A; border-radius:16px; padding:18px; margin-top:25px;">
+        <p style="margin:0 0 10px 0; color:#D6B36A; font-weight:bold; font-size:14px;">Order Details</p>
+
+        <p style="margin:0 0 8px 0; color:#8E8E8E; font-size:13px; line-height:1.6;">
+          <strong style="color:#F5F1E8;">Order:</strong> ${order.title}
+        </p>
+
+        <p style="margin:0 0 8px 0; color:#8E8E8E; font-size:13px; line-height:1.6;">
+          <strong style="color:#F5F1E8;">Department:</strong> ${order.type === "BROADCAST" ? "Broadcast" : "Marketing"}
+        </p>
+
+        <p style="margin:0 0 8px 0; color:#8E8E8E; font-size:13px; line-height:1.6;">
+          <strong style="color:#F5F1E8;">${gameOrContentLabel}:</strong> ${gameOrContentValue}
+        </p>
+
+        <p style="margin:0 0 8px 0; color:#8E8E8E; font-size:13px; line-height:1.6;">
+          <strong style="color:#F5F1E8;">Delivery Format:</strong> ${formats}
+        </p>
+
+        <p style="margin:0; color:#8E8E8E; font-size:13px; line-height:1.6;">
+          <strong style="color:#F5F1E8;">Priority:</strong>
+          <strong style="color:${order.priority === "HIGH" ? "#f87171" : order.priority === "MEDIUM" ? "#facc15" : "#4ade80"};">
+            ${order.priority}
+          </strong>
+        </p>
+      </div>
+
+      <div style="background:#2A1616; border:1px solid #4A2020; border-left:3px solid #f87171; border-radius:14px; padding:16px 18px; margin-top:22px;">
+        <p style="margin:0; color:#F0B4B4; font-size:14px; line-height:1.6;">
+          The source file for this order has been removed — please stop using the previous source until a new one is provided.
+        </p>
+      </div>
+
+      <div style="margin-top:35px; margin-bottom:35px; text-align:center;">
+        <a
+          href="${orderLink}"
+          style="display:inline-block; background:#D6B36A; color:black; text-decoration:none; padding:16px 32px; border-radius:14px; font-weight:bold; font-size:15px;"
+        >
+          View Order
+        </a>
+
+        <p style="color:#777; font-size:12px; line-height:1.7; margin-top:22px;">
+          If the button doesn't work, copy and paste this link into your browser:<br/>
+          <a href="${orderLink}" style="color:#D6B36A; word-break:break-all;">${orderLink}</a>
+        </p>
+      </div>
+
+      <div style="margin-top:40px; padding-top:20px; border-top:1px solid #242424; text-align:center; color:#666; font-size:12px;">
+        © 2026 EWC Translation Hub
+      </div>
+
+    </div>
+
+  </div>
+`,
+        })
+      })
+    )
+  } catch (error) {
+    logger.error({ action: "NOTIFY_SOURCE_REMOVED_ERROR", orderId, err: error })
+  }
+}

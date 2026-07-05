@@ -8,6 +8,7 @@ import {
   assignUsersToMarketingOrder,
   createOrder,
   createSubOrders,
+  duplicateOrder,
   deleteOrder,
   getOrderById,
   getOrderCounts,
@@ -53,6 +54,13 @@ router.post(
   "/:id/sub-orders",
   requireAuth,
   createSubOrders
+)
+
+// Instantly duplicate a sub-order into the same parent (auto-incremented title)
+router.post(
+  "/:id/duplicate",
+  requireAuth,
+  duplicateOrder
 )
 
 // Lazy-load a parent's sub-orders (paginated) when its row is expanded

@@ -9,7 +9,7 @@ import type {
 import { randomUUID } from "node:crypto"
 import { prisma } from "../lib/prisma.js"
 import { triggerNotifications, getIo } from "../lib/socket.js"
-import { notifyTranslatorsSourceReady } from "./notification.controller.js"
+import { notifyTranslatorsSourceReady, notifyTranslatorsOrderDeleted, notifyTranslatorsSourceRemoved } from "./notification.controller.js"
 import { logger } from "../lib/logger.js"
 import { ordersCache } from "../lib/ordersCache.js"
 import {
@@ -42,6 +42,7 @@ const orderRowFields = {
       targetLanguages: true,
       deadlineDate: true,
       deadlineHasTime: true,
+      deliveryType: true,
       deliveryFormats: {
         select: {
           id: true,
@@ -208,6 +209,7 @@ const orderSelectCore = {
       deliveryDate: true,
       deadlineDate: true,
       deadlineHasTime: true,
+      deliveryType: true,
       game: {
         select: {
           id: true,
@@ -1074,14 +1076,18 @@ export async function recomputeParentStatus(
 
   if (subs.length === 0) return undefined
 
+  // A parent is IN_PROGRESS only while a sub-order is actively being worked on.
+  // If every sub is completed → COMPLETED. Otherwise (all pending, or a mix of
+  // completed + pending with none in progress) → PENDING, so completing the last
+  // in-progress sub doesn't leave the parent stuck "In Progress".
   const allCompleted = subs.every((s) => s.status === OrderStatus.COMPLETED)
-  const allPending = subs.every((s) => s.status === OrderStatus.PENDING)
+  const anyInProgress = subs.some((s) => s.status === OrderStatus.IN_PROGRESS)
 
   const newStatus = allCompleted
     ? OrderStatus.COMPLETED
-    : allPending
-    ? OrderStatus.PENDING
-    : OrderStatus.IN_PROGRESS
+    : anyInProgress
+    ? OrderStatus.IN_PROGRESS
+    : OrderStatus.PENDING
 
   await prisma.translationOrder.update({
     where: { id: parentId },
@@ -1152,11 +1158,16 @@ function buildOrderData(
     srtAvailableLink,
     deliveryDate,
     deadline,
+    deliveryType,
   } = body
 
   if (!title?.trim()) {
     return { error: "Title is required" }
   }
+
+  // Broadcast only: Finished (SRT/burned-in) or Raw (SRT). Ignored for marketing.
+  const parsedDeliveryType =
+    deliveryType === "FINISHED" || deliveryType === "RAW" ? deliveryType : null
 
   if (deliveryFormats && !Array.isArray(deliveryFormats)) {
     return { error: "Delivery formats must be an array" }
@@ -1242,6 +1253,7 @@ function buildOrderData(
               deliveryDate: deliveryDate ? new Date(deliveryDate) : new Date(),
               deadlineDate: deadline ? new Date(deadline) : new Date(),
               deadlineHasTime,
+              deliveryType: parsedDeliveryType,
               deliveries: { create: parsedDeliveries },
               game: { connect: { id: normalizedGame } },
             },
@@ -1475,6 +1487,8 @@ export async function createSubOrders(
           srtAvailableLink: b.srtAvailableLink,
           deliveryDate: b.deliveryDate,
           deadlineDate: b.deadlineDate,
+          deadlineHasTime: b.deadlineHasTime,
+          deliveryType: b.deliveryType,
         })
         for (const dl of b.deliveries.create) {
           broadcastDeliveryRows.push({
@@ -1502,6 +1516,7 @@ export async function createSubOrders(
           sourceFileLink: m.sourceFileLink ?? null,
           srtAvailableLink: m.srtAvailableLink,
           deadlineDate: m.deadlineDate,
+          deadlineHasTime: m.deadlineHasTime,
         })
         for (const dl of m.deliveries.create) {
           marketingDeliveryRows.push({
@@ -1568,6 +1583,159 @@ export async function createSubOrders(
   } catch (error) {
     logger.error({ action: "CREATE_SUB_ORDERS_ERROR", userId: req.userId, parentId: req.params.id, err: error })
     return res.status(500).json({ message: "Failed to create sub-orders" })
+  }
+}
+
+/*
+  DUPLICATE SUB-ORDER — instantly copy a sub-order into the same parent with an
+  auto-incremented title. Copies every field (languages, formats, deliveries,
+  deadline + time, delivery type). Recomputes the parent afterwards.
+*/
+export async function duplicateOrder(req: AuthRequest, res: Response) {
+  try {
+    if (!req.userId) return res.status(401).json({ message: "Unauthorized" })
+
+    const user = await prisma.user.findUnique({
+      where: { id: req.userId },
+      select: { id: true, role: true, position: true },
+    })
+    if (!user) return res.status(404).json({ message: "User not found" })
+    if (!canManageOrders(user)) return res.status(403).json({ message: "Unauthorized" })
+
+    const sourceId = String(req.params.id)
+    const source = await prisma.translationOrder.findUnique({
+      where: { id: sourceId },
+      select: {
+        id: true, title: true, notes: true, type: true, event: true, status: true, priority: true, parentId: true,
+        broadcast: {
+          select: {
+            estimatedMinutes: true, sourceLanguage: true, targetLanguages: true,
+            sourceFileLink: true, srtAvailableLink: true, deliveryDate: true,
+            deadlineDate: true, deadlineHasTime: true, deliveryType: true, gameId: true,
+            deliveries: { select: { language: true, deliveryLink: true } },
+            deliveryFormats: { select: { format: true, deliveryLink: true } },
+          },
+        },
+        marketing: {
+          select: {
+            contentTitle: true, aspectRatios: true, sourceLanguage: true, targetLanguages: true,
+            sourceFileLink: true, srtAvailableLink: true, deadlineDate: true, deadlineHasTime: true,
+            deliveries: { select: { language: true, deliveryLink: true } },
+            deliveryFormats: { select: { format: true, deliveryLink: true } },
+          },
+        },
+      },
+    })
+    if (!source) return res.status(404).json({ message: "Order not found" })
+    if (!source.parentId) {
+      return res.status(400).json({ message: "Only sub-orders can be duplicated this way" })
+    }
+
+    // Next title: "<prefix> <max sibling number + 1>", based on the source's
+    // trailing number (or the whole title if it has none).
+    const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+    const tm = source.title.match(/^(.*?)(\d+)\s*$/)
+    const prefix = (tm ? tm[1] : source.title).trim()
+    const siblings = await prisma.translationOrder.findMany({
+      where: { parentId: source.parentId },
+      select: { title: true },
+    })
+    const numRe = new RegExp(`^${escapeRe(prefix)}\\s*(\\d+)\\s*$`)
+    let max = 0
+    for (const s of siblings) {
+      const mm = s.title.match(numRe)
+      if (mm) max = Math.max(max, Number(mm[1]))
+    }
+    const newTitle = prefix ? `${prefix} ${max + 1}` : `${max + 1}`
+
+    const data: any = {
+      title: newTitle,
+      notes: source.notes ?? null,
+      type: source.type,
+      event: source.event,
+      status: source.status,
+      priority: source.priority,
+      createdById: user.id,
+      isParent: false,
+      parentId: source.parentId,
+    }
+    if (source.broadcast) {
+      const b = source.broadcast
+      // Derive delivery type + formats the same way the modal duplicate does, so
+      // legacy sub-orders (no saved type) come out consistent:
+      //   Burned In (± SRT) → Finished (ensure SRT); only SRT → Raw; none → Finished + SRT.
+      const srtItem = b.deliveryFormats.find((f) => f.format === "SRT") || { format: "SRT" as const, deliveryLink: null as string | null }
+      const burnedItem = b.deliveryFormats.find((f) => f.format === "BURNED_IN") || { format: "BURNED_IN" as const, deliveryLink: null as string | null }
+      const hasSRT = b.deliveryFormats.some((f) => f.format === "SRT")
+      const hasBurned = b.deliveryFormats.some((f) => f.format === "BURNED_IN")
+      let dType = b.deliveryType as "FINISHED" | "RAW" | null
+      let formats: { format: any; deliveryLink: string | null }[] = b.deliveryFormats
+      if (dType) {
+        if (dType === "RAW") formats = [srtItem]
+      } else if (hasBurned) {
+        dType = "FINISHED"
+        formats = [burnedItem, srtItem]
+      } else if (hasSRT) {
+        dType = "RAW"
+        formats = [srtItem]
+      } else {
+        dType = "FINISHED"
+        formats = [srtItem]
+      }
+
+      data.broadcast = {
+        create: {
+          estimatedMinutes: b.estimatedMinutes,
+          sourceLanguage: b.sourceLanguage,
+          targetLanguages: b.targetLanguages,
+          sourceFileLink: b.sourceFileLink,
+          srtAvailableLink: b.srtAvailableLink,
+          deliveryDate: b.deliveryDate,
+          deadlineDate: b.deadlineDate,
+          deadlineHasTime: b.deadlineHasTime,
+          deliveryType: dType,
+          game: { connect: { id: b.gameId } },
+          deliveries: { create: b.deliveries.map((d) => ({ language: d.language, deliveryLink: d.deliveryLink })) },
+          deliveryFormats: { create: formats.map((f) => ({ format: f.format, deliveryLink: f.deliveryLink })) },
+        },
+      }
+    } else if (source.marketing) {
+      const m = source.marketing
+      data.marketing = {
+        create: {
+          contentTitle: m.contentTitle,
+          aspectRatios: m.aspectRatios,
+          sourceLanguage: m.sourceLanguage,
+          targetLanguages: m.targetLanguages,
+          sourceFileLink: m.sourceFileLink,
+          srtAvailableLink: m.srtAvailableLink,
+          deadlineDate: m.deadlineDate,
+          deadlineHasTime: m.deadlineHasTime,
+          deliveries: { create: m.deliveries.map((d) => ({ language: d.language, deliveryLink: d.deliveryLink })) },
+          deliveryFormats: { create: m.deliveryFormats.map((f) => ({ format: f.format, deliveryLink: f.deliveryLink })) },
+        },
+      }
+    }
+
+    const created = await prisma.translationOrder.create({ data, select: orderRowFields })
+
+    logger.info({ action: "DUPLICATE_SUB_ORDER", userId: req.userId, sourceId, parentId: source.parentId, newId: created.id, title: newTitle })
+
+    // Roll the new sub-order into the parent (status + nearest deadline) and
+    // refresh lists.
+    const pid = source.parentId
+    const parentStatus = await recomputeParentStatus(pid)
+    const nearestSubDeadline = await nearestSubDeadlineFor(pid)
+    ordersCache.invalidate()
+    // Only patch the parent row (status + nearest deadline). We deliberately do
+    // NOT emit "order-created" — that refetches the top-level list back to page 1.
+    // The acting client reloads the expanded parent's sub-orders itself.
+    try { getIo()?.emit("order-patched", { id: pid, type: source.type, status: parentStatus, nearestSubDeadline }) } catch {}
+
+    return res.json(created)
+  } catch (error) {
+    logger.error({ action: "DUPLICATE_SUB_ORDER_ERROR", userId: req.userId, sourceId: req.params.id, err: error })
+    return res.status(500).json({ message: "Failed to duplicate sub-order" })
   }
 }
 
@@ -1649,6 +1817,7 @@ export async function updateOrder(
       deliveryDate,
       deadline,
       deliveries,
+      deliveryType,
       clientLastEditedAt, // ISO string | null | undefined — optimistic concurrency token
     } = req.body
 
@@ -1898,6 +2067,10 @@ try {
             new Date(deadline),
           deadlineHasTime: /T\d{2}:\d{2}/.test(String(deadline)),
         }
+      : {}),
+
+    ...(deliveryType === "FINISHED" || deliveryType === "RAW"
+      ? { deliveryType }
       : {}),
 
 ...(normalizedGame
@@ -2308,6 +2481,18 @@ const sourceWasChanged =
 
 // A CHANGE = there was already a source and it was replaced (vs. a first-time add).
 const sourceIsChange = sourceWasChanged && !!(prevSourceLink && prevSourceLink.trim())
+
+// A REMOVAL = there was a source and it was explicitly cleared to empty.
+const sourceWasRemoved =
+  typeof sourceFileLink === "string" &&
+  sourceFileLink.trim() === "" &&
+  !!(prevSourceLink && prevSourceLink.trim())
+
+    if (sourceWasRemoved) {
+      notifyTranslatorsSourceRemoved(orderId).catch((e) =>
+        logger.error({ action: "NOTIFY_SOURCE_REMOVED_ERROR", orderId, err: e })
+      )
+    }
 
     if (sourceWasChanged) {
 
@@ -2995,6 +3180,15 @@ export async function deleteOrder(
 
     ordersCache.invalidate()
     try { getIo()?.emit("order-deleted", { id: deleted.id, type: deleted.type }) } catch {}
+
+    // If the deleted order had a source file, tell translators to stop work on it.
+    const deletedSourceLink =
+      fullOrder?.type === "BROADCAST"
+        ? fullOrder?.broadcast?.sourceFileLink
+        : fullOrder?.marketing?.sourceFileLink
+    if (deletedSourceLink) {
+      notifyTranslatorsOrderDeleted(fullOrder).catch(() => {})
+    }
 
     // If a sub-order was deleted, recompute the parent's rolled-up status and
     // its nearest-sub-order deadline.

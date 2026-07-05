@@ -59,6 +59,13 @@ enum DeliveryFormat {
   GOOGLE_SHEET
 }
 
+// Broadcast only: whether the deliverable is a finished asset (SRT or burned-in)
+// or raw (SRT only).
+enum DeliveryType {
+  FINISHED
+  RAW
+}
+
 enum OrderPriority {
   LOW
   MEDIUM
@@ -341,6 +348,9 @@ model BroadcastDetails {
   // Whether deadlineDate carries a specific time-of-day (true) or is date-only
   // (false → stored at UTC midnight, displayed without a time).
   deadlineHasTime Boolean @default(false)
+
+  // Finished (SRT or burned-in) vs Raw (SRT only). Gates the delivery format.
+  deliveryType DeliveryType?
 
   orderId String @unique
 
