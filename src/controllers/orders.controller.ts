@@ -669,12 +669,8 @@ if (
 }
     }
 
-if (
-  isOrderStatus(status)
-) {
-  where.status =
-    status
-}
+// Status is applied later (once grouped/flat is known): grouped keeps parents
+// visible if their own status OR any sub-order's status matches.
 
 if(isEventType(event)
 ){
@@ -912,15 +908,30 @@ if (
     */
 
     // Only a TEXT SEARCH flattens the list (so a matching sub-order surfaces as
-    // its own row even if its parent doesn't match). Structured filters
-    // (status / priority / format / game / content title) keep the grouped,
-    // collapsible view so parents still show their expand/collapse chevron and
-    // sub-orders stay tucked under them.
+    // its own row). Structured filters keep the grouped, collapsible view.
     const flatten = !!search
 
     // Only constrain to top-level rows when NOT flattening and not an exact-id lookup.
     if (!orderId && !flatten) {
       where.parentId = null
+    }
+
+    // STATUS filter:
+    //  • flat (search): match each order's own status.
+    //  • grouped: show a top-level order if its own status matches OR it has a
+    //    sub-order in that status — so a big order stays visible + expandable and
+    //    a sub-order in a differing state (e.g. a READY sub under an IN_PROGRESS
+    //    parent) still surfaces its parent.
+    if (isOrderStatus(status)) {
+      if (flatten) {
+        where.status = status
+      } else {
+        const statusOr: Prisma.TranslationOrderWhereInput = {
+          OR: [{ status }, { subOrders: { some: { status } } }],
+        }
+        const currentAnd = Array.isArray(where.AND) ? where.AND : where.AND ? [where.AND] : []
+        where.AND = [...currentAnd, statusOr]
+      }
     }
 
     const listSelect = flatten ? listOrderSelectFlat : listOrderSelectGrouped
@@ -3289,8 +3300,10 @@ export async function getOrderCounts(
     if (orderId) {
       where.id = orderId
     } else {
-      // Count only top-level rows so badge counts match the list.
-      where.parentId = null
+      // Count individual work units — standalone orders + sub-orders — but not
+      // parent grouping shells, whose status is only a rollup of their children.
+      // This way a READY sub-order is counted even if its parent is In Progress.
+      where.isParent = false
     }
 
     if (search) {
