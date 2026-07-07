@@ -1,6 +1,6 @@
 import { prisma } from "../lib/prisma.js"
 import { logger } from "../lib/logger.js"
-import { sendEmail } from "../lib/mailer.js"
+import { sendEmail, sendMany } from "../lib/mailer.js"
 import { triggerNotifications } from "../lib/socket.js"
 
 export async function notifyTranslatorsSourceReady(
@@ -159,11 +159,7 @@ export async function notifyTranslatorsSourceReady(
 
     logger.info({ action: "NOTIFY_SOURCE_READY_SENDING", orderId, recipients: uniqueTranslators.length, changed })
 
-    await Promise.all(
-      uniqueTranslators.map(
-        async (translator) => {
-
-          await sendEmail({
+    const emails = uniqueTranslators.map((translator) => ({
             from:
   "EWC Translations <translations@ewctranslations.org>",
 
@@ -286,10 +282,9 @@ ${orderLink}
 
   </div>
 `,
-          })
-        }
-      )
-    )
+    }))
+
+    await sendMany(emails)
 
   } catch (error) {
     logger.error({ action: "NOTIFY_TRANSLATORS_ERROR", orderId, err: error })
@@ -341,9 +336,7 @@ export async function notifyTranslatorsOrderDeleted(order: any) {
 
     logger.info({ action: "NOTIFY_ORDER_DELETED_SENDING", orderId: order.id, recipients: recipients.length })
 
-    await Promise.all(
-      recipients.map(async (translator) => {
-        await sendEmail({
+    const emails = recipients.map((translator) => ({
           from: "EWC Translations <translations@ewctranslations.org>",
           to: translator.email,
           replyTo: "translations@ewctranslations.org",
@@ -432,9 +425,9 @@ ${order.priority}
 
   </div>
 `,
-        })
-      })
-    )
+    }))
+
+    await sendMany(emails)
   } catch (error) {
     logger.error({ action: "NOTIFY_ORDER_DELETED_ERROR", orderId: order?.id, err: error })
   }
@@ -485,9 +478,7 @@ export async function notifyTranslatorsSourceRemoved(orderId: string) {
 
     logger.info({ action: "NOTIFY_SOURCE_REMOVED_SENDING", orderId, recipients: recipients.length })
 
-    await Promise.all(
-      recipients.map(async (translator) => {
-        await sendEmail({
+    const emails = recipients.map((translator) => ({
           from: "EWC Translations <translations@ewctranslations.org>",
           to: translator.email,
           replyTo: "translations@ewctranslations.org",
@@ -593,9 +584,9 @@ ${orderLink}
 
   </div>
 `,
-        })
-      })
-    )
+    }))
+
+    await sendMany(emails)
   } catch (error) {
     logger.error({ action: "NOTIFY_SOURCE_REMOVED_ERROR", orderId, err: error })
   }

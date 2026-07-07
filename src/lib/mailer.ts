@@ -46,3 +46,41 @@ export async function sendEmail(args: SendArgs) {
   }
   return resend.emails.send(args)
 }
+
+/**
+ * Send many identical-content-but-different-recipient emails efficiently.
+ *
+ * Default: Resend's BATCH endpoint (up to 100 per API call) — turns N per-second
+ * requests into ceil(N/100), so a 50-translator blast is a single request and
+ * can't trip the rate limit.
+ *
+ * Kill switch: set EMAIL_BATCH_ENABLED=false to fall back to the original
+ * per-recipient sends (exactly the pre-batch behavior) with no redeploy.
+ *
+ * Suppressed (non-production) like sendEmail — logs a one-line summary instead of
+ * hitting Resend.
+ */
+export async function sendMany(emails: SendArgs[]) {
+  if (emails.length === 0) return
+
+  if (!emailsEnabled()) {
+    // eslint-disable-next-line no-console
+    console.log(
+      "\n📭 [BATCH SUPPRESSED — non-production]\n" +
+        `   recipients: ${emails.length}\n` +
+        `   subject:    ${emails[0]?.subject ?? "(none)"}\n`
+    )
+    return
+  }
+
+  // Kill switch → original per-recipient behavior.
+  if (process.env.EMAIL_BATCH_ENABLED === "false") {
+    await Promise.all(emails.map((e) => resend.emails.send(e)))
+    return
+  }
+
+  // Batch: Resend allows up to 100 emails per call.
+  for (let i = 0; i < emails.length; i += 100) {
+    await resend.batch.send(emails.slice(i, i + 100) as any)
+  }
+}
