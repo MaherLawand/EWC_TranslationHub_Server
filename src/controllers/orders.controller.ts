@@ -916,7 +916,9 @@ if (
 
     // Only a TEXT SEARCH flattens the list (so a matching sub-order surfaces as
     // its own row). Structured filters keep the grouped, collapsible view.
-    const flatten = !!search
+    const flatten =
+  !!search ||
+  isOrderStatus(status)
 
     // Only constrain to top-level rows when NOT flattening and not an exact-id lookup.
     if (!orderId && !flatten) {
@@ -930,16 +932,8 @@ if (
     //    a sub-order in a differing state (e.g. a READY sub under an IN_PROGRESS
     //    parent) still surfaces its parent.
     if (isOrderStatus(status)) {
-      if (flatten) {
-        where.status = status
-      } else {
-        const statusOr: Prisma.TranslationOrderWhereInput = {
-          OR: [{ status }, { subOrders: { some: { status } } }],
-        }
-        const currentAnd = Array.isArray(where.AND) ? where.AND : where.AND ? [where.AND] : []
-        where.AND = [...currentAnd, statusOr]
-      }
-    }
+  where.status = status
+}
 
     const listSelect = flatten ? listOrderSelectFlat : listOrderSelectGrouped
     const mode = flatten ? "flat" : "grouped"
