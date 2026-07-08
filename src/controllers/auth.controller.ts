@@ -592,7 +592,7 @@ export async function createUser(
     }
     const VALID_ROLES = ["ADMIN", "USER"]
     const VALID_DEPARTMENTS = ["BROADCAST", "MARKETING"]
-    const VALID_POSITIONS = ["PRODUCER", "POST_PRODUCTION_MANAGER", "TRANSLATOR", "VIEWER", "EDITOR"]
+    const VALID_POSITIONS = ["PRODUCER", "POST_PRODUCTION_MANAGER", "TRANSLATOR", "VIEWER", "EDITOR", "VIDEO_EDITOR"]
     if (!VALID_ROLES.includes(role)) {
       return res.status(400).json({ message: "Invalid role" })
     }
@@ -917,7 +917,7 @@ export async function updateUser(
 
     const VALID_ROLES_U = ["ADMIN", "USER"]
     const VALID_DEPARTMENTS_U = ["BROADCAST", "MARKETING"]
-    const VALID_POSITIONS_U = ["PRODUCER", "POST_PRODUCTION_MANAGER", "TRANSLATOR", "VIEWER", "EDITOR"]
+    const VALID_POSITIONS_U = ["PRODUCER", "POST_PRODUCTION_MANAGER", "TRANSLATOR", "VIEWER", "EDITOR", "VIDEO_EDITOR"]
 
     if (role && !VALID_ROLES_U.includes(role)) {
       return res.status(400).json({ message: "Invalid role" })

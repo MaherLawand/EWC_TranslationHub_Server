@@ -1820,29 +1820,6 @@ export async function updateOrder(
       req.params.id
     )
 
-    const {
-      title,
-      notes,
-      status,
-      priority,
-      type,
-      event,
-      game,
-      estimatedMinutes,
-      sourceLanguage,
-      targetLanguages,
-      contentTitle,
-      aspectRatios,
-      deliveryFormats,
-      sourceFileLink,
-      srtAvailableLink,
-      deliveryDate,
-      deadline,
-      deliveries,
-      deliveryType,
-      clientLastEditedAt, // ISO string | null | undefined — optimistic concurrency token
-    } = req.body
-
     /*
       AUTH
     */
@@ -1876,14 +1853,53 @@ export async function updateOrder(
     }
 
     /*
-      PERMISSIONS
+      PERMISSIONS — managers/admin get a full edit. A VIDEO_EDITOR may edit ONLY
+      the source file link and delivery links; every other field is stripped from
+      the body here (server-enforced), so the normal update logic below can only
+      touch those two — while still running the source-added/removed + READY
+      status handling.
     */
 
-    if (!canManageOrders(user)) {
+    const isManager = canManageOrders(user)
+    const isVideoEditor = user.position === "VIDEO_EDITOR"
+    if (!isManager && !isVideoEditor) {
       return res.status(403).json({
         message: "Unauthorized",
       })
     }
+
+    if (isVideoEditor && !isManager) {
+      req.body = {
+        type: req.body.type,
+        sourceFileLink: req.body.sourceFileLink,
+        srtAvailableLink: req.body.srtAvailableLink,
+        deliveries: req.body.deliveries,
+        clientLastEditedAt: req.body.clientLastEditedAt,
+      }
+    }
+
+    const {
+      title,
+      notes,
+      status,
+      priority,
+      type,
+      event,
+      game,
+      estimatedMinutes,
+      sourceLanguage,
+      targetLanguages,
+      contentTitle,
+      aspectRatios,
+      deliveryFormats,
+      sourceFileLink,
+      srtAvailableLink,
+      deliveryDate,
+      deadline,
+      deliveries,
+      deliveryType,
+      clientLastEditedAt, // ISO string | null | undefined — optimistic concurrency token
+    } = req.body
 
     if (!existingOrder) {
       return res.status(404).json({

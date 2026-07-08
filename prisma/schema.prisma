@@ -29,6 +29,7 @@ enum UserPosition {
   TRANSLATOR
   VIEWER
   EDITOR
+  VIDEO_EDITOR
 }
 
 /**
