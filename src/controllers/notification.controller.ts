@@ -157,6 +157,16 @@ export async function notifyTranslatorsSourceReady(
       ? "The source file for this order has been CHANGED. Please use the updated source."
       : "A new source file is available for translation."
 
+    // Languages + deadline for the email body.
+    const detail = order.type === "BROADCAST" ? order.broadcast : order.marketing
+    const sourceLangs = (detail?.sourceLanguage ?? []).join(", ").toUpperCase() || "—"
+    const targetLangs = (detail?.targetLanguages ?? []).join(", ").toUpperCase() || "—"
+    const deadlineText = detail?.deadlineDate
+      ? (detail.deadlineHasTime
+          ? new Date(detail.deadlineDate).toLocaleString("en-GB", { timeZone: "UTC", day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) + " UTC"
+          : new Date(detail.deadlineDate).toLocaleDateString("en-GB", { timeZone: "UTC", day: "2-digit", month: "short", year: "numeric" }))
+      : "—"
+
     logger.info({ action: "NOTIFY_SOURCE_READY_SENDING", orderId, recipients: uniqueTranslators.length, changed })
 
     const emails = uniqueTranslators.map((translator) => ({
@@ -184,6 +194,12 @@ ${
     ? `Game: ${order.broadcast?.game?.name}`
     : `Content: ${order.marketing?.contentTitle || "Marketing Content"}`
 }
+
+Languages:
+${sourceLangs} → ${targetLangs}
+
+Deadline:
+${deadlineText}
 
 Delivery Formats:
 ${
@@ -243,6 +259,14 @@ ${orderLink}
           ? `<p style="margin:0 0 8px 0; color:#8E8E8E; font-size:13px; line-height:1.6;"><strong style="color:#F5F1E8;">Game:</strong> ${order.broadcast?.game?.name}</p>`
           : `<p style="margin:0 0 8px 0; color:#8E8E8E; font-size:13px; line-height:1.6;"><strong style="color:#F5F1E8;">Content:</strong> ${order.marketing?.contentTitle || "Marketing Content"}</p>`
         }
+
+        <p style="margin:0 0 8px 0; color:#8E8E8E; font-size:13px; line-height:1.6;">
+          <strong style="color:#F5F1E8;">Languages:</strong> ${sourceLangs} &rarr; ${targetLangs}
+        </p>
+
+        <p style="margin:0 0 8px 0; color:#8E8E8E; font-size:13px; line-height:1.6;">
+          <strong style="color:#F5F1E8;">Deadline:</strong> ${deadlineText}
+        </p>
 
         <p style="margin:0 0 8px 0; color:#8E8E8E; font-size:13px; line-height:1.6;">
           <strong style="color:#F5F1E8;">Delivery Format:</strong>
