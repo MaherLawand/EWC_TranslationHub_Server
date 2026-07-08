@@ -157,10 +157,15 @@ export async function notifyTranslatorsSourceReady(
       ? "The source file for this order has been CHANGED. Please use the updated source."
       : "A new source file is available for translation."
 
-    // Languages + deadline for the email body.
+    // Languages + deadline + tier for the email body.
     const detail = order.type === "BROADCAST" ? order.broadcast : order.marketing
     const sourceLangs = (detail?.sourceLanguage ?? []).join(", ").toUpperCase() || "—"
     const targetLangs = (detail?.targetLanguages ?? []).join(", ").toUpperCase() || "—"
+    // Tier is broadcast-only (it lives on the game).
+    const gameTier = order.type === "BROADCAST" ? order.broadcast?.game : null
+    const tierText = gameTier
+      ? `Tier ${gameTier.tier}${gameTier.tier1CN ? ", Tier 1 CN" : ""}`
+      : ""
     const deadlineText = detail?.deadlineDate
       ? (detail.deadlineHasTime
           ? new Date(detail.deadlineDate).toLocaleString("en-GB", { timeZone: "UTC", day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) + " UTC"
@@ -194,7 +199,7 @@ ${
     ? `Game: ${order.broadcast?.game?.name}`
     : `Content: ${order.marketing?.contentTitle || "Marketing Content"}`
 }
-
+${order.type === "BROADCAST" ? `\nTier:\n${tierText}\n` : ""}
 Languages:
 ${sourceLangs} → ${targetLangs}
 
@@ -258,6 +263,11 @@ ${orderLink}
         ${order.type === "BROADCAST"
           ? `<p style="margin:0 0 8px 0; color:#8E8E8E; font-size:13px; line-height:1.6;"><strong style="color:#F5F1E8;">Game:</strong> ${order.broadcast?.game?.name}</p>`
           : `<p style="margin:0 0 8px 0; color:#8E8E8E; font-size:13px; line-height:1.6;"><strong style="color:#F5F1E8;">Content:</strong> ${order.marketing?.contentTitle || "Marketing Content"}</p>`
+        }
+
+        ${order.type === "BROADCAST"
+          ? `<p style="margin:0 0 8px 0; color:#8E8E8E; font-size:13px; line-height:1.6;"><strong style="color:#F5F1E8;">Tier:</strong> ${tierText}</p>`
+          : ``
         }
 
         <p style="margin:0 0 8px 0; color:#8E8E8E; font-size:13px; line-height:1.6;">

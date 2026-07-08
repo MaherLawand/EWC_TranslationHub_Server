@@ -191,6 +191,10 @@ model Game {
   // Production tier: 1 = highest, 3 = lowest. New games default to 3.
   tier Int @default(3)
 
+  // Extra "Tier 1 CN" designation — some games carry this ON TOP of their normal
+  // tier. Shown as its own badge in the broadcast table.
+  tier1CN Boolean @default(false)
+
   broadcasts BroadcastDetails[]
 
   assignedUsers GameAssignment[]

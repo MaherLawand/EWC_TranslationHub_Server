@@ -55,6 +55,7 @@ const orderRowFields = {
           name: true,
           logo: true,
           tier: true,
+          tier1CN: true,
         },
       },
     },
@@ -216,6 +217,7 @@ const orderSelectCore = {
           name: true,
           logo: true,
           tier: true,
+          tier1CN: true,
           assignedUsers: {
             select: {
               id: true,
@@ -768,16 +770,21 @@ if (gameId) {
   TIER FILTER (Broadcast only) — isolate orders whose game is a given tier.
 */
 if (tier) {
-  const tierNum = Number(tier)
-  if (!Number.isNaN(tierNum)) {
-    const prevIs =
-      where.broadcast &&
-      typeof where.broadcast === "object" &&
-      "is" in where.broadcast &&
-      where.broadcast.is
-        ? where.broadcast.is
-        : {}
-    where.broadcast = { is: { ...prevIs, game: { is: { tier: tierNum } } } }
+  const prevIs =
+    where.broadcast &&
+    typeof where.broadcast === "object" &&
+    "is" in where.broadcast &&
+    where.broadcast.is
+      ? where.broadcast.is
+      : {}
+  // "cn" → the extra Tier 1 CN designation; otherwise a numeric tier.
+  if (tier === "cn") {
+    where.broadcast = { is: { ...prevIs, game: { is: { tier1CN: true } } } }
+  } else {
+    const tierNum = Number(tier)
+    if (!Number.isNaN(tierNum)) {
+      where.broadcast = { is: { ...prevIs, game: { is: { tier: tierNum } } } }
+    }
   }
 }
 
