@@ -915,10 +915,9 @@ if (
     */
 
     // Only a TEXT SEARCH flattens the list (so a matching sub-order surfaces as
-    // its own row). Structured filters keep the grouped, collapsible view.
-    const flatten =
-  !!search ||
-  isOrderStatus(status)
+    // its own row). Structured filters — including status — keep the grouped,
+    // collapsible view so a big order stays visible + expandable.
+    const flatten = !!search
 
     // Only constrain to top-level rows when NOT flattening and not an exact-id lookup.
     if (!orderId && !flatten) {
@@ -927,15 +926,54 @@ if (
 
     // STATUS filter:
     //  • flat (search): match each order's own status.
-    //  • grouped: show a top-level order if its own status matches OR it has a
-    //    sub-order in that status — so a big order stays visible + expandable and
-    //    a sub-order in a differing state (e.g. a READY sub under an IN_PROGRESS
-    //    parent) still surfaces its parent.
-    if (isOrderStatus(status)) {
-  where.status = status
-}
+    //  • grouped: a big order's own status is a rollup we no longer key on — show
+    //    a top-level order if its OWN status matches (standalone orders) OR it has
+    //    a sub-order in that status (big orders). Below, the parent's sub-order
+    //    COUNT + nearest deadline are narrowed to only the matching sub-orders,
+    //    and getSubOrders filters the expanded rows the same way.
+    const statusActive = isOrderStatus(status)
+    if (statusActive) {
+      if (flatten) {
+        where.status = status as OrderStatus
+      } else {
+        const statusOr: Prisma.TranslationOrderWhereInput = {
+          OR: [
+            { status: status as OrderStatus },
+            { subOrders: { some: { status: status as OrderStatus } } },
+          ],
+        }
+        const currentAnd = Array.isArray(where.AND)
+          ? where.AND
+          : where.AND
+          ? [where.AND]
+          : []
+        where.AND = [...currentAnd, statusOr]
+      }
+    }
 
-    const listSelect = flatten ? listOrderSelectFlat : listOrderSelectGrouped
+    // In grouped mode with an active status filter, narrow the parent's sub-order
+    // COUNT badge and the nearest-deadline sub-select to only the matching
+    // sub-orders (so a big order under "Pending" reflects just its pending subs).
+    const groupedSelect: Prisma.TranslationOrderSelect = statusActive
+      ? {
+          ...listOrderSelectGrouped,
+          _count: {
+            select: {
+              subOrders: { where: { status: status as OrderStatus } },
+              feedback: true,
+            },
+          },
+          subOrders: {
+            where: { status: status as OrderStatus },
+            select: {
+              broadcast: { select: { deadlineDate: true, deadlineHasTime: true } },
+              marketing: { select: { deadlineDate: true, deadlineHasTime: true } },
+            },
+          },
+        }
+      : listOrderSelectGrouped
+
+    const listSelect = flatten ? listOrderSelectFlat : groupedSelect
     const mode = flatten ? "flat" : "grouped"
 
     /*
@@ -1777,9 +1815,13 @@ export async function getSubOrders(
     const limit = Math.min(Math.max(Number(req.query.limit) || 50, 1), 100)
     const skip = (page - 1) * limit
 
+    // Mirror the grouped list's status filter: when a status is active, an
+    // expanded big order shows only its sub-orders in that status.
+    const status = String(req.query.status || "")
     const where: Prisma.TranslationOrderWhereInput = { parentId }
+    if (isOrderStatus(status)) where.status = status
 
-    const cacheKey = `sub-orders:${parentId}:${page}:${limit}`
+    const cacheKey = `sub-orders:${parentId}:${page}:${limit}:${isOrderStatus(status) ? status : "all"}`
     const cached = ordersCache.get(cacheKey)
     if (cached) return res.json(cached)
 
