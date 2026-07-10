@@ -382,6 +382,31 @@ function isStringArray(
   )
 }
 
+// Parse the gameId query param into a list of ids. Accepts repeated params
+// (?gameId=a&gameId=b) OR a single comma-joined value (?gameId=a,b) — the latter
+// is how a whole-week filter is sent so orders/counts span every game that week.
+function parseGameIds(raw: unknown): string[] {
+  const arr = Array.isArray(raw) ? raw : raw != null && raw !== "" ? [raw] : []
+  return arr
+    .flatMap((v) => String(v).split(","))
+    .map((s) => s.trim())
+    .filter(Boolean)
+}
+
+// Build the broadcast game-id where-fragment (single id → equals, many → in),
+// merged onto any existing `broadcast.is` constraints.
+function gameIdBroadcastWhere(
+  gameIds: string[],
+  existing: Prisma.TranslationOrderWhereInput["broadcast"]
+): Prisma.BroadcastDetailsWhereInput {
+  const prevIs =
+    existing && typeof existing === "object" && "is" in existing && existing.is
+      ? existing.is
+      : {}
+  if (gameIds.length === 1) return { ...prevIs, gameId: gameIds[0] }
+  return { ...prevIs, gameId: { in: gameIds } }
+}
+
 function isDeliveryFormat(
   value: unknown
 ): value is DeliveryFormat {
@@ -538,10 +563,8 @@ const assignedOnly =
       ? [String(formatRaw)]
       : []
 
-    const gameId =
-      String(
-        req.query.gameId || ""
-      )
+    // One id (single game) or many (a whole-week filter).
+    const gameIds = parseGameIds(req.query.gameId)
 
     const tier =
       String(
@@ -751,19 +774,8 @@ const existingAnd = Array.isArray(
       GAME FILTER
     */
 
-if (gameId) {
-  where.broadcast = {
-    is: {
-      ...(where.broadcast &&
-      typeof where.broadcast ===
-        "object" &&
-      "is" in where.broadcast &&
-      where.broadcast.is
-        ? where.broadcast.is
-        : {}),
-      gameId,
-    },
-  }
+if (gameIds.length > 0) {
+  where.broadcast = { is: gameIdBroadcastWhere(gameIds, where.broadcast) }
 }
 
 /*
@@ -3340,7 +3352,7 @@ export async function getOrderCounts(
     const priority = String(req.query.priority || "")
     const type = String(req.query.type || "")
     const event = String(req.query.event || "")
-    const gameId = String(req.query.gameId || "")
+    const gameIds = parseGameIds(req.query.gameId)
     const contentTitle = String(req.query.contentTitle || "")
     const orderId = String(req.query.orderId || "")
     const assignedOnly = req.query.assignedOnly === "true"
@@ -3405,15 +3417,8 @@ export async function getOrderCounts(
 
     if (existingAnd.length > 0) where.AND = existingAnd
 
-    if (gameId) {
-      where.broadcast = {
-        is: {
-          ...(where.broadcast && typeof where.broadcast === "object" && "is" in where.broadcast && where.broadcast.is
-            ? where.broadcast.is
-            : {}),
-          gameId,
-        },
-      }
+    if (gameIds.length > 0) {
+      where.broadcast = { is: gameIdBroadcastWhere(gameIds, where.broadcast) }
     }
 
     if (contentTitle) {
