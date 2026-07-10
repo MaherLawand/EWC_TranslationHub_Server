@@ -1721,12 +1721,19 @@ export async function duplicateOrder(req: AuthRequest, res: Response) {
     }
     const newTitle = prefix ? `${prefix} ${max + 1}` : `${max + 1}`
 
+    // A duplicate starts fresh — never inherit the source's status (which may be
+    // Completed): Ready for Translation when it has a source file, else Pending.
+    const dupSourceLink = (source.broadcast?.sourceFileLink ?? source.marketing?.sourceFileLink ?? "").trim()
+    const dupStatus = dupSourceLink
+      ? OrderStatus.READY_FOR_TRANSLATION
+      : OrderStatus.PENDING
+
     const data: any = {
       title: newTitle,
       notes: source.notes ?? null,
       type: source.type,
       event: source.event,
-      status: source.status,
+      status: dupStatus,
       priority: source.priority,
       createdById: user.id,
       isParent: false,
