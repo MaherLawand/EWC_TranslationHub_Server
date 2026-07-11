@@ -3460,17 +3460,39 @@ export async function getOrderCounts(
     const cachedCounts = ordersCache.get(countsCacheKey)
     if (cachedCounts) return res.json(cachedCounts)
 
-    const groups = await prisma.translationOrder.groupBy({
-      by: ["status"],
-      _count: { _all: true },
-      where,
-    })
+    const [groups, videoRows] = await Promise.all([
+      prisma.translationOrder.groupBy({
+        by: ["status"],
+        _count: { _all: true },
+        where,
+      }),
+      // Every matching work unit's target languages (parents already excluded via
+      // where.isParent=false). Total Videos = sum of all target-language counts.
+      prisma.translationOrder.findMany({
+        where,
+        select: {
+          broadcast: { select: { targetLanguages: true } },
+          marketing: { select: { targetLanguages: true } },
+        },
+      }),
+    ])
 
-    const counts = { PENDING: 0, READY_FOR_TRANSLATION: 0, IN_PROGRESS: 0, COMPLETED: 0, total: 0 }
+    const counts = {
+      PENDING: 0,
+      READY_FOR_TRANSLATION: 0,
+      IN_PROGRESS: 0,
+      COMPLETED: 0,
+      total: 0,
+      totalVideos: 0,
+    }
     for (const g of groups) {
-      const key = g.status as keyof Omit<typeof counts, "total">
+      const key = g.status as keyof Omit<typeof counts, "total" | "totalVideos">
       if (key in counts) counts[key] = g._count._all
       counts.total += g._count._all
+    }
+    for (const r of videoRows) {
+      const langs = r.broadcast?.targetLanguages ?? r.marketing?.targetLanguages ?? []
+      counts.totalVideos += langs.length
     }
 
     ordersCache.set(countsCacheKey, counts, 5_000) // 5s TTL
