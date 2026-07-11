@@ -15,14 +15,20 @@ interface BasePayload {
   action: string
   /** The authenticated user performing the action (req.userId) */
   userId?: string
+  /** "First Last" of the authenticated user (req.userName) — human-readable actor */
+  userName?: string
   [key: string]: unknown
 }
 
 function emit(level: Level, payload: BasePayload & { err?: unknown }): void {
   const { err, ...rest } = payload
 
+  const now = new Date()
   const entry: Record<string, unknown> = {
-    ts: new Date().toISOString(),
+    // ISO instant (sortable/machine) + a human-readable local time so every log
+    // line clearly shows WHEN it happened without decoding the ISO string.
+    ts: now.toISOString(),
+    time: now.toLocaleString("en-GB", { timeZone: "UTC", hour12: false }) + " UTC",
     level,
     ...rest,
   }

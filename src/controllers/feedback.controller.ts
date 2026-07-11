@@ -192,7 +192,7 @@ export async function getOrderFeedback(req: AuthRequest, res: Response) {
 
     return res.json(mapped)
   } catch (error) {
-    logger.error({ action: "GET_FEEDBACK_ERROR", userId: req.userId, orderId: req.params.id, err: error })
+    logger.error({ action: "GET_FEEDBACK_ERROR", userId: req.userId, userName: req.userName, orderId: req.params.id, err: error })
     return res.status(500).json({ message: "Failed to load feedback" })
   }
 }
@@ -208,13 +208,13 @@ export async function markFeedbackRead(req: AuthRequest, res: Response) {
     if (ids.length === 0) return res.json({ marked: 0 })
 
     const result = await prisma.feedbackRead.createMany({
-      data: ids.map((feedbackId: string) => ({ feedbackId, userId: req.userId! })),
+      data: ids.map((feedbackId: string) => ({ feedbackId, userId: req.userId })),
       skipDuplicates: true,
     })
 
     return res.json({ marked: result.count })
   } catch (error) {
-    logger.error({ action: "MARK_FEEDBACK_READ_ERROR", userId: req.userId, err: error })
+    logger.error({ action: "MARK_FEEDBACK_READ_ERROR", userId: req.userId, userName: req.userName, err: error })
     return res.status(500).json({ message: "Failed to mark feedback read" })
   }
 }
@@ -244,7 +244,7 @@ export async function getUnreadFeedbackCounts(req: AuthRequest, res: Response) {
     for (const g of grouped) counts[g.orderId] = g._count._all
     return res.json(counts)
   } catch (error) {
-    logger.error({ action: "UNREAD_FEEDBACK_COUNTS_ERROR", userId: req.userId, err: error })
+    logger.error({ action: "UNREAD_FEEDBACK_COUNTS_ERROR", userId: req.userId, userName: req.userName, err: error })
     return res.status(500).json({ message: "Failed to load unread counts" })
   }
 }
@@ -287,7 +287,7 @@ export async function createOrderFeedback(req: AuthRequest, res: Response) {
       select: feedbackSelect,
     })
 
-    logger.info({ action: "CREATE_FEEDBACK", userId: req.userId, orderId, feedbackId: feedback.id, length: message.length })
+    logger.info({ action: "CREATE_FEEDBACK", userId: req.userId, userName: req.userName, orderId, feedbackId: feedback.id, length: message.length })
 
     res.json(feedback)
 
@@ -297,7 +297,7 @@ export async function createOrderFeedback(req: AuthRequest, res: Response) {
     try { getIo()?.emit("order-feedback", { orderId }) } catch {}
     return
   } catch (error) {
-    logger.error({ action: "CREATE_FEEDBACK_ERROR", userId: req.userId, orderId: req.params.id, err: error })
+    logger.error({ action: "CREATE_FEEDBACK_ERROR", userId: req.userId, userName: req.userName, orderId: req.params.id, err: error })
     return res.status(500).json({ message: "Failed to add feedback" })
   }
 }
@@ -327,12 +327,12 @@ export async function updateOrderFeedback(req: AuthRequest, res: Response) {
       select: feedbackSelect,
     })
 
-    logger.info({ action: "UPDATE_FEEDBACK", userId: req.userId, feedbackId, orderId: existing.orderId })
+    logger.info({ action: "UPDATE_FEEDBACK", userId: req.userId, userName: req.userName, feedbackId, orderId: existing.orderId })
     res.json(feedback)
     try { getIo()?.emit("order-feedback", { orderId: existing.orderId }) } catch {}
     return
   } catch (error) {
-    logger.error({ action: "UPDATE_FEEDBACK_ERROR", userId: req.userId, feedbackId: req.params.feedbackId, err: error })
+    logger.error({ action: "UPDATE_FEEDBACK_ERROR", userId: req.userId, userName: req.userName, feedbackId: req.params.feedbackId, err: error })
     return res.status(500).json({ message: "Failed to update feedback" })
   }
 }
@@ -354,12 +354,12 @@ export async function deleteOrderFeedback(req: AuthRequest, res: Response) {
 
     await prisma.orderFeedback.delete({ where: { id: feedbackId } })
 
-    logger.info({ action: "DELETE_FEEDBACK", userId: req.userId, feedbackId, orderId: existing.orderId })
+    logger.info({ action: "DELETE_FEEDBACK", userId: req.userId, userName: req.userName, feedbackId, orderId: existing.orderId })
     res.json({ message: "Feedback deleted" })
     try { getIo()?.emit("order-feedback", { orderId: existing.orderId }) } catch {}
     return
   } catch (error) {
-    logger.error({ action: "DELETE_FEEDBACK_ERROR", userId: req.userId, feedbackId: req.params.feedbackId, err: error })
+    logger.error({ action: "DELETE_FEEDBACK_ERROR", userId: req.userId, userName: req.userName, feedbackId: req.params.feedbackId, err: error })
     return res.status(500).json({ message: "Failed to delete feedback" })
   }
 }

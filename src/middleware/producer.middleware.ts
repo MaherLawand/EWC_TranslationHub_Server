@@ -51,7 +51,7 @@ export async function requireProducer(
     next()
 
   } catch (error) {
-    logger.error({ action: "PRODUCER_MIDDLEWARE_ERROR", userId: req.userId, err: error })
+    logger.error({ action: "PRODUCER_MIDDLEWARE_ERROR", userId: req.userId, userName: req.userName, err: error })
 
     return res.status(500).json({
       message:

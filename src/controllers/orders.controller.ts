@@ -1064,7 +1064,7 @@ if (
 
   } catch (error) {
 
-    logger.error({ action: "GET_ORDERS_ERROR", userId: req.userId, err: error })
+    logger.error({ action: "GET_ORDERS_ERROR", userId: req.userId, userName: req.userName, err: error })
 
     return res.status(500).json({
       message:
@@ -1116,7 +1116,7 @@ export async function getOrderById(
 
     return res.json({ ...order, editHistory })
   } catch (error) {
-    logger.error({ action: "GET_ORDER_BY_ID_ERROR", userId: req.userId, orderId: req.params.id, err: error })
+    logger.error({ action: "GET_ORDER_BY_ID_ERROR", userId: req.userId, userName: req.userName, orderId: req.params.id, err: error })
     return res.status(500).json({ message: "Failed to fetch order" })
   }
 }
@@ -1436,7 +1436,7 @@ export async function createOrder(
       await recomputeParentStatus(parentId)
     }
 
-    logger.info({ action: "CREATE_ORDER", userId: req.userId, orderId: order.id, type: order.type, title: order.title, event: order.event, priority: order.priority })
+    logger.info({ action: "CREATE_ORDER", userId: req.userId, userName: req.userName, orderId: order.id, type: order.type, title: order.title, event: order.event, priority: order.priority })
 
     ordersCache.invalidate()
     try { getIo()?.emit("order-created", { type: order.type }) } catch {}
@@ -1444,7 +1444,7 @@ export async function createOrder(
 
   } catch (error) {
 
-    logger.error({ action: "CREATE_ORDER_ERROR", userId: req.userId, err: error })
+    logger.error({ action: "CREATE_ORDER_ERROR", userId: req.userId, userName: req.userName, err: error })
 
     return res.status(500).json({
       message:
@@ -1647,14 +1647,14 @@ export async function createSubOrders(
       select: listOrderSelectGrouped,
     })
 
-    logger.info({ action: "CREATE_SUB_ORDERS", userId: req.userId, parentId, count: builts.length })
+    logger.info({ action: "CREATE_SUB_ORDERS", userId: req.userId, userName: req.userName, parentId, count: builts.length })
 
     ordersCache.invalidate()
     try { getIo()?.emit("order-created", { type: parent.type }) } catch {}
 
     return res.json(updatedParent)
   } catch (error) {
-    logger.error({ action: "CREATE_SUB_ORDERS_ERROR", userId: req.userId, parentId: req.params.id, err: error })
+    logger.error({ action: "CREATE_SUB_ORDERS_ERROR", userId: req.userId, userName: req.userName, parentId: req.params.id, err: error })
     return res.status(500).json({ message: "Failed to create sub-orders" })
   }
 }
@@ -1799,7 +1799,7 @@ export async function duplicateOrder(req: AuthRequest, res: Response) {
 
     const created = await prisma.translationOrder.create({ data, select: orderRowFields })
 
-    logger.info({ action: "DUPLICATE_SUB_ORDER", userId: req.userId, sourceId, parentId: source.parentId, newId: created.id, title: newTitle })
+    logger.info({ action: "DUPLICATE_SUB_ORDER", userId: req.userId, userName: req.userName, sourceId, parentId: source.parentId, newId: created.id, title: newTitle })
 
     // Roll the new sub-order into the parent (status + nearest deadline) and
     // refresh lists.
@@ -1814,7 +1814,7 @@ export async function duplicateOrder(req: AuthRequest, res: Response) {
 
     return res.json(created)
   } catch (error) {
-    logger.error({ action: "DUPLICATE_SUB_ORDER_ERROR", userId: req.userId, sourceId: req.params.id, err: error })
+    logger.error({ action: "DUPLICATE_SUB_ORDER_ERROR", userId: req.userId, userName: req.userName, sourceId: req.params.id, err: error })
     return res.status(500).json({ message: "Failed to duplicate sub-order" })
   }
 }
@@ -1867,7 +1867,7 @@ export async function getSubOrders(
 
     return res.json(result)
   } catch (error) {
-    logger.error({ action: "GET_SUB_ORDERS_ERROR", userId: req.userId, parentId: req.params.id, err: error })
+    logger.error({ action: "GET_SUB_ORDERS_ERROR", userId: req.userId, userName: req.userName, parentId: req.params.id, err: error })
     return res.status(500).json({ message: "Failed to fetch sub-orders" })
   }
 }
@@ -2544,7 +2544,7 @@ if (
   }) // end prisma.$transaction
 } catch (txError: any) {
   if (txError?.__conflict === true) {
-    logger.warn({ action: "UPDATE_ORDER_CONFLICT", userId: req.userId, orderId })
+    logger.warn({ action: "UPDATE_ORDER_CONFLICT", userId: req.userId, userName: req.userName, orderId })
     return res.status(409).json({
       message: "This order was recently modified by someone else. Please refresh and try again.",
     })
@@ -2554,7 +2554,7 @@ if (
     txError.code === "P2034"
   ) {
     // PostgreSQL serialization failure — two writers hit the exact same row concurrently
-    logger.warn({ action: "UPDATE_ORDER_SERIALIZATION_CONFLICT", userId: req.userId, orderId })
+    logger.warn({ action: "UPDATE_ORDER_SERIALIZATION_CONFLICT", userId: req.userId, userName: req.userName, orderId })
     return res.status(409).json({
       message: "This order was recently modified by someone else. Please refresh and try again.",
     })
@@ -2631,7 +2631,7 @@ const sourceWasRemoved =
 
     const changes = diffOrders(existingOrder, updatedOrder)
     logger.info({
-      action: "UPDATE_ORDER", userId: req.userId, orderId,
+      action: "UPDATE_ORDER", userId: req.userId, userName: req.userName, orderId,
       type: updatedOrder?.type, title: updatedOrder?.title,
       changes, sourceChanged: sourceWasChanged,
     })
@@ -2657,7 +2657,7 @@ const sourceWasRemoved =
 
   } catch (error) {
 
-    logger.error({ action: "UPDATE_ORDER_ERROR", userId: req.userId, orderId: req.params.id, err: error })
+    logger.error({ action: "UPDATE_ORDER_ERROR", userId: req.userId, userName: req.userName, orderId: req.params.id, err: error })
 
     return res.status(500).json({
       message:
@@ -2808,7 +2808,7 @@ if (
       RESPOND IMMEDIATELY — notifications fire in the background
     */
 
-    logger.info({ action: "UPDATE_ORDER_STATUS", userId: req.userId, orderId, title: existingOrder.title, from: existingOrder.status, to: parsedStatus })
+    logger.info({ action: "UPDATE_ORDER_STATUS", userId: req.userId, userName: req.userName, orderId, title: existingOrder.title, from: existingOrder.status, to: parsedStatus })
 
     ordersCache.invalidate()
     try { getIo()?.emit("order-patched", { id: updatedOrder.id, type: updatedOrder.type, status: updatedOrder.status }) } catch {}
@@ -2979,7 +2979,7 @@ if (
 
   } catch (error) {
 
-    logger.error({ action: "UPDATE_ORDER_STATUS_ERROR", userId: req.userId, orderId: req.params.id, err: error })
+    logger.error({ action: "UPDATE_ORDER_STATUS_ERROR", userId: req.userId, userName: req.userName, orderId: req.params.id, err: error })
 
     return res.status(500).json({
       message:
@@ -3017,7 +3017,7 @@ export async function markNotificationsAsRead(
 
   } catch (error) {
 
-    logger.error({ action: "MARK_NOTIFICATIONS_READ_ERROR", userId: req.userId, err: error })
+    logger.error({ action: "MARK_NOTIFICATIONS_READ_ERROR", userId: req.userId, userName: req.userName, err: error })
 
     return res.status(500).json({
       message:
@@ -3210,7 +3210,7 @@ export async function assignUsersToMarketingOrder(
         select: orderSelect,
       })
 
-    logger.info({ action: "ASSIGN_USERS_TO_ORDER", userId: req.userId, orderId, orderTitle: order.title, count: userIds.length, userIds })
+    logger.info({ action: "ASSIGN_USERS_TO_ORDER", userId: req.userId, userName: req.userName, orderId, orderTitle: order.title, count: userIds.length, userIds })
 
     ordersCache.invalidate()
     try { getIo()?.emit("order-patched", { id: orderId, type: order.type }) } catch {}
@@ -3218,7 +3218,7 @@ export async function assignUsersToMarketingOrder(
 
   } catch (error) {
 
-    logger.error({ action: "ASSIGN_USERS_TO_ORDER_ERROR", userId: req.userId, orderId: req.params.id, err: error })
+    logger.error({ action: "ASSIGN_USERS_TO_ORDER_ERROR", userId: req.userId, userName: req.userName, orderId: req.params.id, err: error })
 
     return res.status(500).json({
       message:
@@ -3294,7 +3294,7 @@ export async function deleteOrder(
       select: { id: true, type: true, parentId: true, title: true },
     })
 
-    logger.info({ action: "DELETE_ORDER", userId: req.userId, orderId, deleted: orderSnapshot(fullOrder) })
+    logger.info({ action: "DELETE_ORDER", userId: req.userId, userName: req.userName, orderId, deleted: orderSnapshot(fullOrder) })
 
     ordersCache.invalidate()
     try { getIo()?.emit("order-deleted", { id: deleted.id, type: deleted.type }) } catch {}
@@ -3336,7 +3336,7 @@ export async function deleteOrder(
       })
     }
 
-    logger.error({ action: "DELETE_ORDER_ERROR", userId: req.userId, orderId: req.params.id, err: error })
+    logger.error({ action: "DELETE_ORDER_ERROR", userId: req.userId, userName: req.userName, orderId: req.params.id, err: error })
 
     return res.status(500).json({
       message:
@@ -3499,7 +3499,7 @@ export async function getOrderCounts(
 
     return res.json(counts)
   } catch (error) {
-    logger.error({ action: "GET_ORDER_COUNTS_ERROR", userId: req.userId, err: error })
+    logger.error({ action: "GET_ORDER_COUNTS_ERROR", userId: req.userId, userName: req.userName, err: error })
     return res.status(500).json({ message: "Failed to get order counts" })
   }
 }

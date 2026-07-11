@@ -48,7 +48,7 @@ export async function requireAdmin(
     next()
 
   } catch (error) {
-    logger.error({ action: "ADMIN_MIDDLEWARE_ERROR", userId: req.userId, err: error })
+    logger.error({ action: "ADMIN_MIDDLEWARE_ERROR", userId: req.userId, userName: req.userName, err: error })
 
     return res.status(500).json({
       message:

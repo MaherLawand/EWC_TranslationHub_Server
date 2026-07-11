@@ -4,6 +4,8 @@ import { prisma } from "../lib/prisma.js"
 
 export interface AuthRequest extends Request {
   userId?: string
+  /** "First Last" of the authenticated user — attached for human-readable logs. */
+  userName?: string
 }
 
 export async function requireAuth(
@@ -28,7 +30,7 @@ export async function requireAuth(
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
-      select: { isActive: true },
+      select: { isActive: true, firstName: true, lastName: true },
     })
 
     if (!user || !user.isActive) {
@@ -38,6 +40,8 @@ export async function requireAuth(
     }
 
     req.userId = decoded.userId
+    // Human-readable actor name for logs (falls back to the id if unnamed).
+    req.userName = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || decoded.userId
 
     next()
   } catch {

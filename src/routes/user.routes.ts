@@ -45,7 +45,7 @@ router.get(
 
       return res.json(user)
     } catch (error) {
-      logger.error({ action: "GET_ME_ERROR", userId: req.userId, err: error })
+      logger.error({ action: "GET_ME_ERROR", userId: req.userId, userName: req.userName, err: error })
 
       return res.status(500).json({
         message:
@@ -85,7 +85,7 @@ router.get(
 
       return res.json(users)
     } catch (error) {
-      logger.error({ action: "GET_ALL_USERS_ERROR", userId: req.userId, err: error })
+      logger.error({ action: "GET_ALL_USERS_ERROR", userId: req.userId, userName: req.userName, err: error })
 
       return res.status(500).json({
         message:

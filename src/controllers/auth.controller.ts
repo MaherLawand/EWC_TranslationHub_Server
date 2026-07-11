@@ -103,7 +103,7 @@ export async function setPassword(
       },
     })
 
-    logger.info({ action: "SET_PASSWORD", userId: user.id, email: user.email })
+    logger.info({ action: "SET_PASSWORD", userId: user.id, userName: `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim(), email: user.email })
 
     return res.json({
       message:
@@ -232,7 +232,7 @@ export async function login(
       })
     }
     if (!user.isActive) {
-      logger.warn({ action: "LOGIN_FAILED", email, userId: user.id, reason: "account_inactive" })
+      logger.warn({ action: "LOGIN_FAILED", email, userId: user.id, userName: `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim(), reason: "account_inactive" })
       return res.status(403).json({
         message: "Account not activated yet",
       })
@@ -245,7 +245,7 @@ export async function login(
 
     if (!validPassword) {
       const { failures, locked } = await loginAttempts.recordFailure(email)
-      logger.warn({ action: "LOGIN_FAILED", email, userId: user.id, reason: "wrong_password", failures })
+      logger.warn({ action: "LOGIN_FAILED", email, userId: user.id, userName: `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim(), reason: "wrong_password", failures })
       if (locked) {
         logger.info({ action: "LOCKOUT_EMAIL_SENDING", email: user.email })
         sendLockoutEmail(user.email)
@@ -275,7 +275,7 @@ export async function login(
     })
 
     await loginAttempts.clear(email)
-    logger.info({ action: "LOGIN", userId: user.id, email: user.email, role: user.role })
+    logger.info({ action: "LOGIN", userId: user.id, userName: `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim(), email: user.email, role: user.role })
 
     return res.json({
       message: "Login successful",
@@ -867,7 +867,7 @@ lastName: true,
     },
   })
 
-    logger.info({ action: "CREATE_USER", byUserId: req.userId, newUserId: user.id, email: user.email, role: user.role, department: user.department, position: user.position })
+    logger.info({ action: "CREATE_USER", byUserId: req.userId, byUserName: req.userName, newUserId: user.id, email: user.email, role: user.role, department: user.department, position: user.position })
 
     return res.json({
   ...user,
@@ -876,7 +876,7 @@ lastName: true,
 })
 
   } catch (error) {
-    logger.error({ action: "CREATE_USER_ERROR", byUserId: req.userId, err: error })
+    logger.error({ action: "CREATE_USER_ERROR", byUserId: req.userId, byUserName: req.userName, err: error })
 
     return res.status(500).json({
       message:
@@ -1187,7 +1187,7 @@ If you did not expect this invitation, you can safely ignore this email.
       if (
         emailResponse.error
       ) {
-        logger.error({ action: "UPDATE_USER_EMAIL_FAILED", byUserId: req.userId, targetUserId: id, err: emailResponse.error })
+        logger.error({ action: "UPDATE_USER_EMAIL_FAILED", byUserId: req.userId, byUserName: req.userName, targetUserId: id, err: emailResponse.error })
 
         return res.status(500).json({
           message:
@@ -1233,7 +1233,7 @@ lastName: true,
     const userChangedFields = Object.entries({ firstName, lastName, email, role, department, position })
       .filter(([, v]) => v !== undefined)
       .map(([k]) => k)
-    logger.info({ action: "UPDATE_USER", byUserId: req.userId, targetUserId: updatedUser.id, email: updatedUser.email, role: updatedUser.role, changedFields: userChangedFields })
+    logger.info({ action: "UPDATE_USER", byUserId: req.userId, byUserName: req.userName, targetUserId: updatedUser.id, email: updatedUser.email, role: updatedUser.role, changedFields: userChangedFields })
 
     return res.json({
   ...updatedUser,
@@ -1247,7 +1247,7 @@ lastName: true,
       return res.status(400).json({ message: "Email already in use" })
     }
 
-    logger.error({ action: "UPDATE_USER_ERROR", byUserId: req.userId, err: error })
+    logger.error({ action: "UPDATE_USER_ERROR", byUserId: req.userId, byUserName: req.userName, err: error })
 
     return res.status(500).json({
       message:
@@ -1285,7 +1285,7 @@ export async function deleteUser(
       },
     })
 
-    logger.info({ action: "DELETE_USER", byUserId: req.userId, targetUserId: id })
+    logger.info({ action: "DELETE_USER", byUserId: req.userId, byUserName: req.userName, targetUserId: id })
 
     return res.json({
       message:
@@ -1293,7 +1293,7 @@ export async function deleteUser(
     })
 
   } catch (error) {
-    logger.error({ action: "DELETE_USER_ERROR", byUserId: req.userId, targetUserId: req.params.id, err: error })
+    logger.error({ action: "DELETE_USER_ERROR", byUserId: req.userId, byUserName: req.userName, targetUserId: req.params.id, err: error })
 
     return res.status(500).json({
       message:
@@ -1410,14 +1410,14 @@ export async function assignGamesToUser(
       ),
     ])
 
-    logger.info({ action: "ASSIGN_GAMES_TO_USER", byUserId: req.userId, targetUserId: userId, gameIds: gameIds ?? [] })
+    logger.info({ action: "ASSIGN_GAMES_TO_USER", byUserId: req.userId, byUserName: req.userName, targetUserId: userId, gameIds: gameIds ?? [] })
 
     return res.json({
       message:
         "Games assigned successfully",
     })
   } catch (error) {
-    logger.error({ action: "ASSIGN_GAMES_TO_USER_ERROR", byUserId: req.userId, targetUserId: req.params.id, err: error })
+    logger.error({ action: "ASSIGN_GAMES_TO_USER_ERROR", byUserId: req.userId, byUserName: req.userName, targetUserId: req.params.id, err: error })
 
     return res.status(500).json({
       message:
