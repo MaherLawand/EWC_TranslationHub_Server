@@ -1,0 +1,1 @@
+npx tsx prisma/scripts/daily-report-google-sheets.ts

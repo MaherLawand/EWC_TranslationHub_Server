@@ -2,6 +2,8 @@
 # but keep the folder, its README, and this file in git.
 *.csv
 *.xlsx
+# Google service-account credentials — SECRET, never commit.
+*.json
 !.gitkeep
 !README.md
 !.gitignore
