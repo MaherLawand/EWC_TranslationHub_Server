@@ -3035,6 +3035,59 @@ if (parsedStatus === OrderStatus.IN_PROGRESS) updateData.inProgressAt = new Date
   }
 }
 
+/*
+  Quick-edit a broadcast order's content category (admin-only, from the table).
+  Emits an in-place `order-patched` carrying contentCategory so clients patch
+  just that row — no full re-fetch (mirrors the status update).
+*/
+export async function updateOrderContentCategory(
+  req: AuthRequest,
+  res: Response
+) {
+  try {
+    if (!req.userId) return res.status(401).json({ message: "Unauthorized" })
+
+    const user = await prisma.user.findUnique({
+      where: { id: req.userId },
+      select: { id: true, role: true, position: true },
+    })
+    if (!user) return res.status(404).json({ message: "User not found" })
+    // Admin-only quick edit.
+    if (user.role !== UserRole.ADMIN) {
+      return res.status(403).json({ message: "Unauthorized" })
+    }
+
+    const orderId = String(req.params.id)
+    const category = req.body?.contentCategory
+    if (!isContentCategory(category)) {
+      return res.status(400).json({ message: "Content category is required" })
+    }
+
+    const existing = await prisma.translationOrder.findUnique({
+      where: { id: orderId },
+      select: { id: true, type: true, broadcast: { select: { id: true } } },
+    })
+    if (!existing || !existing.broadcast) {
+      return res.status(404).json({ message: "Broadcast order not found" })
+    }
+
+    await prisma.translationOrder.update({
+      where: { id: orderId },
+      data: { broadcast: { update: { contentCategory: category } } },
+    })
+
+    logger.info({ action: "UPDATE_CONTENT_CATEGORY", userId: req.userId, userName: req.userName, orderId, contentCategory: category })
+
+    ordersCache.invalidate()
+    try { getIo()?.emit("order-patched", { id: orderId, type: existing.type, contentCategory: category }) } catch {}
+
+    return res.json({ id: orderId, type: existing.type, contentCategory: category })
+  } catch (error) {
+    logger.error({ action: "UPDATE_CONTENT_CATEGORY_ERROR", userId: req.userId, userName: req.userName, orderId: req.params.id, err: error })
+    return res.status(500).json({ message: "Failed to update content category" })
+  }
+}
+
 export async function markNotificationsAsRead(
   req: AuthRequest,
   res: Response

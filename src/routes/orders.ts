@@ -17,6 +17,7 @@ import {
   markNotificationsAsRead,
   updateOrder,
   updateOrderStatus,
+  updateOrderContentCategory,
 } from "../controllers/orders.controller.js"
 
 import {
@@ -86,6 +87,12 @@ router.patch(
   "/:id/status",
   requireAuth,
   updateOrderStatus
+)
+
+router.patch(
+  "/:id/content-category",
+  requireAuth,
+  updateOrderContentCategory
 )
 
 router.patch(
