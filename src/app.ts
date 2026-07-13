@@ -59,7 +59,11 @@ app.use("/auth", authRoutes)
 
 app.use("/users", apiLimiter, userRoutes)
 
-app.use("/orders", apiLimiter, orderRoutes)
+// Orders are NOT rate-limited: the dashboard is chatty (list + counts +
+// sub-orders + feedback + live patches per session), and hitting the cap made
+// GET /orders return 429 → the table showed no orders. All order routes are
+// still behind requireAuth.
+app.use("/orders", orderRoutes)
 
 app.use("/games", apiLimiter, gameRoutes)
 

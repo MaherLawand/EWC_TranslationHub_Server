@@ -3065,7 +3065,7 @@ export async function updateOrderContentCategory(
 
     const existing = await prisma.translationOrder.findUnique({
       where: { id: orderId },
-      select: { id: true, type: true, broadcast: { select: { id: true } } },
+      select: { id: true, type: true, isParent: true, broadcast: { select: { id: true } } },
     })
     if (!existing || !existing.broadcast) {
       return res.status(404).json({ message: "Broadcast order not found" })
@@ -3076,12 +3076,21 @@ export async function updateOrderContentCategory(
       data: { broadcast: { update: { contentCategory: category } } },
     })
 
-    logger.info({ action: "UPDATE_CONTENT_CATEGORY", userId: req.userId, userName: req.userName, orderId, contentCategory: category })
+    // Big order → cascade the category to every sub-order so they stay in sync.
+    if (existing.isParent) {
+      await prisma.broadcastDetails.updateMany({
+        where: { order: { parentId: orderId } },
+        data: { contentCategory: category },
+      })
+    }
+
+    logger.info({ action: "UPDATE_CONTENT_CATEGORY", userId: req.userId, userName: req.userName, orderId, contentCategory: category, cascaded: existing.isParent })
 
     ordersCache.invalidate()
-    try { getIo()?.emit("order-patched", { id: orderId, type: existing.type, contentCategory: category }) } catch {}
+    // cascaded flag → clients reload the expanded parent's sub-order rows.
+    try { getIo()?.emit("order-patched", { id: orderId, type: existing.type, contentCategory: category, cascaded: existing.isParent }) } catch {}
 
-    return res.json({ id: orderId, type: existing.type, contentCategory: category })
+    return res.json({ id: orderId, type: existing.type, contentCategory: category, cascaded: existing.isParent })
   } catch (error) {
     logger.error({ action: "UPDATE_CONTENT_CATEGORY_ERROR", userId: req.userId, userName: req.userName, orderId: req.params.id, err: error })
     return res.status(500).json({ message: "Failed to update content category" })
