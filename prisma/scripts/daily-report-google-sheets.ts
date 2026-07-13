@@ -136,7 +136,7 @@ function utcTimestamp(value?: string | Date | null): string {
   if (!value) return ""
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return String(value)
-  return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}:${pad(date.getUTCSeconds())} UTC`
+  return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())} UTC`
 }
 
 function utcDay(value: string): string {
