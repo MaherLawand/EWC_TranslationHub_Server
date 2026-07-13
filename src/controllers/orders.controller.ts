@@ -15,6 +15,7 @@ import { ordersCache } from "../lib/ordersCache.js"
 import {
   Prisma,
   DeliveryFormat,
+  ContentCategory,
   OrderStatus,
   OrderPriority,
   OrderType,
@@ -43,6 +44,7 @@ const orderRowFields = {
       deadlineDate: true,
       deadlineHasTime: true,
       deliveryType: true,
+      contentCategory: true,
       deliveryFormats: {
         select: {
           id: true,
@@ -141,6 +143,9 @@ const orderSelectCore = {
 
   completedAt: true,
 
+  readyAt: true,
+  inProgressAt: true,
+
   lastEditedAt: true,
 
   sourceChangedAt: true,
@@ -211,6 +216,7 @@ const orderSelectCore = {
       deadlineDate: true,
       deadlineHasTime: true,
       deliveryType: true,
+      contentCategory: true,
       game: {
         select: {
           id: true,
@@ -487,8 +493,13 @@ const DELIVERY_FORMATS =
   const ORDER_PRIORITY =
   Object.values(OrderPriority)
 
-  const ORDER_TYPE = 
+  const ORDER_TYPE =
   Object.values(OrderType)
+
+const CONTENT_CATEGORIES = Object.values(ContentCategory)
+function isContentCategory(value: unknown): value is ContentCategory {
+  return CONTENT_CATEGORIES.includes(value as ContentCategory)
+}
 
 
 export async function getOrders(
@@ -1131,10 +1142,10 @@ export async function recomputeParentStatus(
 ) {
   if (!parentId) return
 
-  const subs = await prisma.translationOrder.findMany({
-    where: { parentId },
-    select: { status: true },
-  })
+  const [parent, subs] = await Promise.all([
+    prisma.translationOrder.findUnique({ where: { id: parentId }, select: { status: true } }),
+    prisma.translationOrder.findMany({ where: { parentId }, select: { status: true } }),
+  ])
 
   if (subs.length === 0) return undefined
 
@@ -1153,15 +1164,20 @@ export async function recomputeParentStatus(
     ? OrderStatus.READY_FOR_TRANSLATION
     : OrderStatus.PENDING
 
-  await prisma.translationOrder.update({
-    where: { id: parentId },
-    data: {
-      status: newStatus,
-      ...(newStatus === OrderStatus.COMPLETED
-        ? { completedAt: new Date() }
-        : { completedAt: null, completedById: null }),
-    },
-  })
+  // Only stamp a transition timestamp when the parent's status actually CHANGES
+  // into that stage (so it isn't reset every time a sub-order updates).
+  const changed = parent?.status !== newStatus
+  const data: any = { status: newStatus }
+  if (newStatus === OrderStatus.COMPLETED) {
+    if (changed) data.completedAt = new Date()
+  } else {
+    data.completedAt = null
+    data.completedById = null
+  }
+  if (changed && newStatus === OrderStatus.READY_FOR_TRANSLATION) data.readyAt = new Date()
+  if (changed && newStatus === OrderStatus.IN_PROGRESS) data.inProgressAt = new Date()
+
+  await prisma.translationOrder.update({ where: { id: parentId }, data })
 
   return newStatus
 }
@@ -1223,6 +1239,7 @@ function buildOrderData(
     deliveryDate,
     deadline,
     deliveryType,
+    contentCategory,
   } = body
 
   if (!title?.trim()) {
@@ -1232,6 +1249,9 @@ function buildOrderData(
   // Broadcast only: Finished (SRT/burned-in) or Raw (SRT). Ignored for marketing.
   const parsedDeliveryType =
     deliveryType === "FINISHED" || deliveryType === "RAW" ? deliveryType : null
+
+  // Broadcast content type (RAW / OPENER / HYPE_PROMO / …). Ignored for marketing.
+  const parsedContentCategory = isContentCategory(contentCategory) ? contentCategory : null
 
   if (deliveryFormats && !Array.isArray(deliveryFormats)) {
     return { error: "Delivery formats must be an array" }
@@ -1262,6 +1282,10 @@ function buildOrderData(
 
   if (orderType === OrderType.BROADCAST && !normalizedGame) {
     return { error: "Game is required" }
+  }
+
+  if (orderType === OrderType.BROADCAST && !parsedContentCategory) {
+    return { error: "Content category is required" }
   }
 
   if (event && !isEventType(event)) {
@@ -1306,6 +1330,11 @@ function buildOrderData(
 
     status: initialStatus,
 
+    // Stamp the entry time for whichever stage it starts in.
+    readyAt: initialStatus === OrderStatus.READY_FOR_TRANSLATION ? new Date() : undefined,
+    inProgressAt: initialStatus === OrderStatus.IN_PROGRESS ? new Date() : undefined,
+    completedAt: initialStatus === OrderStatus.COMPLETED ? new Date() : undefined,
+
     priority: isOrderPriority(priority) ? priority : OrderPriority.MEDIUM,
 
     createdById: userId,
@@ -1327,6 +1356,7 @@ function buildOrderData(
               deadlineDate: deadline ? new Date(deadline) : new Date(),
               deadlineHasTime,
               deliveryType: parsedDeliveryType,
+              contentCategory: parsedContentCategory,
               deliveries: { create: parsedDeliveries },
               game: { connect: { id: normalizedGame } },
             },
@@ -1540,6 +1570,9 @@ export async function createSubOrders(
         type: d.type,
         event: d.event,
         status: d.status,
+        readyAt: d.readyAt ?? null,
+        inProgressAt: d.inProgressAt ?? null,
+        completedAt: d.completedAt ?? null,
         priority: d.priority,
         createdById: d.createdById,
         isParent: false,
@@ -1562,6 +1595,7 @@ export async function createSubOrders(
           deadlineDate: b.deadlineDate,
           deadlineHasTime: b.deadlineHasTime,
           deliveryType: b.deliveryType,
+          contentCategory: b.contentCategory,
         })
         for (const dl of b.deliveries.create) {
           broadcastDeliveryRows.push({
@@ -1684,7 +1718,7 @@ export async function duplicateOrder(req: AuthRequest, res: Response) {
           select: {
             estimatedMinutes: true, sourceLanguage: true, targetLanguages: true,
             sourceFileLink: true, srtAvailableLink: true, deliveryDate: true,
-            deadlineDate: true, deadlineHasTime: true, deliveryType: true, gameId: true,
+            deadlineDate: true, deadlineHasTime: true, deliveryType: true, contentCategory: true, gameId: true,
             deliveries: { select: { language: true, deliveryLink: true } },
             deliveryFormats: { select: { format: true, deliveryLink: true } },
           },
@@ -1774,6 +1808,7 @@ export async function duplicateOrder(req: AuthRequest, res: Response) {
           deadlineDate: b.deadlineDate,
           deadlineHasTime: b.deadlineHasTime,
           deliveryType: dType,
+          contentCategory: b.contentCategory,
           game: { connect: { id: b.gameId } },
           deliveries: { create: b.deliveries.map((d) => ({ language: d.language, deliveryLink: d.deliveryLink })) },
           deliveryFormats: { create: formats.map((f) => ({ format: f.format, deliveryLink: f.deliveryLink })) },
@@ -1960,6 +1995,7 @@ export async function updateOrder(
       deadline,
       deliveries,
       deliveryType,
+      contentCategory,
       clientLastEditedAt, // ISO string | null | undefined — optimistic concurrency token
     } = req.body
 
@@ -2171,6 +2207,12 @@ try {
 
     ...(deliveryType === "FINISHED" || deliveryType === "RAW"
       ? { deliveryType }
+      : {}),
+
+    // Content category — set a valid value, clear when explicitly null/empty,
+    // leave unchanged when the field isn't in the payload.
+    ...(contentCategory !== undefined
+      ? { contentCategory: isContentCategory(contentCategory) ? contentCategory : null }
       : {}),
 
 ...(normalizedGame
@@ -2609,7 +2651,7 @@ const sourceWasRemoved =
       // READY_FOR_TRANSLATION and roll it up if it's a sub-order.
       if (!sourceIsChange && updatedOrder?.status === OrderStatus.PENDING) {
         prisma.translationOrder
-          .update({ where: { id: orderId }, data: { status: OrderStatus.READY_FOR_TRANSLATION } })
+          .update({ where: { id: orderId }, data: { status: OrderStatus.READY_FOR_TRANSLATION, readyAt: new Date() } })
           .then(async () => {
             ordersCache.invalidate()
             try { getIo()?.emit("order-patched", { id: orderId, type: updatedOrder?.type, status: OrderStatus.READY_FOR_TRANSLATION }) } catch {}
@@ -2788,6 +2830,11 @@ if (
   updateData.completedAt =
     null
 }
+
+// Stamp the moment the order ENTERS Ready / In Progress so the sidebar can show
+// when each stage began and how long it took.
+if (parsedStatus === OrderStatus.READY_FOR_TRANSLATION) updateData.readyAt = new Date()
+if (parsedStatus === OrderStatus.IN_PROGRESS) updateData.inProgressAt = new Date()
 
     /*
       UPDATE ORDER
@@ -3466,11 +3513,13 @@ export async function getOrderCounts(
         _count: { _all: true },
         where,
       }),
-      // Every matching work unit's target languages (parents already excluded via
-      // where.isParent=false). Total Videos = sum of all target-language counts.
+      // Every matching work unit's status + target languages (parents already
+      // excluded via where.isParent=false). Videos = sum of target-language
+      // counts, both overall (totalVideos) and per status (counts.videos).
       prisma.translationOrder.findMany({
         where,
         select: {
+          status: true,
           broadcast: { select: { targetLanguages: true } },
           marketing: { select: { targetLanguages: true } },
         },
@@ -3484,15 +3533,18 @@ export async function getOrderCounts(
       COMPLETED: 0,
       total: 0,
       totalVideos: 0,
+      videos: { PENDING: 0, READY_FOR_TRANSLATION: 0, IN_PROGRESS: 0, COMPLETED: 0 },
     }
     for (const g of groups) {
-      const key = g.status as keyof Omit<typeof counts, "total" | "totalVideos">
-      if (key in counts) counts[key] = g._count._all
+      const key = g.status as keyof typeof counts.videos
+      if (key in counts) (counts as any)[key] = g._count._all
       counts.total += g._count._all
     }
     for (const r of videoRows) {
       const langs = r.broadcast?.targetLanguages ?? r.marketing?.targetLanguages ?? []
       counts.totalVideos += langs.length
+      const key = r.status as keyof typeof counts.videos
+      if (key in counts.videos) counts.videos[key] += langs.length
     }
 
     ordersCache.set(countsCacheKey, counts, 5_000) // 5s TTL

@@ -74,6 +74,18 @@ enum OrderPriority {
   HIGH
 }
 
+// Broadcast content type + its expected turnaround (informational). The hours
+// are the target time each should take: RAW ASAP, OPENER 2h, HYPE_PROMO 4h,
+// ENGAGEMENT 5h, LONG_FORM 8h, EXPLAINER 12h.
+enum ContentCategory {
+  RAW
+  OPENER
+  HYPE_PROMO
+  ENGAGEMENT
+  LONG_FORM
+  EXPLAINER
+}
+
 enum NotificationType {
   ORDER_COMPLETED
   ORDER_REOPENED
@@ -255,6 +267,12 @@ model TranslationOrder {
 
   completedAt DateTime?
 
+  // Status-transition timestamps — set the moment the order ENTERS that status,
+  // so the sidebar can show when each stage began and how long each took
+  // (Ready → In Progress, In Progress → Completed).
+  readyAt      DateTime?
+  inProgressAt DateTime?
+
   /**
    * LAST EDIT
    */
@@ -357,6 +375,9 @@ model BroadcastDetails {
 
   // Finished (SRT or burned-in) vs Raw (SRT only). Gates the delivery format.
   deliveryType DeliveryType?
+
+  // Content type (drives the expected turnaround; see ContentCategory).
+  contentCategory ContentCategory?
 
   orderId String @unique
 
@@ -525,3 +546,4 @@ model FeedbackRead {
   @@index([userId])
   @@index([feedbackId])
 }
+

@@ -1,0 +1,7 @@
+# Ignore dropped log exports and generated reports (may contain data),
+# but keep the folder, its README, and this file in git.
+*.csv
+*.xlsx
+!.gitkeep
+!README.md
+!.gitignore
