@@ -4,9 +4,14 @@
  * A Google Sheets version of daily-report.ts. It deliberately leaves the Excel
  * script unchanged.
  *
- * The CSV exports decide which orders belong on each daily tab. The database is
- * the source of truth for each order's current status and status timestamps.
- * There is intentionally no edit history or order-creation timestamp.
+ * ONE CSV = ONE TAB. Each CSV in server/logs/ becomes its own report tab, named
+ * after the file (e.g. "07132026_10_10"). Drop a new CSV and re-run to add/update
+ * its tab. The database is the source of truth for each order's current status and
+ * status timestamps.
+ *
+ * NEVER DELETES: the script only clears/rewrites the tabs for the CSVs currently
+ * present (plus "Daily Report - Overview"); every other tab is left untouched. So
+ * past report windows stay forever, even after you remove their CSV from the folder.
  *
  * Usage (from server/):
  *   npx tsx prisma/scripts/daily-report-google-sheets.ts [path] [options]
@@ -15,7 +20,7 @@
  *   --sheet=<spreadsheet-id>  Write to an existing Google Sheet. Defaults to
  *                              GOOGLE_SHEETS_SPREADSHEET_ID, or creates one.
  *   --title=<name>            Title used if the script creates a new Sheet.
- *   --date=YYYY-MM-DD         Include one UTC day only.
+ *   --date=YYYY-MM-DD         Only include events on this UTC day.
  *   --base=https://...        Base app URL for clickable order titles.
  *   --dry-run                 Parse and prepare the report without Google API
  *                              credentials or network writes.
@@ -25,9 +30,7 @@
  *   GOOGLE_SERVICE_ACCOUNT_EMAIL=...
  *   GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY='-----BEGIN PRIVATE KEY-----\n...'
  *
- * Existing Sheets must be shared with the service account as an Editor. This
- * script only owns/rebuilds tabs named "Daily Report - Overview" and
- * "Daily Report - YYYY-MM-DD", leaving every other tab untouched.
+ * The Google Sheet must be shared with the service account as an Editor.
  */
 
 import "dotenv/config" // loads server/.env so GOOGLE_* / DATABASE_URL / CLIENT_URL are available
@@ -45,6 +48,12 @@ const UTC_DAY_MS = 24 * 60 * 60 * 1000
 // from source-added (ready) to completion.
 const RAW_REPORT_THRESHOLD_MS = 2 * 60 * 60 * 1000
 
+// Only these statuses appear in the report (no Pending, Ready, or Deleted).
+const SHOWN_STATUSES = new Set(["IN_PROGRESS", "COMPLETED"])
+
+// Sentinel placed in a row's first cell to render it as a solid black divider.
+const DIVIDER_MARK = "▬▬▬"
+
 const ORDER_ACTIONS = new Set([
   "CREATE_ORDER",
   "CREATE_SUB_ORDERS",
@@ -58,7 +67,7 @@ const ORDER_ACTIONS = new Set([
 
 type CsvEvent = { ts: string; action: string; attrs: any }
 type StatusName = "PENDING" | "READY_FOR_TRANSLATION" | "IN_PROGRESS" | "COMPLETED" | "DELETED"
-type Delay = { hours: number }
+type Delay = { hours: number; kind: "late" | "overdue" | "early" }
 
 type OrderReport = {
   orderId: string
@@ -67,6 +76,7 @@ type OrderReport = {
   type: string
   event?: string
   priority?: string
+  deliveryFormat?: string
   contentCategory?: string
   currentStatus?: string
   readyAt?: string
@@ -170,7 +180,17 @@ const CONTENT_CATEGORY_INFO: Record<string, { label: string; hours: string }> = 
 function contentCategoryCell(value?: string): string {
   if (!value) return ""
   const info = CONTENT_CATEGORY_INFO[value]
-  return info ? `${info.label} (expected ${info.hours})` : nice(value)
+  return info ? info.label : nice(value)
+}
+// Plain-English turnaround target, e.g. "Should be delivered within 5 hours".
+// RAW/ASAP maps to 2 hours (the report's RAW rule).
+function deliveryTargetCell(value?: string): string {
+  if (!value) return ""
+  const info = CONTENT_CATEGORY_INFO[value]
+  if (!info) return ""
+  const hours = info.hours === "ASAP" ? 2 : parseInt(info.hours, 10)
+  if (!hours) return ""
+  return `Should be delivered within ${hours} hour${hours === 1 ? "" : "s"}`
 }
 
 function personName(user: any): string {
@@ -182,31 +202,41 @@ function personName(user: any): string {
  * of their UTC day; timed deadlines are compared as exact instants.
  */
 function getDelay(order: OrderReport): Delay | null {
-  if (!order.completedAt) return null
+  // Deleted orders aren't in flight.
+  if (order.deletedAt || order.currentStatus === "DELETED") return null
 
-  // RAW/ASAP is judged against a 2h turnaround from source-added, not its deadline.
+  // Target instant: RAW = source-added + 2h; else the deadline (date-only → end of day).
+  let targetMs: number
   if (order.contentCategory === "RAW") {
     if (!order.readyAt) return null
-    const completedMs = new Date(order.completedAt).getTime()
     const readyMs = new Date(order.readyAt).getTime()
-    if (Number.isNaN(completedMs) || Number.isNaN(readyMs)) return null
-    const overMs = completedMs - readyMs - RAW_REPORT_THRESHOLD_MS
-    if (overMs <= 0) return null
-    return { hours: overMs / (60 * 60 * 1000) }
+    if (Number.isNaN(readyMs)) return null
+    targetMs = readyMs + RAW_REPORT_THRESHOLD_MS
+  } else {
+    if (!order.deadline) return null
+    const storedDeadlineMs = new Date(order.deadline).getTime()
+    if (Number.isNaN(storedDeadlineMs)) return null
+    targetMs = order.deadlineHasTime ? storedDeadlineMs : storedDeadlineMs + UTC_DAY_MS - 1
   }
 
-  if (!order.deadline) return null
-  const completedMs = new Date(order.completedAt).getTime()
-  const storedDeadlineMs = new Date(order.deadline).getTime()
-  if (Number.isNaN(completedMs) || Number.isNaN(storedDeadlineMs)) return null
-  const deadlineMs = order.deadlineHasTime ? storedDeadlineMs : storedDeadlineMs + UTC_DAY_MS - 1
-  const delayMs = completedMs - deadlineMs
-  if (delayMs <= 0) return null
-  return { hours: delayMs / (60 * 60 * 1000) }
+  const H = 60 * 60 * 1000
+  if (order.completedAt) {
+    const completedMs = new Date(order.completedAt).getTime()
+    if (Number.isNaN(completedMs)) return null
+    const diff = completedMs - targetMs
+    if (diff > 0) return { hours: diff / H, kind: "late" }
+    if (diff < 0) return { hours: -diff / H, kind: "early" } // completed before target
+    return null // exactly on time
+  }
+
+  // Not completed yet → overdue only if now is already past the target.
+  const diff = Date.now() - targetMs
+  if (diff > 0) return { hours: diff / H, kind: "overdue" }
+  return null
 }
 
-// Under this many hours the delay is "minor" (light orange); at/above it's a
-// bigger delay (red). The ⚠ / ⛔ markers let the sheet color the cell.
+// Under this many hours a late/overdue delay is "minor" (light orange); at/above
+// it's bigger (red). Markers: ⚠ minor late, ⛔ big late/overdue, ✅ early.
 const MINOR_DELAY_MAX_HOURS = 1
 
 function delayCell(delay: Delay | null): string {
@@ -215,8 +245,9 @@ function delayCell(delay: Delay | null): string {
   const h = Math.floor(totalMin / 60)
   const m = totalMin % 60
   const amount = h ? (m ? `${h}h ${m}m` : `${h}h`) : `${m}m`
+  if (delay.kind === "early") return `✅ ${amount} early`
   const marker = delay.hours < MINOR_DELAY_MAX_HOURS ? "⚠" : "⛔"
-  return `${marker} ${amount} late`
+  return `${marker} ${amount} ${delay.kind === "overdue" ? "overdue" : "late"}`
 }
 
 /** Human duration between two ISO instants, e.g. "3h 12m", "45m". Blank if
@@ -225,6 +256,22 @@ function durationLabel(fromIso?: string, toIso?: string): string {
   if (!fromIso || !toIso) return ""
   const ms = new Date(toIso).getTime() - new Date(fromIso).getTime()
   if (Number.isNaN(ms) || ms < 0) return ""
+  const mins = Math.round(ms / 60000)
+  const h = Math.floor(mins / 60)
+  const m = mins % 60
+  return h ? (m ? `${h}h ${m}m` : `${h}h`) : `${m}m`
+}
+
+/** Allotted window from when the source was added to the deadline (date-only
+ *  deadlines are treated as end-of-day, matching getDelay). Blank if missing. */
+function sourceToDeadlineLabel(order: OrderReport): string {
+  if (!order.readyAt || !order.deadline) return ""
+  const readyMs = new Date(order.readyAt).getTime()
+  const storedMs = new Date(order.deadline).getTime()
+  if (Number.isNaN(readyMs) || Number.isNaN(storedMs)) return ""
+  const deadlineMs = order.deadlineHasTime ? storedMs : storedMs + UTC_DAY_MS - 1
+  const ms = deadlineMs - readyMs
+  if (ms < 0) return ""
   const mins = Math.round(ms / 60000)
   const h = Math.floor(mins / 60)
   const m = mins % 60
@@ -266,8 +313,11 @@ function getOrder(orders: Map<string, OrderReport>, orderId: string): OrderRepor
   return order
 }
 
-function isReportTab(title: string): boolean {
-  return title === OVERVIEW_TAB || new RegExp(`^${REPORT_TAB_PREFIX}\\d{4}-\\d{2}-\\d{2}$`).test(title)
+// Each CSV becomes its own tab, named after the file (minus extension). Sheets
+// tab names can't contain []:*?/\ and cap at 100 chars.
+function tabNameFromFile(file: string): string {
+  const base = basename(file).replace(/\.csv$/i, "")
+  return base.replace(/[[\]:*?/\\]/g, "-").slice(0, 100) || "Report"
 }
 
 type ServiceAccount = { client_email: string; private_key: string }
@@ -348,7 +398,7 @@ async function googleRequest<T>(method: "GET" | "POST", path: string, token: str
   }
 }
 
-type GoogleSheetInfo = { properties: { sheetId: number; title: string } }
+type GoogleSheetInfo = { properties: { sheetId: number; title: string }; conditionalFormats?: unknown[] }
 type GoogleSpreadsheet = { spreadsheetId: string; spreadsheetUrl: string; sheets: GoogleSheetInfo[] }
 
 async function createSpreadsheet(token: string, title: string): Promise<GoogleSpreadsheet> {
@@ -359,11 +409,38 @@ async function createSpreadsheet(token: string, title: string): Promise<GoogleSp
 }
 
 async function fetchSpreadsheet(token: string, spreadsheetId: string): Promise<GoogleSpreadsheet> {
-  return googleRequest<GoogleSpreadsheet>("GET", `spreadsheets/${encodeURIComponent(spreadsheetId)}?fields=spreadsheetId,spreadsheetUrl,sheets.properties`, token)
+  return googleRequest<GoogleSpreadsheet>("GET", `spreadsheets/${encodeURIComponent(spreadsheetId)}?fields=spreadsheetId,spreadsheetUrl,sheets(properties,conditionalFormats)`, token)
 }
 
 function sheetIdByName(spreadsheet: GoogleSpreadsheet): Map<string, number> {
   return new Map(spreadsheet.sheets.map((sheet) => [sheet.properties.title, sheet.properties.sheetId]))
+}
+
+// How many conditional-format rules each existing sheet currently has (so we can
+// delete them before re-applying, otherwise old rules pile up every run).
+function conditionalRuleCounts(spreadsheet: GoogleSpreadsheet): Map<number, number> {
+  return new Map(spreadsheet.sheets.map((sheet) => [sheet.properties.sheetId, sheet.conditionalFormats?.length ?? 0]))
+}
+
+/**
+ * The Overview tab accumulates one row per report (CSV) across days. Since each
+ * run only knows about the CSVs currently present, we read the existing Overview
+ * rows so archived days aren't lost — the caller merges them with this run's rows.
+ * Returns the data rows only (title/header rows filtered out). Empty on first run.
+ */
+async function fetchOverviewDataRows(token: string, spreadsheetId: string): Promise<string[][]> {
+  if (!spreadsheetId) return []
+  try {
+    const res = await googleRequest<{ values?: string[][] }>(
+      "GET",
+      `spreadsheets/${encodeURIComponent(spreadsheetId)}/values/${encodeURIComponent(`${quoteSheetName(OVERVIEW_TAB)}!A:D`)}`,
+      token
+    )
+    const rows = res.values ?? []
+    return rows.filter((row) => row[0] && row[0] !== "Report (CSV)" && !String(row[0]).startsWith("Daily Orders Report"))
+  } catch {
+    return [] // Overview tab doesn't exist yet (first run) or couldn't be read.
+  }
 }
 
 function rangeFor(sheetId: number, rows: number, columns: number, startRow = 0) {
@@ -392,20 +469,19 @@ async function publishGoogleSheets(
     ? await fetchSpreadsheet(token, existingId)
     : await createSpreadsheet(token, spreadsheetTitle)
 
-  const desiredNames = new Set(sheets.map((sheet) => sheet.name))
   const existingNames = sheetIdByName(spreadsheet)
-  const clearRanges = [...existingNames.keys()].filter(isReportTab).map((name) => `${quoteSheetName(name)}!A:Z`)
+  // IMPORTANT: never delete tabs. Only clear the tabs we're about to (re)write —
+  // every other tab (past report windows) is left completely untouched.
+  const clearRanges = sheets
+    .filter((spec) => existingNames.has(spec.name))
+    .map((spec) => `${quoteSheetName(spec.name)}!A:Z`)
   if (clearRanges.length > 0) {
     await googleRequest("POST", `spreadsheets/${encodeURIComponent(spreadsheet.spreadsheetId)}/values:batchClear`, token, { ranges: clearRanges })
   }
 
   const setupRequests: any[] = []
-  for (const [name, sheetId] of existingNames) {
-    if (isReportTab(name) && name !== OVERVIEW_TAB && !desiredNames.has(name)) setupRequests.push({ deleteSheet: { sheetId } })
-  }
-  if (!existingNames.has(OVERVIEW_TAB)) setupRequests.push({ addSheet: { properties: { title: OVERVIEW_TAB } } })
   for (const spec of sheets) {
-    if (spec.name !== OVERVIEW_TAB && !existingNames.has(spec.name)) setupRequests.push({ addSheet: { properties: { title: spec.name } } })
+    if (!existingNames.has(spec.name)) setupRequests.push({ addSheet: { properties: { title: spec.name } } })
   }
   if (setupRequests.length > 0) {
     await googleRequest("POST", `spreadsheets/${encodeURIComponent(spreadsheet.spreadsheetId)}:batchUpdate`, token, { requests: setupRequests })
@@ -413,6 +489,7 @@ async function publishGoogleSheets(
   }
 
   const ids = sheetIdByName(spreadsheet)
+  const ruleCounts = conditionalRuleCounts(spreadsheet)
   const values = sheets.map((spec) => ({ range: `${quoteSheetName(spec.name)}!A1`, values: spec.rows }))
   await googleRequest("POST", `spreadsheets/${encodeURIComponent(spreadsheet.spreadsheetId)}/values:batchUpdate`, token, {
     valueInputOption: "USER_ENTERED",
@@ -428,6 +505,18 @@ async function publishGoogleSheets(
   const minorDelayText = gridColor(120, 63, 4)
   const majorDelayFill = gridColor(244, 199, 195) // light red
   const majorDelayText = gridColor(153, 0, 0)
+  const earlyFill = gridColor(217, 234, 211) // light green (completed ahead of target)
+  const earlyText = gridColor(39, 78, 19)
+  // Status section band — STRONG saturated color + white text, so it clearly
+  // reads as a major divider (everything below belongs to that status).
+  const statusBand: Record<string, { fill: any; text: any }> = {
+    IN_PROGRESS: { fill: gridColor(52, 101, 164), text: gridColor(255, 255, 255) },
+    COMPLETED: { fill: gridColor(67, 129, 62), text: gridColor(255, 255, 255) },
+  }
+  // Type subsection band (Marketing / Broadcast) — a clean light slate, clearly
+  // secondary to the strong status band above it.
+  const subsectionFill = gridColor(222, 228, 236)
+  const subsectionText = gridColor(30, 41, 59)
   const statusColors: Record<StatusName, any> = {
     PENDING: gridColor(255, 242, 204),
     READY_FOR_TRANSLATION: gridColor(217, 242, 247),
@@ -445,9 +534,16 @@ async function publishGoogleSheets(
     const headerRange = rangeFor(sheetId, 2, columnCount, 1)
     const dataRange = rangeFor(sheetId, rowCount, columnCount, 2)
 
+    // Reset the tab's formatting first so nothing accumulates across runs:
+    // delete every existing conditional-format rule, then clear all cell formats
+    // (fixes old wider-column colors lingering after columns were removed).
+    const existingRules = ruleCounts.get(sheetId) ?? 0
+    for (let i = 0; i < existingRules; i++) styleRequests.push({ deleteConditionalFormatRule: { sheetId, index: 0 } })
+    styleRequests.push({ repeatCell: { range: { sheetId }, cell: {}, fields: "userEnteredFormat" } })
+
     styleRequests.push(
       { unmergeCells: { range: { sheetId } } },
-      { updateSheetProperties: { properties: { sheetId, gridProperties: { frozenRowCount: 2, hideGridlines: true } }, fields: "gridProperties.frozenRowCount,gridProperties.hideGridlines" } },
+      { updateSheetProperties: { properties: { sheetId, gridProperties: { frozenRowCount: 2, hideGridlines: false } }, fields: "gridProperties.frozenRowCount,gridProperties.hideGridlines" } },
       { mergeCells: { range: titleRange, mergeType: "MERGE_ALL" } },
       { repeatCell: { range: titleRange, cell: { userEnteredFormat: { backgroundColor: headerFill, textFormat: { bold: true, fontSize: 14, foregroundColor: titleText }, verticalAlignment: "MIDDLE", horizontalAlignment: "LEFT" } }, fields: "userEnteredFormat(backgroundColor,textFormat,verticalAlignment,horizontalAlignment)" } },
       { repeatCell: { range: headerRange, cell: { userEnteredFormat: { backgroundColor: gridColor(55, 65, 81), textFormat: { bold: true, foregroundColor: headerText }, verticalAlignment: "MIDDLE", wrapStrategy: "WRAP" } }, fields: "userEnteredFormat(backgroundColor,textFormat,verticalAlignment,wrapStrategy)" } },
@@ -455,13 +551,15 @@ async function publishGoogleSheets(
       { setBasicFilter: { filter: { range: { sheetId, startRowIndex: 1, endRowIndex: rowCount, startColumnIndex: 0, endColumnIndex: columnCount } } } },
     )
 
-    // Delay cell: bold + severity color (light orange minor / light red bigger),
-    // so it's clearly visible while the order title keeps its link color.
-    const delayIndex = spec.columns.findIndex((column) => column.header === "Delay")
+    // Delay cell: bold + color by kind — light red bigger late/overdue (⛔),
+    // light orange minor late (⚠), light green early (✅), while the order title
+    // keeps its link color.
+    const delayIndex = spec.columns.findIndex((column) => column.header === "Late / Early")
     if (delayIndex >= 0) {
       const delayRef = `$${columnLetter(delayIndex)}3`
       const delayCol = { ...dataRange, startColumnIndex: delayIndex, endColumnIndex: delayIndex + 1 }
       styleRequests.push(
+        { addConditionalFormatRule: { index: 0, rule: { ranges: [delayCol], booleanRule: { condition: { type: "CUSTOM_FORMULA", values: [{ userEnteredValue: `=REGEXMATCH(${delayRef},"✅")` }] }, format: { backgroundColor: earlyFill, textFormat: { bold: true, foregroundColor: earlyText } } } } } },
         { addConditionalFormatRule: { index: 0, rule: { ranges: [delayCol], booleanRule: { condition: { type: "CUSTOM_FORMULA", values: [{ userEnteredValue: `=REGEXMATCH(${delayRef},"⛔")` }] }, format: { backgroundColor: majorDelayFill, textFormat: { bold: true, foregroundColor: majorDelayText } } } } } },
         { addConditionalFormatRule: { index: 0, rule: { ranges: [delayCol], booleanRule: { condition: { type: "CUSTOM_FORMULA", values: [{ userEnteredValue: `=REGEXMATCH(${delayRef},"⚠")` }] }, format: { backgroundColor: minorDelayFill, textFormat: { bold: true, foregroundColor: minorDelayText } } } } } },
       )
@@ -484,6 +582,53 @@ async function publishGoogleSheets(
           },
         })
       }
+
+      // Full-width status SECTION header bands (rows whose Order cell starts
+      // with "▸ STATUS"): strong color + white bold + larger font.
+      for (const status of ["IN_PROGRESS", "COMPLETED"] as const) {
+        const band = statusBand[status]
+        styleRequests.push({
+          addConditionalFormatRule: {
+            index: 0,
+            rule: {
+              ranges: [dataRange],
+              booleanRule: {
+                condition: { type: "CUSTOM_FORMULA", values: [{ userEnteredValue: `=REGEXMATCH($A3,"^▸ ${status.replace(/_/g, " ")}")` }] },
+                format: { backgroundColor: band.fill, textFormat: { bold: true, foregroundColor: band.text } },
+              },
+            },
+          },
+        })
+      }
+
+      // Type SUBSECTION header bands (rows whose Order cell starts with "▪ ").
+      styleRequests.push({
+        addConditionalFormatRule: {
+          index: 0,
+          rule: {
+            ranges: [dataRange],
+            booleanRule: {
+              condition: { type: "CUSTOM_FORMULA", values: [{ userEnteredValue: '=REGEXMATCH($A3,"^▪ ")' }] },
+              format: { backgroundColor: subsectionFill, textFormat: { bold: true, foregroundColor: subsectionText } },
+            },
+          },
+        },
+      })
+
+      // Solid BLACK divider row (between status blocks). Black text hides the
+      // marker so the whole row reads as one clean black bar.
+      styleRequests.push({
+        addConditionalFormatRule: {
+          index: 0,
+          rule: {
+            ranges: [dataRange],
+            booleanRule: {
+              condition: { type: "CUSTOM_FORMULA", values: [{ userEnteredValue: '=REGEXMATCH($A3,"^▬")' }] },
+              format: { backgroundColor: gridColor(0, 0, 0), textFormat: { foregroundColor: gridColor(0, 0, 0) } },
+            },
+          },
+        },
+      })
     }
 
     spec.columns.forEach((column, index) => {
@@ -509,8 +654,13 @@ async function main() {
   const dryRun = args.includes("--dry-run")
   const { files } = gatherCsvFiles(inputArg)
 
-  const events: CsvEvent[] = []
-  const seen = new Set<string>()
+  // Parse each CSV into its OWN event list. Every file becomes its own report tab
+  // (named after the file), so download windows are never merged, split by day, or
+  // deleted — dropping a new CSV just adds/updates that one tab.
+  type FileReport = { tab: string; events: CsvEvent[]; orderIds: Set<string> }
+  const fileReports: FileReport[] = []
+  const allOrderIds = new Set<string>()
+
   for (const file of files) {
     const rows = parseCsv(readFileSync(file, "utf8"))
     if (rows.length === 0) continue
@@ -519,6 +669,9 @@ async function main() {
     const timestampIndex = header.indexOf("timestamp")
     if (attributesIndex === -1) { console.warn(`Skipping ${basename(file)} — no attributes column.`); continue }
 
+    const events: CsvEvent[] = []
+    const seen = new Set<string>()
+    const orderIds = new Set<string>()
     for (const row of rows.slice(1)) {
       const rawAttributes = row[attributesIndex]
       if (!rawAttributes) continue
@@ -531,23 +684,33 @@ async function main() {
       if (seen.has(key)) continue
       seen.add(key)
       events.push({ ts, action: attrs.action, attrs })
+           const orderId = attrs.orderId || attrs.newId || attrs.deleted?.id || attrs.parentId || ""
+      if (orderId) { orderIds.add(orderId); allOrderIds.add(orderId) }
+      // // A tab only includes orders whose STATUS actually changed in this window
+      // // (In Progress / Completed happened here) — NOT old orders that were merely
+      // // edited, reassigned, or had feedback added during the window.
+      // if (attrs.action === "UPDATE_ORDER_STATUS" && attrs.orderId) {
+      //   orderIds.add(attrs.orderId)
+      //   allOrderIds.add(attrs.orderId)
+      // }
     }
+    if (events.length > 0) fileReports.push({ tab: tabNameFromFile(file), events, orderIds })
   }
 
-  if (events.length === 0) {
+  if (fileReports.length === 0) {
     console.error(`No order events found${dateFilter ? ` for ${dateFilter}` : ""} in ${files.length} CSV file(s).`)
     process.exit(1)
   }
-  events.sort((a, b) => a.ts.localeCompare(b.ts))
 
+  // One global order map from every event (across all files), sorted by time.
   const orders = new Map<string, OrderReport>()
-  for (const event of events) {
+  const allEvents = fileReports.flatMap((fr) => fr.events).sort((a, b) => a.ts.localeCompare(b.ts))
+  for (const event of allEvents) {
     const attrs = event.attrs
     const orderId = attrs.orderId || attrs.newId || attrs.deleted?.id || attrs.parentId || ""
     if (!orderId) continue
     const order = getOrder(orders, orderId)
-    const date = utcDay(event.ts)
-    order.activeDates.add(date)
+    order.activeDates.add(utcDay(event.ts))
     order.title ||= attrs.title || attrs.orderTitle || attrs.deleted?.title || ""
     order.type ||= attrs.type || attrs.deleted?.type || ""
     order.event ||= attrs.event || attrs.deleted?.event || ""
@@ -577,12 +740,14 @@ async function main() {
           marketing: {
             select: {
               deadlineDate: true, deadlineHasTime: true,
+              deliveryFormats: { select: { format: true } },
               assignments: { select: { user: { select: { firstName: true, lastName: true } } } },
             },
           },
           broadcast: {
             select: {
               deadlineDate: true, deadlineHasTime: true, contentCategory: true,
+              deliveryFormats: { select: { format: true } },
               game: { select: { assignedUsers: { select: { user: { select: { firstName: true, lastName: true } } } } } },
             },
           },
@@ -605,6 +770,11 @@ async function main() {
         order.deadline = details?.deadlineDate?.toISOString()
         order.deadlineHasTime = details?.deadlineHasTime || false
         order.contentCategory = dbOrder.broadcast?.contentCategory || "" // broadcast only
+        const deliveryFormats = [
+          ...(dbOrder.marketing?.deliveryFormats || []),
+          ...(dbOrder.broadcast?.deliveryFormats || []),
+        ].map((entry: any) => entry?.format).filter(Boolean)
+        order.deliveryFormat = [...new Set(deliveryFormats)].join(", ")
         const assignees: string[] = dbOrder.marketing
           ? dbOrder.marketing.assignments.map((assignment: any) => personName(assignment.user))
           : dbOrder.broadcast?.game.assignedUsers.map((assignment: any) => personName(assignment.user)) || []
@@ -620,7 +790,6 @@ async function main() {
     order.priority ||= ""
   }
 
-  const dates = [...new Set(events.map((event) => utcDay(event.ts)))].sort()
   // Note: "Source added" = when the source file was added, which is exactly when
   // the order became Ready for Translation (readyAt). Keep Status at index 4 —
   // the status color formatting below relies on that position.
@@ -630,9 +799,12 @@ async function main() {
     { header: "Type", width: 100 },
     { header: "Event", width: 90 },
     { header: "Priority", width: 90 },
+    { header: "Delivery Format", width: 140 },
     { header: "Status", width: 150 },
-    { header: "Delay", width: 130 },
-    { header: "Content Category (expected)", width: 180 },
+    { header: "Late / Early", width: 130 },
+    { header: "Content Category", width: 140 },
+    { header: "Expected Delivery", width: 230 },
+    { header: "Time To Deliver", width: 150 },
     { header: "Deadline (UTC)", width: 170 },
     { header: "Source Added / Ready (UTC)", width: 190 },
     { header: "In Progress (UTC)", width: 175 },
@@ -641,27 +813,28 @@ async function main() {
     { header: "Source → Completed", width: 150 },
     { header: "Completed by", width: 160 },
     { header: "Assigned to", width: 220 },
-    { header: "Deleted by", width: 160 },
-    { header: "Deleted (UTC)", width: 175 },
   ]
 
   const reportSheets: SheetSpec[] = []
-  const overviewRows: string[][] = [["Day (UTC)", "Orders active", "Status changes", "Completed", "Deleted", "Completed late"]]
+  const overviewRows: string[][] = [["Report (CSV)", "In Progress", "Completed", "Delayed"]]
 
-  for (const date of dates) {
-    const dayEvents = events.filter((event) => utcDay(event.ts) === date)
-    const dayOrders = [...orders.values()]
-      .filter((order) => order.activeDates.has(date))
-      .sort((a, b) => a.title.localeCompare(b.title))
-    const rowData = dayOrders.map((order) => [
+  // One tab per CSV file — the orders that had activity in that window.
+  for (const fr of fileReports) {
+    const fileOrders = [...fr.orderIds]
+      .map((id) => orders.get(id))
+      .filter((order): order is OrderReport => !!order && SHOWN_STATUSES.has(order.currentStatus || ""))
+    const orderRow = (order: OrderReport): string[] => [
       orderTitleCell(order, siteBase),
       order.createdBy || "",
       nice(order.type),
       nice(order.event),
       nice(order.priority),
+      nice(order.deliveryFormat),
       nice(order.currentStatus),
       delayCell(getDelay(order)),
       contentCategoryCell(order.contentCategory),
+      deliveryTargetCell(order.contentCategory),
+      sourceToDeadlineLabel(order),
       displayDeadline(order.deadline, order.deadlineHasTime),
       utcTimestamp(order.readyAt),
       utcTimestamp(order.inProgressAt),
@@ -670,42 +843,60 @@ async function main() {
       durationLabel(order.readyAt, order.completedAt),
       order.completedBy || "",
       order.assignedTo.join(", "),
-      order.deletedBy || "",
-      utcTimestamp(order.deletedAt),
-    ])
-    reportSheets.push({
-      name: `${REPORT_TAB_PREFIX}${date}`,
-      columns: orderColumns,
-      rows: [[`Daily Orders Report · ${date} (UTC)`], orderColumns.map((column) => column.header), ...rowData],
-    })
+    ]
+    // Two-level grouping for readability: STATUS section (In Progress, then
+    // Completed) → TYPE subsection (Marketing, then Broadcast). Section rows carry
+    // a marker in column A ("▸ " status band, "▪ " type band) that the styling
+    // step colors. A blank spacer row separates the blocks.
+    const blank = () => Array(orderColumns.length).fill("")
+    const rows: string[][] = [
+      [`Daily Orders Report · ${fr.tab}`],
+      orderColumns.map((column) => column.header),
+    ]
+    for (const status of ["IN_PROGRESS", "COMPLETED"]) {
+      const statusGroup = fileOrders.filter((order) => order.currentStatus === status)
+      if (statusGroup.length === 0) continue
+      // One solid black divider row between status blocks (not before the first).
+      if (rows.length > 2) {
+        const divider = blank()
+        divider[0] = DIVIDER_MARK
+        rows.push(divider)
+      }
+
+      const statusHeader = blank()
+      statusHeader[0] = `▸ ${status.replace(/_/g, " ")} — ${statusGroup.length} order${statusGroup.length === 1 ? "" : "s"}`
+      rows.push(statusHeader)
+
+      let firstSubsection = true
+      for (const type of ["MARKETING", "BROADCAST"]) {
+        const typeGroup = statusGroup
+          .filter((order) => (order.type || "").toUpperCase() === type)
+          .sort((a, b) => a.title.localeCompare(b.title))
+        if (typeGroup.length === 0) continue
+
+        if (!firstSubsection) rows.push(blank()) // one blank between subsections
+        firstSubsection = false
+
+        const typeHeader = blank()
+        typeHeader[0] = `▪ ${nice(type)} (${typeGroup.length})`
+        rows.push(typeHeader)
+        for (const order of typeGroup) rows.push(orderRow(order))
+      }
+    }
+    reportSheets.push({ name: fr.tab, columns: orderColumns, rows })
     overviewRows.push([
-      date,
-      String(dayOrders.length),
-      String(dayEvents.filter((event) => event.action === "UPDATE_ORDER_STATUS").length),
-      String(dayOrders.filter((order) => utcDay(order.completedAt || "") === date).length),
-      String(dayOrders.filter((order) => utcDay(order.deletedAt || "") === date).length),
-      String(dayOrders.filter((order) => getDelay(order)).length),
+      fr.tab,
+      String(fileOrders.filter((order) => order.currentStatus === "IN_PROGRESS").length),
+      String(fileOrders.filter((order) => order.currentStatus === "COMPLETED").length),
+      String(fileOrders.filter((order) => { const d = getDelay(order); return d && d.kind !== "early" }).length),
     ])
   }
 
-  reportSheets.unshift({
-    name: OVERVIEW_TAB,
-    columns: [
-      { header: "Day (UTC)", width: 135 },
-      { header: "Orders active", width: 120 },
-      { header: "Status changes", width: 130 },
-      { header: "Completed", width: 105 },
-      { header: "Deleted", width: 90 },
-      { header: "Completed late", width: 125 },
-    ],
-    rows: [["Daily Orders Report · Overview"], ...overviewRows],
-  })
-
-  const delayed = [...orders.values()].filter((order) => getDelay(order)).length
+  const delayed = [...orders.values()].filter((order) => { const d = getDelay(order); return d && d.kind !== "early" }).length
   console.log(`\n📊 Daily Orders Report (Google Sheets)`)
   console.log(`   Source : ${files.length} file(s) — ${files.map((file) => basename(file)).join(", ")}`)
-  console.log(`   Orders : ${orders.size}   Events: ${events.length}   Days: ${dates.length}`)
-  console.log(`   Delayed completed orders: ${delayed}`)
+  console.log(`   Orders : ${orders.size}   Events: ${allEvents.length}   Reports: ${fileReports.length}`)
+  console.log(`   Delayed orders (incl. ongoing): ${delayed}`)
 
   if (dryRun) {
     console.log("   Dry run: Google Sheets was not contacted.\n")
@@ -713,6 +904,31 @@ async function main() {
   }
 
   const token = await getGoogleAccessToken(getServiceAccount())
+
+  // Overview accumulates across days: merge this run's rows with the ones already
+  // in the sheet, keyed by report (CSV) name. Prior rows for archived CSVs stay;
+  // rows for CSVs in this run are refreshed; new CSVs are appended at the bottom.
+  const overviewHeader = overviewRows[0]
+  const currentByKey = new Map(overviewRows.slice(1).map((row) => [row[0], row]))
+  const priorOverview = await fetchOverviewDataRows(token, sheetId)
+  const seen = new Set<string>()
+  const mergedOverview: string[][] = []
+  for (const row of priorOverview) {
+    mergedOverview.push(currentByKey.get(row[0]) ?? row)
+    seen.add(row[0])
+  }
+  for (const [key, row] of currentByKey) if (!seen.has(key)) mergedOverview.push(row)
+  reportSheets.unshift({
+    name: OVERVIEW_TAB,
+    columns: [
+      { header: "Report (CSV)", width: 260 },
+      { header: "In Progress", width: 110 },
+      { header: "Completed", width: 110 },
+      { header: "Delayed", width: 100 },
+    ],
+    rows: [["Daily Orders Report · Overview"], overviewHeader, ...mergedOverview],
+  })
+
   const spreadsheet = await publishGoogleSheets(token, sheetId, sheetTitle, reportSheets)
   console.log(`   Sheet  : ${spreadsheet.spreadsheetUrl}`)
   console.log(`   Tabs   : ${reportSheets.map((sheet) => sheet.name).join(", ")}\n`)

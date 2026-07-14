@@ -25,6 +25,17 @@ import {
   UserDepartment,
 } from "@prisma/client"
 
+// Builds a deep-link to an order on the site, matching the client's URL params
+// (?page=marketing|Broadcast&orderId=...&event=...). Prefer an explicit public
+// site URL; CLIENT_URL is the fallback (may be localhost in dev).
+function orderPageLink(type: string, orderId: string, event?: string | null): string {
+  const base = process.env.SITE_URL || process.env.REPORT_BASE_URL || process.env.CLIENT_URL || ""
+  if (!base || !orderId) return ""
+  const root = base.replace(/\/+$/, "")
+  const page = String(type).toUpperCase() === "MARKETING" ? "marketing" : "Broadcast"
+  return `${root}/?page=${page}&orderId=${encodeURIComponent(orderId)}${event ? `&event=${encodeURIComponent(String(event))}` : ""}`
+}
+
 // Shared per-row fields used for both top-level rows and nested sub-orders.
 const orderRowFields = {
   id: true,
@@ -2753,6 +2764,7 @@ export async function updateOrderStatus(
             id: true,
             title: true,
             type: true,
+            event: true,
             isParent: true,
             parentId: true,
             status: true,
@@ -2855,7 +2867,7 @@ if (parsedStatus === OrderStatus.IN_PROGRESS) updateData.inProgressAt = new Date
       RESPOND IMMEDIATELY — notifications fire in the background
     */
 
-    logger.info({ action: "UPDATE_ORDER_STATUS", userId: req.userId, userName: req.userName, orderId, title: existingOrder.title, from: existingOrder.status, to: parsedStatus })
+    logger.info({ action: "UPDATE_ORDER_STATUS", userId: req.userId, userName: req.userName, orderId, title: existingOrder.title, from: existingOrder.status, to: parsedStatus, orderLink: orderPageLink(existingOrder.type, orderId, existingOrder.event) })
 
     ordersCache.invalidate()
     try { getIo()?.emit("order-patched", { id: updatedOrder.id, type: updatedOrder.type, status: updatedOrder.status }) } catch {}
