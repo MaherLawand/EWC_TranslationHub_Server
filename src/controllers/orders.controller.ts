@@ -3109,6 +3109,68 @@ export async function updateOrderContentCategory(
   }
 }
 
+/**
+ * Manually re-notify translators that the source file changed.
+ *
+ * The automatic notification only fires when the source *link* string changes.
+ * But sometimes the file behind the same link is swapped (e.g. a Drive file
+ * replaced in place), so the link is identical and translators are never told.
+ * This endpoint lets an editor explicitly resend the "Source File Updated" email
+ * regardless of whether the link changed, and flags the order so the caution
+ * icon appears for translators working off the old copy.
+ */
+export async function resendSourceNotification(
+  req: AuthRequest,
+  res: Response
+) {
+  try {
+    if (!req.userId) return res.status(401).json({ message: "Unauthorized" })
+
+    const orderId = String(req.params.id)
+    const existing = await prisma.translationOrder.findUnique({
+      where: { id: orderId },
+      select: {
+        id: true,
+        type: true,
+        isParent: true,
+        broadcast: { select: { sourceFileLink: true } },
+        marketing: { select: { sourceFileLink: true } },
+      },
+    })
+    if (!existing) return res.status(404).json({ message: "Order not found" })
+
+    const sourceFileLink =
+      existing.type === "BROADCAST"
+        ? existing.broadcast?.sourceFileLink
+        : existing.marketing?.sourceFileLink
+
+    if (!sourceFileLink || !sourceFileLink.trim()) {
+      return res.status(400).json({ message: "This order has no source file to notify about." })
+    }
+
+    // Flag the order (caution icon) so translators see it may have changed.
+    try {
+      await prisma.translationOrder.update({ where: { id: orderId }, data: { sourceChangedAt: new Date() } })
+      ordersCache.invalidate()
+      try { getIo()?.emit("order-patched", { id: orderId, type: existing.type }) } catch {}
+    } catch (e) {
+      logger.error({ action: "SET_SOURCE_CHANGED_ERROR", orderId, err: e })
+    }
+
+    // Resend as a CHANGE ("Source File Updated"), fire-and-forget.
+    notifyTranslatorsSourceReady(orderId, true).catch((e) =>
+      logger.error({ action: "NOTIFY_TRANSLATORS_ERROR", orderId, err: e })
+    )
+
+    logger.info({ action: "RESEND_SOURCE_NOTIFICATION", userId: req.userId, userName: req.userName, orderId, orderLink: orderPageLink(existing.type, orderId) })
+
+    return res.json({ id: orderId, ok: true })
+  } catch (error) {
+    logger.error({ action: "RESEND_SOURCE_NOTIFICATION_ERROR", userId: req.userId, userName: req.userName, orderId: req.params.id, err: error })
+    return res.status(500).json({ message: "Failed to resend source notification" })
+  }
+}
+
 export async function markNotificationsAsRead(
   req: AuthRequest,
   res: Response

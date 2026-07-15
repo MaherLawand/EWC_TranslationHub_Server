@@ -18,6 +18,7 @@ import {
   updateOrder,
   updateOrderStatus,
   updateOrderContentCategory,
+  resendSourceNotification,
 } from "../controllers/orders.controller.js"
 
 import {
@@ -93,6 +94,14 @@ router.patch(
   "/:id/content-category",
   requireAuth,
   updateOrderContentCategory
+)
+
+// Manually resend the "source file updated" email to translators (used when the
+// file behind an unchanged link was swapped).
+router.post(
+  "/:id/resend-source-notification",
+  requireAuth,
+  resendSourceNotification
 )
 
 router.patch(

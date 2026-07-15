@@ -67,7 +67,7 @@ const ORDER_ACTIONS = new Set([
 
 type CsvEvent = { ts: string; action: string; attrs: any }
 type StatusName = "PENDING" | "READY_FOR_TRANSLATION" | "IN_PROGRESS" | "COMPLETED" | "DELETED"
-type Delay = { hours: number; kind: "late" | "overdue" | "early" }
+type Delay = { hours: number; kind: "late" | "overdue" | "early" | "left" }
 
 type OrderReport = {
   orderId: string
@@ -229,10 +229,12 @@ function getDelay(order: OrderReport): Delay | null {
     return null // exactly on time
   }
 
-  // Not completed yet → overdue only if now is already past the target.
+  // Not completed yet → overdue if now is past the target, otherwise "time left"
+  // counting down to the deadline.
   const diff = Date.now() - targetMs
   if (diff > 0) return { hours: diff / H, kind: "overdue" }
-  return null
+  if (diff < 0) return { hours: -diff / H, kind: "left" }
+  return null // exactly at the deadline
 }
 
 // Under this many hours a late/overdue delay is "minor" (light orange); at/above
@@ -246,6 +248,7 @@ function delayCell(delay: Delay | null): string {
   const m = totalMin % 60
   const amount = h ? (m ? `${h}h ${m}m` : `${h}h`) : `${m}m`
   if (delay.kind === "early") return `✅ ${amount} early`
+  if (delay.kind === "left") return `⏳ ${amount} left` // in progress, deadline not reached
   const marker = delay.hours < MINOR_DELAY_MAX_HOURS ? "⚠" : "⛔"
   return `${marker} ${amount} ${delay.kind === "overdue" ? "overdue" : "late"}`
 }
@@ -507,6 +510,8 @@ async function publishGoogleSheets(
   const majorDelayText = gridColor(153, 0, 0)
   const earlyFill = gridColor(217, 234, 211) // light green (completed ahead of target)
   const earlyText = gridColor(39, 78, 19)
+  const leftFill = gridColor(207, 226, 243) // light blue (in progress, time remaining)
+  const leftText = gridColor(28, 69, 135)
   // Status section band — STRONG saturated color + white text, so it clearly
   // reads as a major divider (everything below belongs to that status).
   const statusBand: Record<string, { fill: any; text: any }> = {
@@ -552,14 +557,15 @@ async function publishGoogleSheets(
     )
 
     // Delay cell: bold + color by kind — light red bigger late/overdue (⛔),
-    // light orange minor late (⚠), light green early (✅), while the order title
-    // keeps its link color.
+    // light orange minor late (⚠), light green early (✅), light blue time-left (⏳),
+    // while the order title keeps its link color.
     const delayIndex = spec.columns.findIndex((column) => column.header === "Late / Early")
     if (delayIndex >= 0) {
       const delayRef = `$${columnLetter(delayIndex)}3`
       const delayCol = { ...dataRange, startColumnIndex: delayIndex, endColumnIndex: delayIndex + 1 }
       styleRequests.push(
         { addConditionalFormatRule: { index: 0, rule: { ranges: [delayCol], booleanRule: { condition: { type: "CUSTOM_FORMULA", values: [{ userEnteredValue: `=REGEXMATCH(${delayRef},"✅")` }] }, format: { backgroundColor: earlyFill, textFormat: { bold: true, foregroundColor: earlyText } } } } } },
+        { addConditionalFormatRule: { index: 0, rule: { ranges: [delayCol], booleanRule: { condition: { type: "CUSTOM_FORMULA", values: [{ userEnteredValue: `=REGEXMATCH(${delayRef},"⏳")` }] }, format: { backgroundColor: leftFill, textFormat: { bold: true, foregroundColor: leftText } } } } } },
         { addConditionalFormatRule: { index: 0, rule: { ranges: [delayCol], booleanRule: { condition: { type: "CUSTOM_FORMULA", values: [{ userEnteredValue: `=REGEXMATCH(${delayRef},"⛔")` }] }, format: { backgroundColor: majorDelayFill, textFormat: { bold: true, foregroundColor: majorDelayText } } } } } },
         { addConditionalFormatRule: { index: 0, rule: { ranges: [delayCol], booleanRule: { condition: { type: "CUSTOM_FORMULA", values: [{ userEnteredValue: `=REGEXMATCH(${delayRef},"⚠")` }] }, format: { backgroundColor: minorDelayFill, textFormat: { bold: true, foregroundColor: minorDelayText } } } } } },
       )
@@ -888,11 +894,11 @@ async function main() {
       fr.tab,
       String(fileOrders.filter((order) => order.currentStatus === "IN_PROGRESS").length),
       String(fileOrders.filter((order) => order.currentStatus === "COMPLETED").length),
-      String(fileOrders.filter((order) => { const d = getDelay(order); return d && d.kind !== "early" }).length),
+      String(fileOrders.filter((order) => { const d = getDelay(order); return d && (d.kind === "late" || d.kind === "overdue") }).length),
     ])
   }
 
-  const delayed = [...orders.values()].filter((order) => { const d = getDelay(order); return d && d.kind !== "early" }).length
+  const delayed = [...orders.values()].filter((order) => { const d = getDelay(order); return d && (d.kind === "late" || d.kind === "overdue") }).length
   console.log(`\n📊 Daily Orders Report (Google Sheets)`)
   console.log(`   Source : ${files.length} file(s) — ${files.map((file) => basename(file)).join(", ")}`)
   console.log(`   Orders : ${orders.size}   Events: ${allEvents.length}   Reports: ${fileReports.length}`)
