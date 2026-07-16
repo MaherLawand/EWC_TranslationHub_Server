@@ -1250,8 +1250,12 @@ export async function nearestSubDeadlineFor(
 */
 function buildOrderData(
   body: any,
-  userId: string
+  userId: string,
+  // Sub-orders inherit their audience from the parent instead of choosing one,
+  // so legacy parents (source file, no saved selection) must not hard-fail.
+  opts: { requireNotifyAudience?: boolean } = {}
 ): { data?: any; error?: string } {
+  const { requireNotifyAudience = true } = opts
   const {
     title,
     notes,
@@ -1355,7 +1359,7 @@ function buildOrderData(
   // Email audience for the source-file notification (pills). Required when a
   // source file is present at creation.
   const notifyPositions = sanitizeNotifyPositions(body.notifyPositions)
-  if (hasSourceAtCreate && notifyPositions.length === 0) {
+  if (requireNotifyAudience && hasSourceAtCreate && notifyPositions.length === 0) {
     return { error: "Select at least one role to notify (Translator, TransPerfect, or Tarjama) when a source file is added" }
   }
   // A source file needs a target language, otherwise no translator can be matched.
@@ -1567,7 +1571,7 @@ export async function createSubOrders(
 
     const parent = await prisma.translationOrder.findUnique({
       where: { id: parentId },
-      select: { id: true, isParent: true, type: true, event: true },
+      select: { id: true, isParent: true, type: true, event: true, notifyPositions: true },
     })
 
     if (!parent) {
@@ -1598,8 +1602,15 @@ export async function createSubOrders(
         ...item,
         type: item?.type ?? parent.type,
         event: item?.event ?? parent.event,
+        // Sub-orders inherit the parent's notify audience when none was sent
+        // (the sidebar's Add Sub-Order panel has no pills).
+        notifyPositions: sanitizeNotifyPositions(item?.notifyPositions).length
+          ? item.notifyPositions
+          : parent.notifyPositions,
       }
-      const built = buildOrderData(merged, user.id)
+      // Inherited audience — don't reject a legacy parent that has a source file
+      // but no saved selection.
+      const built = buildOrderData(merged, user.id, { requireNotifyAudience: false })
       if (built.error || !built.data) {
         return res
           .status(400)
