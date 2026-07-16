@@ -32,3 +32,40 @@ export function sanitizeNotifyPositions(input: unknown): string[] {
   const allowed = new Set<string>(NOTIFY_POSITION_OPTIONS as readonly string[])
   return [...new Set(input.filter((v): v is string => typeof v === "string" && allowed.has(v)))]
 }
+
+/**
+ * Order visibility for translator-side roles.
+ *
+ * The Notify pills act as an assignment: once an order names the roles that get
+ * its source-file email, only those roles may see it. Admins and every non-
+ * translator position (Producer, PPM, Video Editor, Viewer, Editor) are
+ * unrestricted. Orders with no selection yet stay visible to all three
+ * translator roles.
+ *
+ * Returns a Prisma where-fragment to AND into the query, or null for no filter.
+ */
+export function orderVisibilityWhere(
+  role?: string | null,
+  position?: string | null
+): { OR: ({ notifyPositions: { isEmpty: true } } | { notifyPositions: { has: string } })[] } | null {
+  if (role === "ADMIN") return null
+  if (!isTranslatorPosition(position)) return null
+  return {
+    OR: [
+      { notifyPositions: { isEmpty: true } },
+      { notifyPositions: { has: position as string } },
+    ],
+  }
+}
+
+/** Whether a single already-loaded order is visible to this user. */
+export function canSeeOrder(
+  role: string | null | undefined,
+  position: string | null | undefined,
+  notifyPositions: string[] | null | undefined
+): boolean {
+  if (role === "ADMIN") return true
+  if (!isTranslatorPosition(position)) return true
+  const list = notifyPositions ?? []
+  return list.length === 0 || list.includes(position as string)
+}

@@ -4,7 +4,7 @@ import { prisma } from "../lib/prisma.js"
 import { triggerNotifications, getIo } from "../lib/socket.js"
 import { logger } from "../lib/logger.js"
 import { sendFeedbackEmail } from "../utils/sendFeedbackEmail.js"
-import { TRANSLATOR_POSITIONS, isTranslatorPosition } from "../lib/positions.js"
+import { TRANSLATOR_POSITIONS, isTranslatorPosition, canSeeOrder } from "../lib/positions.js"
 
 const feedbackSelect = {
   id: true,
@@ -177,6 +177,17 @@ export async function getOrderFeedback(req: AuthRequest, res: Response) {
     if (!req.userId) return res.status(401).json({ message: "Unauthorized" })
     const orderId = String(req.params.id)
 
+    // Assignment-based visibility — no reading a thread on an order you can't see.
+    if (isTranslatorPosition(req.userPosition) && req.userRole !== "ADMIN") {
+      const order = await prisma.translationOrder.findUnique({
+        where: { id: orderId },
+        select: { notifyPositions: true },
+      })
+      if (!order || !canSeeOrder(req.userRole, req.userPosition, order.notifyPositions)) {
+        return res.status(404).json({ message: "Order not found" })
+      }
+    }
+
     const feedback = await prisma.orderFeedback.findMany({
       where: { orderId },
       orderBy: { createdAt: "asc" },
@@ -279,9 +290,13 @@ export async function createOrderFeedback(req: AuthRequest, res: Response) {
 
     const order = await prisma.translationOrder.findUnique({
       where: { id: orderId },
-      select: { id: true },
+      select: { id: true, notifyPositions: true },
     })
     if (!order) return res.status(404).json({ message: "Order not found" })
+    // Assignment-based visibility — can't post on an order you can't see.
+    if (!canSeeOrder(user.role, user.position, order.notifyPositions)) {
+      return res.status(404).json({ message: "Order not found" })
+    }
 
     const feedback = await prisma.orderFeedback.create({
       data: { orderId, authorId: user.id, message },

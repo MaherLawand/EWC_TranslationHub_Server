@@ -12,7 +12,7 @@ import { triggerNotifications, getIo } from "../lib/socket.js"
 import { notifyTranslatorsSourceReady, notifyTranslatorsOrderDeleted, notifyTranslatorsSourceRemoved } from "./notification.controller.js"
 import { logger } from "../lib/logger.js"
 import { ordersCache } from "../lib/ordersCache.js"
-import { isTranslatorPosition, sanitizeNotifyPositions } from "../lib/positions.js"
+import { isTranslatorPosition, sanitizeNotifyPositions, orderVisibilityWhere, canSeeOrder } from "../lib/positions.js"
 import {
   Prisma,
   DeliveryFormat,
@@ -1014,6 +1014,18 @@ if (
     const mode = flatten ? "flat" : "grouped"
 
     /*
+      VISIBILITY — the Notify pills act as an assignment: a translator-side role
+      only sees orders whose selection names their role (or that have no
+      selection yet). Admins/other positions are unrestricted. Folded into `where`
+      BEFORE the cache key is built, so each audience caches separately.
+    */
+    const visibility = orderVisibilityWhere(req.userRole, req.userPosition)
+    if (visibility) {
+      const currentAnd = Array.isArray(where.AND) ? where.AND : where.AND ? [where.AND] : []
+      where.AND = [...currentAnd, visibility]
+    }
+
+    /*
       CACHE CHECK
     */
 
@@ -1120,6 +1132,12 @@ export async function getOrderById(
     ])
 
     if (!order) {
+      return res.status(404).json({ message: "Order not found" })
+    }
+
+    // Assignment-based visibility — a translator-side role can only open an order
+    // whose Notify selection names their role (404 so we don't leak existence).
+    if (!canSeeOrder(req.userRole, req.userPosition, (order as any).notifyPositions)) {
       return res.status(404).json({ message: "Order not found" })
     }
 
@@ -1905,7 +1923,12 @@ export async function getSubOrders(
     const where: Prisma.TranslationOrderWhereInput = { parentId }
     if (isOrderStatus(status)) where.status = status
 
-    const cacheKey = `sub-orders:${parentId}:${page}:${limit}:${isOrderStatus(status) ? status : "all"}`
+    // Same assignment-based visibility as the top-level list.
+    const visibility = orderVisibilityWhere(req.userRole, req.userPosition)
+    if (visibility) where.AND = [visibility]
+
+    // Cache per audience — otherwise one role's rows would be served to another.
+    const cacheKey = `sub-orders:${parentId}:${page}:${limit}:${isOrderStatus(status) ? status : "all"}:${visibility ? req.userPosition : "all"}`
     const cached = ordersCache.get(cacheKey)
     if (cached) return res.json(cached)
 
@@ -2822,6 +2845,7 @@ export async function updateOrderStatus(
             isParent: true,
             parentId: true,
             status: true,
+            notifyPositions: true,
           },
         }),
       ])
@@ -2847,6 +2871,11 @@ export async function updateOrderStatus(
         message:
           "Order not found",
       })
+    }
+
+    // Can't change the status of an order you aren't assigned to see.
+    if (!canSeeOrder(user.role, user.position, existingOrder.notifyPositions)) {
+      return res.status(404).json({ message: "Order not found" })
     }
 
     // A parent ("big order") status is derived from its sub-orders, not set manually.
@@ -3698,6 +3727,14 @@ export async function getOrderCounts(
           },
         }
       }
+    }
+
+    // Counts must match what the list shows — apply the same assignment-based
+    // visibility (folded in before the cache key so audiences cache separately).
+    const countsVisibility = orderVisibilityWhere(req.userRole, req.userPosition)
+    if (countsVisibility) {
+      const currentAnd = Array.isArray(where.AND) ? where.AND : where.AND ? [where.AND] : []
+      where.AND = [...currentAnd, countsVisibility]
     }
 
     const countsCacheKey = `counts:${JSON.stringify(where)}:${assignedOnly ? req.userId : "all"}`
