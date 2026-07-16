@@ -2,10 +2,67 @@ import { prisma } from "../lib/prisma.js"
 import { logger } from "../lib/logger.js"
 import { sendEmail, sendMany } from "../lib/mailer.js"
 import { triggerNotifications } from "../lib/socket.js"
+import { DEFAULT_NOTIFY_POSITIONS, sanitizeNotifyPositions } from "../lib/positions.js"
+
+// The positions that should receive an order's translator emails. Uses the
+// order's saved pill selection; legacy orders with none fall back to TransPerfect.
+function resolveNotifyPositions(saved?: unknown, override?: unknown): string[] {
+  const fromOverride = sanitizeNotifyPositions(override)
+  if (fromOverride.length) return fromOverride
+  const fromSaved = sanitizeNotifyPositions(saved)
+  if (fromSaved.length) return fromSaved
+  return [...DEFAULT_NOTIFY_POSITIONS]
+}
+
+/**
+ * Resolve the active users who should receive an order's source-file notification.
+ *
+ * - Vendor roles (TransPerfect / Tarjama) → every active user of that position.
+ * - TRANSLATOR → only translators whose specialtyLanguages overlap the order's
+ *   TARGET languages (they're "assigned" by specialty). No match → no translators.
+ */
+async function resolveRecipients(order: any, positionsOverride?: string[]): Promise<any[]> {
+  const positions = resolveNotifyPositions(order?.notifyPositions, positionsOverride)
+  const wantsTranslator = positions.includes("TRANSLATOR")
+  const vendorPositions = positions.filter((p) => p !== "TRANSLATOR")
+
+  const out: any[] = []
+
+  if (vendorPositions.length) {
+    out.push(
+      ...(await prisma.user.findMany({
+        where: { position: { in: vendorPositions as any }, isActive: true },
+      }))
+    )
+  }
+
+  if (wantsTranslator) {
+    const detail = order?.type === "BROADCAST" ? order?.broadcast : order?.marketing
+    const targetSet = new Set<string>(
+      (detail?.targetLanguages ?? []).map((l: string) => String(l).toLowerCase())
+    )
+    // With no target languages there is nothing to match a specialty against.
+    if (targetSet.size) {
+      const translators = await prisma.user.findMany({
+        where: { position: "TRANSLATOR", isActive: true },
+      })
+      out.push(
+        ...translators.filter((t) =>
+          (t.specialtyLanguages ?? []).some((l) => targetSet.has(String(l).toLowerCase()))
+        )
+      )
+    }
+  }
+
+  // De-duplicate by id (a user can't hold two positions, but be safe).
+  const seen = new Set<string>()
+  return out.filter((u) => (seen.has(u.id) ? false : (seen.add(u.id), true)))
+}
 
 export async function notifyTranslatorsSourceReady(
   orderId: string,
-  changed = false
+  changed = false,
+  positionsOverride?: string[]
 ) {
   try {
 
@@ -75,31 +132,16 @@ export async function notifyTranslatorsSourceReady(
       GET TRANSLATORS
     */
 
-    // Every active translator is notified when a source file is added,
-    // regardless of department.
-    const translators =
-      await prisma.user.findMany({
-        where: {
-          position: "TRANSLATOR",
-          isActive: true,
-        },
-      })
+    // Notify the active users chosen via the order's pills. Vendor roles get all
+    // of their users; the Translator role is filtered to matching specialties.
+    const uniqueTranslators = await resolveRecipients(order, positionsOverride)
 
     if (
-      translators.length === 0
+      uniqueTranslators.length === 0
     ) {
-      logger.info({ action: "NOTIFY_SOURCE_READY_SKIP", orderId, reason: "no_active_translators" })
+      logger.info({ action: "NOTIFY_SOURCE_READY_SKIP", orderId, reason: "no_matching_recipients", positions: resolveNotifyPositions((order as any).notifyPositions, positionsOverride) })
       return
     }
-
-    /*
-      REMOVE DUPLICATES — O(n) via Set
-    */
-
-    const seen = new Set<string>()
-    const uniqueTranslators = translators.filter(
-      (t) => seen.has(t.id) ? false : (seen.add(t.id), true)
-    )
 
     /*
       CREATE NOTIFICATIONS
@@ -345,7 +387,7 @@ export async function notifyTranslatorsOrderDeleted(order: any) {
     if (!sourceFileLink) return
 
     const translators = await prisma.user.findMany({
-      where: { position: "TRANSLATOR", isActive: true },
+      where: { position: { in: resolveNotifyPositions((order as any).notifyPositions) as any }, isActive: true },
       select: { id: true, email: true },
     })
     const recipients = translators.filter((t) => t.email)
@@ -483,10 +525,9 @@ export async function notifyTranslatorsSourceRemoved(orderId: string) {
     })
     if (!order) return
 
-    const translators = await prisma.user.findMany({
-      where: { position: "TRANSLATOR", isActive: true },
-      select: { id: true, email: true },
-    })
+    // Same audience as the source-ready email (vendor roles in full; translators
+    // filtered by specialty against the order's target languages).
+    const translators = await resolveRecipients(order)
     const recipients = translators.filter((t) => t.email)
     if (recipients.length === 0) return
 

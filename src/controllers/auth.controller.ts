@@ -500,6 +500,8 @@ export async function getAllUsers(
 
       position: true,
 
+      specialtyLanguages: true,
+
       isActive: true,
 
       createdAt: true,
@@ -581,7 +583,14 @@ export async function createUser(
       role,
       department,
       position,
+      specialtyLanguages,
     } = req.body
+
+    // Specialty languages only apply to translators; ignored otherwise.
+    const cleanSpecialty =
+      position === "TRANSLATOR" && Array.isArray(specialtyLanguages)
+        ? [...new Set(specialtyLanguages.filter((l: any) => typeof l === "string" && l.trim()))]
+        : []
 
     // Input validation
     if (!firstName?.trim() || !lastName?.trim()) {
@@ -592,7 +601,7 @@ export async function createUser(
     }
     const VALID_ROLES = ["ADMIN", "USER"]
     const VALID_DEPARTMENTS = ["BROADCAST", "MARKETING"]
-    const VALID_POSITIONS = ["PRODUCER", "POST_PRODUCTION_MANAGER", "TRANSLATOR", "VIEWER", "EDITOR", "VIDEO_EDITOR"]
+    const VALID_POSITIONS = ["PRODUCER", "POST_PRODUCTION_MANAGER", "TRANSLATOR", "TRANSPERFECT", "TARJAMA", "VIEWER", "EDITOR", "VIDEO_EDITOR"]
     if (!VALID_ROLES.includes(role)) {
       return res.status(400).json({ message: "Invalid role" })
     }
@@ -849,6 +858,7 @@ lastName,
       role,
       department,
       position,
+      specialtyLanguages: cleanSpecialty,
       inviteToken,
       inviteExpiry,
       isActive: false,
@@ -862,6 +872,7 @@ lastName: true,
       role: true,
       department: true,
       position: true,
+      specialtyLanguages: true,
       isActive: true,
       createdAt: true,
     },
@@ -909,7 +920,19 @@ export async function updateUser(
       role,
       department,
       position,
+      specialtyLanguages,
     } = req.body
+
+    // Resolve the specialty-languages update: only meaningful for translators;
+    // switching to any other position clears it. Undefined → leave unchanged.
+    const sanitizeSpecialty = (v: any) =>
+      Array.isArray(v) ? [...new Set(v.filter((l: any) => typeof l === "string" && l.trim()))] : []
+    let specialtyUpdate: string[] | undefined = undefined
+    if (position !== undefined) {
+      specialtyUpdate = position === "TRANSLATOR" ? sanitizeSpecialty(specialtyLanguages) : []
+    } else if (specialtyLanguages !== undefined) {
+      specialtyUpdate = sanitizeSpecialty(specialtyLanguages)
+    }
 
     /*
       FIELD VALIDATION
@@ -917,7 +940,7 @@ export async function updateUser(
 
     const VALID_ROLES_U = ["ADMIN", "USER"]
     const VALID_DEPARTMENTS_U = ["BROADCAST", "MARKETING"]
-    const VALID_POSITIONS_U = ["PRODUCER", "POST_PRODUCTION_MANAGER", "TRANSLATOR", "VIEWER", "EDITOR", "VIDEO_EDITOR"]
+    const VALID_POSITIONS_U = ["PRODUCER", "POST_PRODUCTION_MANAGER", "TRANSLATOR", "TRANSPERFECT", "TARJAMA", "VIEWER", "EDITOR", "VIDEO_EDITOR"]
 
     if (role && !VALID_ROLES_U.includes(role)) {
       return res.status(400).json({ message: "Invalid role" })
@@ -1213,6 +1236,7 @@ If you did not expect this invitation, you can safely ignore this email.
           role,
           department,
           position,
+          ...(specialtyUpdate !== undefined ? { specialtyLanguages: specialtyUpdate } : {}),
           inviteToken,
           inviteExpiry,
         },
@@ -1225,6 +1249,7 @@ lastName: true,
           role: true,
           department: true,
           position: true,
+          specialtyLanguages: true,
           isActive: true,
           createdAt: true,
         },

@@ -12,6 +12,7 @@ import { triggerNotifications, getIo } from "../lib/socket.js"
 import { notifyTranslatorsSourceReady, notifyTranslatorsOrderDeleted, notifyTranslatorsSourceRemoved } from "./notification.controller.js"
 import { logger } from "../lib/logger.js"
 import { ordersCache } from "../lib/ordersCache.js"
+import { isTranslatorPosition, sanitizeNotifyPositions } from "../lib/positions.js"
 import {
   Prisma,
   DeliveryFormat,
@@ -160,6 +161,8 @@ const orderSelectCore = {
   lastEditedAt: true,
 
   sourceChangedAt: true,
+
+  notifyPositions: true,
 
   _count: { select: { feedback: true } },
 
@@ -487,7 +490,7 @@ function canUpdateStatus(
 ) {
   return (
     canManageOrders(user) ||
-    user.position === "TRANSLATOR" ||
+    isTranslatorPosition(user.position) ||
     user.position === "EDITOR"
   )
 }
@@ -1120,14 +1123,15 @@ export async function getOrderById(
       return res.status(404).json({ message: "Order not found" })
     }
 
-    // A TRANSLATOR opening the order clears the "source changed" caution (they've
-    // seen the update). Managers viewing it — including the one who just made the
-    // change — must NOT clear it, or the flag would vanish before translators see it.
+    // A translator (Translator / TransPerfect / Tarjama) opening the order clears
+    // the "source changed" caution (they've seen the update). Managers viewing it —
+    // including the one who just made the change — must NOT clear it, or the flag
+    // would vanish before translators see it.
     if ((order as any).sourceChangedAt && req.userId) {
       prisma.user
         .findUnique({ where: { id: req.userId }, select: { position: true } })
         .then((u) => {
-          if (u?.position === "TRANSLATOR") {
+          if (isTranslatorPosition(u?.position)) {
             return prisma.translationOrder
               .update({ where: { id }, data: { sourceChangedAt: null } })
               .then(() => ordersCache.invalidate())
@@ -1330,6 +1334,17 @@ function buildOrderData(
       ? OrderStatus.READY_FOR_TRANSLATION
       : resolvedStatus
 
+  // Email audience for the source-file notification (pills). Required when a
+  // source file is present at creation.
+  const notifyPositions = sanitizeNotifyPositions(body.notifyPositions)
+  if (hasSourceAtCreate && notifyPositions.length === 0) {
+    return { error: "Select at least one role to notify (Translator, TransPerfect, or Tarjama) when a source file is added" }
+  }
+  // A source file needs a target language, otherwise no translator can be matched.
+  if (hasSourceAtCreate && tgtLang.length === 0) {
+    return { error: "At least one target language is required when a source file is added" }
+  }
+
   const data: any = {
     title: title.trim(),
 
@@ -1349,6 +1364,8 @@ function buildOrderData(
     priority: isOrderPriority(priority) ? priority : OrderPriority.MEDIUM,
 
     createdById: userId,
+
+    notifyPositions,
 
     ...(orderType === "BROADCAST"
       ? {
@@ -1586,6 +1603,7 @@ export async function createSubOrders(
         completedAt: d.completedAt ?? null,
         priority: d.priority,
         createdById: d.createdById,
+        notifyPositions: d.notifyPositions ?? [],
         isParent: false,
         parentId,
       })
@@ -1724,7 +1742,7 @@ export async function duplicateOrder(req: AuthRequest, res: Response) {
     const source = await prisma.translationOrder.findUnique({
       where: { id: sourceId },
       select: {
-        id: true, title: true, notes: true, type: true, event: true, status: true, priority: true, parentId: true,
+        id: true, title: true, notes: true, type: true, event: true, status: true, priority: true, parentId: true, notifyPositions: true,
         broadcast: {
           select: {
             estimatedMinutes: true, sourceLanguage: true, targetLanguages: true,
@@ -1781,6 +1799,7 @@ export async function duplicateOrder(req: AuthRequest, res: Response) {
       status: dupStatus,
       priority: source.priority,
       createdById: user.id,
+      notifyPositions: source.notifyPositions ?? [],
       isParent: false,
       parentId: source.parentId,
     }
@@ -1982,6 +2001,7 @@ export async function updateOrder(
         sourceFileLink: req.body.sourceFileLink,
         srtAvailableLink: req.body.srtAvailableLink,
         deliveries: req.body.deliveries,
+        notifyPositions: req.body.notifyPositions,
         clientLastEditedAt: req.body.clientLastEditedAt,
       }
     }
@@ -2030,6 +2050,37 @@ if (
     message: "Order type cannot be changed",
   })
 }
+
+    /*
+      NOTIFY AUDIENCE (pills) — required whenever the order ends up with a source
+      file. If the request omits notifyPositions, keep the existing selection.
+    */
+    const notifyPositionsProvided = req.body.notifyPositions !== undefined
+    const parsedNotifyPositions = notifyPositionsProvided
+      ? sanitizeNotifyPositions(req.body.notifyPositions)
+      : sanitizeNotifyPositions((existingOrder as any).notifyPositions)
+    const existingSourceLink =
+      existingOrder.type === "BROADCAST"
+        ? existingOrder.broadcast?.sourceFileLink
+        : existingOrder.marketing?.sourceFileLink
+    const finalSourceLink =
+      typeof sourceFileLink === "string" ? sourceFileLink : (existingSourceLink || "")
+    if (finalSourceLink.trim() && parsedNotifyPositions.length === 0) {
+      return res.status(400).json({
+        message: "Select at least one role to notify (Translator, TransPerfect, or Tarjama) when a source file is added",
+      })
+    }
+    // A source file needs a target language, otherwise no translator can be matched.
+    const existingTargets =
+      existingOrder.type === "BROADCAST"
+        ? existingOrder.broadcast?.targetLanguages
+        : existingOrder.marketing?.targetLanguages
+    const finalTargets = Array.isArray(targetLanguages) ? targetLanguages : (existingTargets || [])
+    if (finalSourceLink.trim() && finalTargets.length === 0) {
+      return res.status(400).json({
+        message: "At least one target language is required when a source file is added",
+      })
+    }
 
     /*
       ORDER TYPE
@@ -2145,6 +2196,9 @@ try {
 ...(isEventType(event)
   ? { event }
   : {}),
+
+        // Persist the notify-audience pills when the request includes them.
+        ...(notifyPositionsProvided ? { notifyPositions: parsedNotifyPositions } : {}),
 
         type: orderType,
 
@@ -3148,9 +3202,16 @@ export async function resendSourceNotification(
       return res.status(400).json({ message: "This order has no source file to notify about." })
     }
 
-    // Flag the order (caution icon) so translators see it may have changed.
+    // Optional audience override from the modal pills; else the stored selection.
+    const override = sanitizeNotifyPositions(req.body?.notifyPositions)
+
+    // Persist the override (so it becomes the order's saved selection) and flag
+    // the order (caution icon) so translators see it may have changed.
     try {
-      await prisma.translationOrder.update({ where: { id: orderId }, data: { sourceChangedAt: new Date() } })
+      await prisma.translationOrder.update({
+        where: { id: orderId },
+        data: { sourceChangedAt: new Date(), ...(override.length ? { notifyPositions: override } : {}) },
+      })
       ordersCache.invalidate()
       try { getIo()?.emit("order-patched", { id: orderId, type: existing.type }) } catch {}
     } catch (e) {
@@ -3158,7 +3219,7 @@ export async function resendSourceNotification(
     }
 
     // Resend as a CHANGE ("Source File Updated"), fire-and-forget.
-    notifyTranslatorsSourceReady(orderId, true).catch((e) =>
+    notifyTranslatorsSourceReady(orderId, true, override.length ? override : undefined).catch((e) =>
       logger.error({ action: "NOTIFY_TRANSLATORS_ERROR", orderId, err: e })
     )
 

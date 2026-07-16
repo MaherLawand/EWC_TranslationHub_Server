@@ -27,6 +27,9 @@ enum UserPosition {
   PRODUCER
   POST_PRODUCTION_MANAGER
   TRANSLATOR
+  // Vendor translator roles — same visibility/behavior as TRANSLATOR.
+  TRANSPERFECT
+  TARJAMA
   VIEWER
   EDITOR
   VIDEO_EDITOR
@@ -146,6 +149,11 @@ model User {
   department UserDepartment?
 
   position UserPosition?
+
+  // Languages a TRANSLATOR specializes in (what they're good at translating into).
+  // Used to route source-file emails to matching translators only. Language names,
+  // e.g. ["Arabic","French"]. Empty/ignored for non-translator positions.
+  specialtyLanguages String[] @default([])
 
   assignedGames GameAssignment[]
 
@@ -287,6 +295,12 @@ model TranslationOrder {
   // caution flag can warn translators who may be working off the old source.
   // Cleared when the order is opened.
   sourceChangedAt DateTime?
+
+  // Which translator positions receive the "source file ready/updated" email for
+  // this order (chosen via pills when a source file is added). Values are
+  // UserPosition names, e.g. ["TRANSLATOR","TARJAMA"]. Empty on legacy orders →
+  // recipients fall back to TRANSPERFECT.
+  notifyPositions String[] @default([])
 
   /**
    * HISTORY

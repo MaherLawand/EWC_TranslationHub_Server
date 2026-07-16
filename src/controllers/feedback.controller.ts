@@ -4,6 +4,7 @@ import { prisma } from "../lib/prisma.js"
 import { triggerNotifications, getIo } from "../lib/socket.js"
 import { logger } from "../lib/logger.js"
 import { sendFeedbackEmail } from "../utils/sendFeedbackEmail.js"
+import { TRANSLATOR_POSITIONS, isTranslatorPosition } from "../lib/positions.js"
 
 const feedbackSelect = {
   id: true,
@@ -89,7 +90,7 @@ async function notifyFeedback(
     // Always notify every active translator, so they see new feedback threads
     // even on orders they aren't assigned to / haven't commented on yet.
     const translators = await prisma.user.findMany({
-      where: { isActive: true, position: "TRANSLATOR" },
+      where: { isActive: true, position: { in: TRANSLATOR_POSITIONS as any } },
       select: { id: true, email: true },
     })
     recipients = [...recipients, ...translators.map((t) => ({ id: t.id }))]
@@ -268,7 +269,7 @@ export async function createOrderFeedback(req: AuthRequest, res: Response) {
     // feedback is a back-and-forth thread between them.
     const canPostFeedback =
       user.role === "ADMIN" ||
-      user.position === "TRANSLATOR" ||
+      isTranslatorPosition(user.position) ||
       user.position === "PRODUCER" ||
       user.position === "POST_PRODUCTION_MANAGER" ||
       user.position === "EDITOR"
