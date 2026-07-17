@@ -85,6 +85,8 @@ type OrderReport = {
   completedBy?: string
   deadline?: string
   deadlineHasTime?: boolean
+  /** Roles the source-file email was routed to (the order's Notify pills). */
+  notifyPositions?: string[]
   assignedTo: string[]
   deletedBy?: string
   deletedAt?: string
@@ -177,6 +179,23 @@ const CONTENT_CATEGORY_INFO: Record<string, { label: string; hours: string }> = 
   LONG_FORM: { label: "Long Form", hours: "8h" },
   EXPLAINER: { label: "Explainer", hours: "12h" },
 }
+// External vendors the source-file email can be routed to. TRANSLATOR is the
+// in-house team, so it's deliberately absent — the report tracks vendor
+// assignment only, and an order sent only to Translator shows blank here.
+// Key order fixes the display order, so it never varies with pill click order.
+const VENDOR_LABELS: Record<string, string> = {
+  TRANSPERFECT: "TransPerfect",
+  TARJAMA: "Tarjama",
+}
+function vendorCell(notifyPositions?: string[]): string {
+  if (!notifyPositions?.length) return ""
+  const chosen = new Set(notifyPositions)
+  return Object.keys(VENDOR_LABELS)
+    .filter((role) => chosen.has(role))
+    .map((role) => VENDOR_LABELS[role])
+    .join(", ")
+}
+
 function contentCategoryCell(value?: string): string {
   if (!value) return ""
   const info = CONTENT_CATEGORY_INFO[value]
@@ -740,7 +759,7 @@ async function main() {
         where: { id: { in: [...orders.keys()] } },
         select: {
           id: true, title: true, type: true, event: true, priority: true, status: true,
-          readyAt: true, inProgressAt: true, completedAt: true,
+          readyAt: true, inProgressAt: true, completedAt: true, notifyPositions: true,
           createdBy: { select: { firstName: true, lastName: true } },
           completedBy: { select: { firstName: true, lastName: true } },
           marketing: {
@@ -772,6 +791,7 @@ async function main() {
         order.inProgressAt = dbOrder.inProgressAt?.toISOString()
         order.completedAt = dbOrder.completedAt?.toISOString()
         order.completedBy = personName(dbOrder.completedBy)
+        order.notifyPositions = dbOrder.notifyPositions
         const details = dbOrder.broadcast || dbOrder.marketing
         order.deadline = details?.deadlineDate?.toISOString()
         order.deadlineHasTime = details?.deadlineHasTime || false
@@ -818,6 +838,7 @@ async function main() {
     { header: "Completed (UTC)", width: 175 },
     { header: "Source → Completed", width: 150 },
     { header: "Completed by", width: 160 },
+    { header: "Assigned Vendor", width: 150 },
     { header: "Assigned to", width: 220 },
   ]
 
@@ -848,6 +869,7 @@ async function main() {
       utcTimestamp(order.completedAt),
       durationLabel(order.readyAt, order.completedAt),
       order.completedBy || "",
+      vendorCell(order.notifyPositions),
       order.assignedTo.join(", "),
     ]
     // Two-level grouping for readability: STATUS section (In Progress, then

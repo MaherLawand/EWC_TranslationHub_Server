@@ -2739,6 +2739,9 @@ const sourceWasRemoved =
 
       // Flag the order so the table shows a caution icon for translators who may
       // be working off the old source. Only for real changes, not first-time adds.
+      // readyAt is deliberately NOT moved — it marks when the order first became
+      // translatable, and moving it would put the timeline behind inProgressAt /
+      // completedAt on an order that's already underway.
       if (sourceIsChange) {
         prisma.translationOrder
           .update({ where: { id: orderId }, data: { sourceChangedAt: new Date() } })
@@ -2768,6 +2771,23 @@ const sourceWasRemoved =
         orderId,
         sourceIsChange
       ).catch((e) => logger.error({ action: "NOTIFY_TRANSLATORS_ERROR", orderId, err: e }))
+    }
+
+    /*
+      NOTIFY AUDIENCE EXPANDED — a new role (e.g. TransPerfect adding Translator)
+      was added to notifyPositions on an order that already has a source and
+      whose source link didn't change this edit (that case is fully handled
+      above). Email only the newly-added roles — everyone already selected has
+      already been notified and shouldn't get a duplicate "source added" email.
+    */
+    if (!sourceWasChanged && finalSourceLink.trim() && notifyPositionsProvided) {
+      const previouslyNotified = new Set(sanitizeNotifyPositions((existingOrder as any).notifyPositions))
+      const newlyAdded = parsedNotifyPositions.filter((p) => !previouslyNotified.has(p))
+      if (newlyAdded.length > 0) {
+        notifyTranslatorsSourceReady(orderId, false, newlyAdded).catch((e) =>
+          logger.error({ action: "NOTIFY_TRANSLATORS_ERROR", orderId, err: e })
+        )
+      }
     }
 
     const changes = diffOrders(existingOrder, updatedOrder)
