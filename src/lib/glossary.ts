@@ -291,6 +291,41 @@ export function entriesForColumn(
   return out
 }
 
+/**
+ * Turn a glossary failure into a short, actionable hint.
+ *
+ * The four ways this breaks in production look identical from the UI — a 503 —
+ * but need completely different fixes, and the difference is only visible in the
+ * server logs. Google's own messages are safe to pass on: they name the problem
+ * and never contain the credentials.
+ */
+export function describeGlossaryFailure(error: unknown): string {
+  const message = error instanceof Error ? error.message : String(error)
+
+  if (/Missing Google service-account credentials/i.test(message)) {
+    return "The server has no Google credentials. Set GOOGLE_SERVICE_ACCOUNT_EMAIL and GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY."
+  }
+  if (/invalid_grant|Invalid JWT|Invalid Signature|DECODER|PEM|asn1|unsupported/i.test(message)) {
+    return "The Google private key was rejected. It is likely mangled — the \\n sequences must survive as literal backslash-n, and the surrounding quotes must not be included."
+  }
+  if (/not valid JSON/i.test(message)) {
+    return "GOOGLE_SERVICE_ACCOUNT_JSON is set but isn't valid JSON."
+  }
+  // Token exchange failed without a specific reason from Google. In practice this
+  // is a malformed key or an email that doesn't match it — both are copy-paste
+  // damage, and the raw message ("...: OK") says nothing useful.
+  if (/Could not authenticate the Google service account/i.test(message)) {
+    return "Google rejected the service-account sign-in. Re-copy GOOGLE_SERVICE_ACCOUNT_EMAIL and GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY — the key must keep its literal \\n sequences and carry no surrounding quotes."
+  }
+  if (/permission|forbidden|403/i.test(message)) {
+    return "Google refused access to the glossary sheet. Share it (view access is enough) or check the spreadsheet id."
+  }
+  if (/not found|404/i.test(message)) {
+    return "The glossary spreadsheet was not found. Check GLOSSARY_SHEET_ID."
+  }
+  return message
+}
+
 /** Warm the cache at boot so the first user doesn't wait on Sheets. Never throws. */
 export function warmGlossary(): void {
   getGlossary()

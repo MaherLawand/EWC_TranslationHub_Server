@@ -24,7 +24,7 @@ import {
   SrtInvariantError,
   type SrtEdit,
 } from "../lib/srt.js"
-import { getGlossary, entriesForColumn } from "../lib/glossary.js"
+import { getGlossary, entriesForColumn, describeGlossaryFailure } from "../lib/glossary.js"
 import { glossaryColumnFor, COLUMN_TO_LABEL, usesNonLatinScript } from "../lib/glossaryLanguages.js"
 import { checkGlossary, isConfigured, GlossaryCheckUnavailable } from "../lib/glossaryCheck.js"
 import { wikiForGame } from "../lib/games.js"
@@ -72,7 +72,12 @@ export async function getGlossaryLanguages(req: AuthRequest, res: Response) {
     return res.json({ languages, configured: isConfigured() })
   } catch (error) {
     logger.error({ action: "GLOSSARY_LANGUAGES_ERROR", userId: req.userId, err: error })
-    return res.status(503).json({ message: "The glossary is temporarily unavailable." })
+    return res.status(503).json({
+      message: "The glossary is temporarily unavailable.",
+      // Names the actual cause, so this is diagnosable without server logs. Safe
+      // to return: it describes configuration, never the credentials themselves.
+      detail: describeGlossaryFailure(error),
+    })
   }
 }
 
