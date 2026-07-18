@@ -671,6 +671,103 @@ async function checkUntranslatedChunk(
   return { suggestions, usage }
 }
 
+/**
+ * Have the model review deterministic hits IN CONTEXT, and drop the wrong ones.
+ *
+ * The scans are deliberately dumb: they find every place a glossary term or a
+ * roster name appears, which is what makes them exhaustive, repeatable and free.
+ * What they cannot do is read the sentence. Whether a hit is a real fix depends
+ * on things only visible in context:
+ *
+ *   - "Team Vitality" and "Team Falcons" are proper names. Replacing "Team" with
+ *     "ÉQUIPE" or "فريق" renames the organisation.
+ *   - "à l'Esports World Cup" already carries the article, so applying the
+ *     glossary's "L'Esports World Cup" yields "à l'L'Esports World Cup".
+ *   - "Place au verdict" is ordinary French; the English row "Place => Lieu"
+ *     matches the characters but not the meaning.
+ *
+ * Each of those was previously chased with a bespoke rule, and every new file
+ * found a case the rules missed. This asks the question directly instead.
+ *
+ * The model only ever REMOVES suggestions here — it cannot invent or alter one,
+ * so a bad answer costs recall, never correctness.
+ */
+const ReviewSchema = z.object({
+  decisions: z.array(
+    z.object({
+      id: z.number().int().describe("The id of the proposed change being judged."),
+      keep: z.boolean().describe("True to apply the change, false to discard it."),
+      reason: z.string().describe("Short reason, for logs."),
+    })
+  ),
+})
+
+const REVIEW_INSTRUCTIONS = `You are checking proposed subtitle changes before they are shown to a translator. Each one replaces a piece of text in a specific subtitle line. Every proposal is tagged with its kind, and the two kinds are judged by DIFFERENT rules.
+
+=== kind: TERMINOLOGY ===
+Applies an approved glossary translation. Answer keep = false when:
+- The matched text is part of a PROPER NAME — a team, organisation, player, product, game title, or tournament. "Team Vitality", "Team Falcons", "League of Legends" and "Esports World Cup" are names; translating a word inside one renames the entity.
+- The replacement would DUPLICATE something the line already has, such as an article or preposition.
+- The result would be ungrammatical in the target language: wrong article, agreement, or word form for that position in the sentence.
+- The matched text is an ordinary word of the TARGET language that merely resembles the English source term, and is correct as written.
+- The line already conveys the approved term.
+
+=== kind: NAME SPELLING ===
+Corrects the SPELLING of a team or player name against an official roster. Here the matched text IS a proper name — that is the point, not a reason to reject. Answer keep = true when it is plainly the same entity, misspelled: a wrong letter, a missing space, wrong capitalisation. Answer keep = false only when the proposal points at a DIFFERENT entity, or the name as written is already correct.
+
+Judge each proposal only against the line it is attached to. A wrong change in a broadcast subtitle is worse than a missed one, so when a TERMINOLOGY proposal is unclear, answer keep = false.`
+
+async function reviewSuggestions(
+  suggestions: Suggestion[],
+  cueText: Map<number, string>,
+  languageLabel: string
+): Promise<{ kept: Suggestion[]; usage: Usage; dropped: { find: string; reason: string }[] }> {
+  const empty: Usage = { input: 0, cached: 0, output: 0 }
+  if (suggestions.length === 0) return { kept: [], usage: empty, dropped: [] }
+
+  const openai = getClient()
+  const block = suggestions
+    .map((s, i) => {
+      const line = cueText.get(s.cueIndex) ?? ""
+      const kind = s.kind === "name" ? "NAME SPELLING" : "TERMINOLOGY"
+      return `#${i}\n  kind: ${kind}\n  line: ${line}\n  replace: "${s.find}" -> "${s.replace}"`
+    })
+    .join("\n\n")
+
+  const response = await openai.responses.parse({
+    model: MODEL,
+    instructions: REVIEW_INSTRUCTIONS,
+    input: [
+      { role: "user", content: `Target language: ${languageLabel}\n\nProposed changes:\n\n${block}` },
+    ],
+    text: { format: zodTextFormat(ReviewSchema, "review_decisions") },
+  })
+
+  const parsed = response.output_parsed
+  const usage: Usage = {
+    input: response.usage?.input_tokens ?? 0,
+    cached: response.usage?.input_tokens_details?.cached_tokens ?? 0,
+    output: response.usage?.output_tokens ?? 0,
+  }
+
+  // If the review can't be parsed, keep everything: the scans are the source of
+  // truth, and this pass exists to trim them, not to gate them.
+  if (!parsed) return { kept: suggestions, usage, dropped: [] }
+
+  const verdicts = new Map(parsed.decisions.map((d) => [d.id, d]))
+  const kept: Suggestion[] = []
+  const dropped: { find: string; reason: string }[] = []
+
+  suggestions.forEach((s, i) => {
+    const verdict = verdicts.get(i)
+    // No verdict for this one — keep it rather than silently losing a real fix.
+    if (!verdict || verdict.keep) kept.push(s)
+    else dropped.push({ find: s.find, reason: verdict.reason })
+  })
+
+  return { kept, usage, dropped }
+}
+
 function formatCues(cues: Cue[]): string {
   return cues
     .map((cue) => `[${cue.index}] ${cue.textLines.join("\n")}`)
@@ -1017,8 +1114,31 @@ export async function checkGlossary(
   // Approved terminology outranks a proposal, so glossary hits come first and win
   // any tie: where both passes touched the same span, the approved term is kept.
   const seen = new Set<string>()
+  // Review the deterministic hits in context and drop the ones that are wrong
+  // for the sentence they sit in. Only these need it: the model's own
+  // suggestions were produced with the line in front of it already.
+  //
+  // Only GLOSSARY hits go to the review. Name fixes are settled against the
+  // Liquipedia roster, which the model cannot see — asked to judge them it has
+  // no way to know "Karmine Corp" is the real org, and in testing it rejected a
+  // correct fix while its own stated reason said to keep it. Roster data decides
+  // names; the model decides language.
+  const cueText = new Map(cues.map((cue) => [cue.index, cue.textLines.join(" ")]))
+  const review = await reviewSuggestions(literal, cueText, languageLabel)
+  if (review.dropped.length > 0) {
+    logger.info({
+      action: "GLOSSARY_CONTEXT_REVIEW_DROPPED",
+      dropped: review.dropped.length,
+      of: literal.length,
+      samples: review.dropped.slice(0, 6),
+    })
+  }
+  const reviewedDeterministic = [...review.kept, ...nameSuggestions].sort(
+    (a, b) => a.cueIndex - b.cueIndex
+  )
+
   const merged: Suggestion[] = []
-  for (const suggestion of [...literal, ...nameSuggestions, ...suggestions, ...untranslated]) {
+  for (const suggestion of [...reviewedDeterministic, ...suggestions, ...untranslated]) {
     const key = `${suggestion.cueIndex}::${suggestion.find.toLowerCase()}`
     if (seen.has(key)) continue
     seen.add(key)
@@ -1027,7 +1147,7 @@ export async function checkGlossary(
   // Present in file order so the reviewer reads top to bottom.
   merged.sort((a, b) => a.cueIndex - b.cueIndex)
 
-  const usage = all.reduce<Usage>(
+  const usage = [...all, { usage: review.usage }].reduce<Usage>(
     (acc, r) => ({
       input: acc.input + r.usage.input,
       cached: acc.cached + r.usage.cached,
