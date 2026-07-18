@@ -1,9 +1,9 @@
 /**
  * SRT glossary checker — standalone (not tied to an order).
  *
- * Access is restricted to the in-house TRANSLATOR position. Note this deliberately
- * does NOT use isTranslatorPosition(), which also matches the TRANSPERFECT and
- * TARJAMA vendor roles — this tool is in-house only.
+ * Access is restricted to the in-house TRANSLATOR position and admins. Note this
+ * deliberately does NOT use isTranslatorPosition(), which also matches the
+ * TRANSPERFECT and TARJAMA vendor roles — this tool is in-house only.
  *
  * Two endpoints, both stateless:
  *   POST /srt/check   text + language  -> suggested terminology fixes
@@ -38,9 +38,15 @@ import { buildRosterIndex, type RosterIndex } from "../lib/nameCheck.js"
 const MAX_SRT_CHARS = 400_000
 const MAX_CUES = 3000
 
-/** Only the in-house translator role may use this tool. */
-function isInHouseTranslator(position?: string | null): boolean {
-  return position === "TRANSLATOR"
+/**
+ * Who may use this tool: in-house translators, plus admins.
+ *
+ * Deliberately NOT isTranslatorPosition(), which also matches the TRANSPERFECT
+ * and TARJAMA vendor roles — the glossary is internal terminology and stays
+ * closed to outside vendors.
+ */
+function canUseSrtChecker(role?: string | null, position?: string | null): boolean {
+  return position === "TRANSLATOR" || role === "ADMIN"
 }
 
 /**
@@ -54,8 +60,8 @@ const MAX_IN_FLIGHT = 10
 export async function getGlossaryLanguages(req: AuthRequest, res: Response) {
   try {
     if (!req.userId) return res.status(401).json({ message: "Unauthorized" })
-    if (!isInHouseTranslator(req.userPosition)) {
-      return res.status(403).json({ message: "This tool is available to translators only." })
+    if (!canUseSrtChecker(req.userRole, req.userPosition)) {
+      return res.status(403).json({ message: "This tool is available to translators and admins only." })
     }
 
     const glossary = await getGlossary()
@@ -74,8 +80,8 @@ export async function getGlossaryLanguages(req: AuthRequest, res: Response) {
 export async function checkSrt(req: AuthRequest, res: Response) {
   try {
     if (!req.userId) return res.status(401).json({ message: "Unauthorized" })
-    if (!isInHouseTranslator(req.userPosition)) {
-      return res.status(403).json({ message: "This tool is available to translators only." })
+    if (!canUseSrtChecker(req.userRole, req.userPosition)) {
+      return res.status(403).json({ message: "This tool is available to translators and admins only." })
     }
     if (!isConfigured()) {
       return res.status(503).json({ message: "The glossary checker is not configured yet." })
@@ -233,8 +239,8 @@ export async function checkSrt(req: AuthRequest, res: Response) {
 export async function exportSrt(req: AuthRequest, res: Response) {
   try {
     if (!req.userId) return res.status(401).json({ message: "Unauthorized" })
-    if (!isInHouseTranslator(req.userPosition)) {
-      return res.status(403).json({ message: "This tool is available to translators only." })
+    if (!canUseSrtChecker(req.userRole, req.userPosition)) {
+      return res.status(403).json({ message: "This tool is available to translators and admins only." })
     }
 
     const srtText = typeof req.body?.srtText === "string" ? req.body.srtText : ""
