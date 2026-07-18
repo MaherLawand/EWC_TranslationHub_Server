@@ -98,8 +98,18 @@ async function fetchCategory(wiki: string, category: string): Promise<string[]> 
         headers: { "User-Agent": USER_AGENT, "Accept-Encoding": "gzip" },
         signal: AbortSignal.timeout(20_000),
       })
-      if (response.status === 429) throw new Error("Liquipedia rate limit hit")
-      if (!response.ok) throw new Error(`Liquipedia responded ${response.status}`)
+      if (response.status === 429) {
+        throw new Error("rate limited by Liquipedia (HTTP 429)")
+      }
+      // Liquipedia fronts the wiki with Cloudflare, which challenges or blocks
+      // datacentre IP ranges. That is the usual reason this works from a laptop
+      // and fails from a cloud host with identical code.
+      if (response.status === 403) {
+        throw new Error(
+          "HTTP 403 — Liquipedia blocked this server's IP, which commonly happens to cloud hosts"
+        )
+      }
+      if (!response.ok) throw new Error(`Liquipedia responded HTTP ${response.status}`)
       return (await response.json()) as CategoryResponse
     })
 

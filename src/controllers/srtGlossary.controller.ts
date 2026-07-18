@@ -151,12 +151,16 @@ export async function checkSrt(req: AuthRequest, res: Response) {
         const { players, teams } = await getRoster(wiki)
         roster = buildRosterIndex(players, teams)
       } catch (error) {
-        rosterNote = "Liquipedia could not be reached, so names were not checked."
+        // Include the reason: a datacentre IP block, a rate-limit rejection and a
+        // timeout all need different responses, and "could not be reached" hides
+        // which one happened.
+        const reason = (error as Error).message
+        rosterNote = `Liquipedia could not be reached, so names were not checked. (${reason})`
         logger.warn({
           action: "LIQUIPEDIA_ROSTER_UNAVAILABLE",
           game,
           wiki,
-          err: (error as Error).message,
+          err: reason,
         })
       }
     }

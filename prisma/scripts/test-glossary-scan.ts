@@ -11,6 +11,7 @@ import {
   scanLiteralTerms,
   findUntranslatedRuns,
   relatedGlossaryRows,
+  isMorphologicalVariant,
   type GlossaryRow,
 } from "../../src/lib/glossaryCheck.js"
 
@@ -289,6 +290,38 @@ check("ignores a row whose source IS the term — the literal pass owns that", (
 
 check("returns nothing when no phrase mentions the term", () => {
   eq(relatedGlossaryRows("Overgrowth", AEGIS_PHRASES).length, 0, "no match")
+})
+
+
+console.log("\nMorphological variants (must not be 'corrected')")
+
+check("THE LIVE BUG: restoring the definite article inside an idafa", () => {
+  // File: "في تشكيلة NIGMA الرسمية" — the article MUST drop in a possessive
+  // construction, so proposing the glossary's dictionary form breaks grammar.
+  eq(isMorphologicalVariant("تشكيلة", "التشكيلة"), true, "same word, article differs")
+})
+
+check("THE LIVE BUG: a generic word upgraded into a proper event name", () => {
+  // File: "من البطولة كلها" = "the whole tournament", not the Main Tournament.
+  eq(isMorphologicalVariant("البطولة", "البطولة الرئيسية"), true, "one contains the other")
+})
+
+check("ignores diacritics and tatweel when comparing", () => {
+  eq(isMorphologicalVariant("مُوجَة", "موجة"), true, "same word, vowelled")
+})
+
+check("treats alef and ta-marbuta variants as the same word", () => {
+  eq(isMorphologicalVariant("إعادة", "اعادة"), true, "alef variants")
+})
+
+check("a genuinely different term is STILL reported", () => {
+  // The whole point of the model pass: wrong word, not wrong inflection.
+  eq(isMorphologicalVariant("بطل", "شخصية"), false, "unrelated words must pass through")
+  eq(isMorphologicalVariant("موجة قتل", "الأيجيز"), false, "unrelated terms")
+})
+
+check("an English-to-Arabic fix is unaffected", () => {
+  eq(isMorphologicalVariant("Rampage", "موجة قتل"), false, "different scripts entirely")
 })
 
 console.log(`\n${passed} passed, ${failed} failed\n`)

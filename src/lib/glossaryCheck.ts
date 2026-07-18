@@ -432,6 +432,44 @@ const UntranslatedSchema = z.object({
   ),
 })
 
+/**
+ * Compare target-language text ignoring inflection that carries no terminology
+ * meaning: Arabic diacritics, tatweel, alef/ya/ta-marbuta variants, and the
+ * definite article "ال".
+ */
+function normalizeTargetText(value: string): string {
+  return value
+    .replace(/[ً-ْـ]/g, "") // diacritics + tatweel
+    .replace(/[آأإ]/g, "ا") // alef variants -> bare alef
+    .replace(/ى/g, "ي") // alef maqsura -> ya
+    .replace(/ة/g, "ه") // ta marbuta -> ha
+    .replace(/\bال/g, "") // definite article, wherever it appears
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase()
+}
+
+/**
+ * Is this "correction" just the same word in a different form?
+ *
+ * A glossary stores dictionary forms, but Arabic inflects: "التشكيلة" is the
+ * entry, yet inside a possessive construction the article must drop, giving
+ * "تشكيلة". The model sees a mismatch and proposes restoring the article, which
+ * is grammatically WRONG in that position. The same shape appears when a generic
+ * word is "upgraded" into a longer proper name — "البطولة" (the tournament)
+ * becoming "البطولة الرئيسية" (the Main Tournament) in a sentence that meant the
+ * ordinary word.
+ *
+ * Both show up as one string containing the other once inflection is normalised.
+ * A genuinely wrong term is a DIFFERENT word, so it is unaffected by this.
+ */
+export function isMorphologicalVariant(find: string, replace: string): boolean {
+  const a = normalizeTargetText(find)
+  const b = normalizeTargetText(replace)
+  if (!a || !b) return false
+  return a === b || a.includes(b) || b.includes(a)
+}
+
 /** Script of the target language, used to reject an untranslated 'translation'. */
 const NON_LATIN_SCRIPT = /[\p{Script=Arabic}\p{Script=Han}\p{Script=Devanagari}]/u
 
@@ -804,6 +842,12 @@ export async function checkGlossary(
     // Replacing the approved term with itself is a no-op.
     if (s.find.trim() === s.replace.trim()) {
       invalid.push({ reason: "no_op", glossaryKey: s.glossaryKey, replace: s.replace })
+      return false
+    }
+    // Same word, different inflection — not a terminology error, and "fixing" it
+    // damages the grammar of the sentence it sits in.
+    if (isMorphologicalVariant(s.find, s.replace)) {
+      invalid.push({ reason: "morphological_variant", glossaryKey: s.glossaryKey, replace: s.replace })
       return false
     }
     // The rules above verify the model QUOTED its glossary row correctly, but not
