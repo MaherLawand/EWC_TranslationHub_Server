@@ -127,7 +127,20 @@ function isShouted(name: string): boolean {
  * Returns null when the fragment is correct, unknown, or too ambiguous to call.
  * Silence is the expected answer for most fragments.
  */
-export function checkName(fragment: string, index: RosterIndex): NameHit | null {
+export function checkName(
+  fragment: string,
+  index: RosterIndex,
+  /**
+   * Disables fuzzy matching, allowing only an exact roster hit.
+   *
+   * Used for fragments split out of a longer phrase. Splitting is a recovery
+   * heuristic — it exists so a name glued to the word before it is still seen —
+   * and its output is weak evidence. Left fuzzy, it rewrites pieces of ordinary
+   * phrases into player handles: "Laguna Blade" yielded "Blade" -> "Blaze", and
+   * "Lone Druid" yielded "Druid" -> "Druidz", both nonsense.
+   */
+  exactOnly = false
+): NameHit | null {
   const found = fragment.trim()
   if (found.length < MIN_EXACT_LENGTH) return null
 
@@ -154,6 +167,8 @@ export function checkName(fragment: string, index: RosterIndex): NameHit | null 
   // A shortened form of a real name ("Chira" from "CHIRA JUNIOR") is correct, and
   // must never be fuzzy-matched onto some unrelated name.
   if (index.words.has(lower)) return null
+
+  if (exactOnly) return null
 
   const tolerance = toleranceFor(found.length)
   if (tolerance === 0) return null

@@ -168,5 +168,32 @@ check("an ordinary word is not a known name", () => {
   eq(isKnownName("Overgrowth", INDEX), false, "not in the roster")
 })
 
+
+console.log("\nSplit fragments (exact matches only)")
+
+check("THE LIVE BUG: a word split out of an ability name is not made a handle", () => {
+  // "Laguna Blade" and "Lone Druid" are Dota abilities. Splitting them exposed
+  // "Blade" and "Druid", which fuzzy-matched the handles "Blaze" and "Druidz".
+  const live = buildRosterIndex(["Blaze", "Druidz"], [])
+  eq(checkName("Blade", live, true), null, "split fragment must not fuzzy-match")
+  eq(checkName("Druid", live, true), null, "split fragment must not fuzzy-match")
+})
+
+check("without the exact-only flag those same fragments WOULD match", () => {
+  // Documents why the flag is needed rather than the thresholds being wrong.
+  const live = buildRosterIndex(["Blaze", "Druidz"], [])
+  eq(checkName("Blade", live)?.correct, "Blaze", "fuzzy match exists")
+})
+
+check("a split fragment still reports an exact casing fix", () => {
+  const live = buildRosterIndex([], ["PVision"])
+  eq(checkName("PVISION", live, true)?.correct, "PVision", "exact match survives")
+})
+
+check("a full run keeps fuzzy matching", () => {
+  const live = buildRosterIndex([], ["Karmine Corp"])
+  eq(checkName("Carmine Corp", live, false)?.correct, "Karmine Corp", "real fix preserved")
+})
+
 console.log(`\n${passed} passed, ${failed} failed\n`)
 if (failed > 0) process.exit(1)

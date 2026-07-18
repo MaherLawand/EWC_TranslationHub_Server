@@ -218,7 +218,20 @@ function boundariesFor(term: string): { before: string; after: string } {
   }
 }
 
-export function scanLiteralTerms(cues: Cue[], rows: GlossaryRow[]): Suggestion[] {
+export function scanLiteralTerms(
+  cues: Cue[],
+  rows: GlossaryRow[],
+  /**
+   * True when the target language uses the same script as the English source.
+   *
+   * In Arabic or Chinese, an English term sitting in the text is unambiguously
+   * untranslated. In French it may simply be a French word: "Place au verdict"
+   * is correct French, but the glossary's English row "Place => Lieu" matches it
+   * verbatim. Such hits are reported at medium confidence so the reviewer
+   * decides, instead of being pre-accepted.
+   */
+  sameScriptAsSource = false
+): Suggestion[] {
   const candidates = rows.filter((row) => {
     const source = row.source.trim()
     const target = row.target.trim()
@@ -257,7 +270,7 @@ export function scanLiteralTerms(cues: Cue[], rows: GlossaryRow[]): Suggestion[]
         glossaryKey: row.key,
         sourceTerm: row.source,
         approvedTerm: target,
-        confidence: "high",
+        confidence: sameScriptAsSource ? "medium" : "high",
         context: row.context,
       })
     }
@@ -296,7 +309,12 @@ const MIN_RUN_CHARS = 3
 const MAX_RUN_CHARS = 40
 const MAX_RUN_WORDS = 4
 
-export type UntranslatedCandidate = { cueIndex: number; text: string }
+export type UntranslatedCandidate = {
+  cueIndex: number
+  text: string
+  /** Split out of a longer capitalised run — weak evidence, exact matches only. */
+  split?: boolean
+}
 
 export function findUntranslatedRuns(
   cues: Cue[],
@@ -388,6 +406,74 @@ export function relatedGlossaryRows(term: string, rows: GlossaryRow[]): RelatedR
     out.push({ source, target })
     if (out.length >= MAX_RELATED_ROWS) break
   }
+  return out
+}
+
+/**
+ * Candidate proper nouns, for name checking in ANY target language.
+ *
+ * findUntranslatedRuns() can't serve this: it treats a run of Latin script as
+ * foreign text, which only holds for a non-Latin target. In a French or
+ * Indonesian subtitle every word is Latin, so it either matches whole sentences
+ * (dropped by the length caps) or nothing at all — which is why team names went
+ * unchecked in a French file.
+ *
+ * Capitalisation is the language-agnostic signal instead. It over-collects —
+ * sentence-initial words come along too — but the roster comparison is strict
+ * about what it will actually report, so the cost is a few wasted comparisons
+ * rather than false suggestions.
+ *
+ * KNOWN GAP: an all-lowercase handle ("iceiceice") isn't captured here. In a
+ * non-Latin file the untranslated-run pass still catches it; in a Latin one it
+ * is currently missed.
+ */
+const CAPITALIZED_RUN =
+  /\p{Lu}[\p{L}\p{N}'’.-]*(?:[ ]\p{Lu}[\p{L}\p{N}'’.-]*){0,3}/gu
+
+export function findNameCandidates(
+  cues: Cue[],
+  rows: GlossaryRow[] = []
+): UntranslatedCandidate[] {
+  // Terminology is the glossary pass's job; don't second-guess it here.
+  const glossaryTerms = new Set<string>()
+  for (const row of rows) {
+    glossaryTerms.add(row.source.trim().toLowerCase())
+    glossaryTerms.add(row.target.trim().toLowerCase())
+  }
+
+  const out: UntranslatedCandidate[] = []
+  const seen = new Set<string>()
+
+  for (const cue of cues) {
+    const text = cue.textLines.join("\n")
+    if (!text.trim()) continue
+
+    for (const match of text.matchAll(CAPITALIZED_RUN)) {
+      const run = match[0].replace(/[.'’-]+$/u, "").trim()
+      if (!run) continue
+
+      // The run is greedy, so a sentence-initial word glues itself to the name
+      // that follows it: "Ou DplusKIA" hid the team entirely. Offer the whole run
+      // AND each word on its own, longest first, and let the matcher decide.
+      const words = run.split(/\s+/).filter(Boolean)
+      const variants: { text: string; split: boolean }[] =
+        words.length > 1
+          ? [{ text: run, split: false }, ...words.map((w) => ({ text: w, split: true }))]
+          : [{ text: run, split: false }]
+
+      for (const { text: variant, split } of variants) {
+        if (variant.length < MIN_RUN_CHARS || variant.length > MAX_RUN_CHARS) continue
+        const lower = variant.toLowerCase()
+        if (glossaryTerms.has(lower)) continue
+
+        const key = `${cue.index}::${lower}`
+        if (seen.has(key)) continue
+        seen.add(key)
+        out.push({ cueIndex: cue.index, text: variant, split })
+      }
+    }
+  }
+
   return out
 }
 
@@ -704,20 +790,52 @@ export async function checkGlossary(
   const contextByKey = new Map(glossaryRows.map((r) => [r.key, r.context]))
 
   // Pass 1 — free, exhaustive, deterministic. Catches every untranslated term.
-  const literal = scanLiteralTerms(cues, glossaryRows)
+  const literal = scanLiteralTerms(cues, glossaryRows, !detectUntranslated)
 
-  // Every Latin fragment in the file, before anything is decided about it.
+  // Fragments that might need TRANSLATING — only meaningful for a non-Latin
+  // target, where a run of Latin script is self-evidently foreign.
   const allCandidates = detectUntranslated ? findUntranslatedRuns(cues, glossaryRows, literal) : []
 
+  // Fragments that might be NAMES. Deliberately a separate extractor: name
+  // checking must work in French and Indonesian too, where the Latin-script
+  // heuristic above finds nothing.
+  const nameCandidates = roster ? findNameCandidates(cues, glossaryRows) : []
+
+  // Check names across the union of both, so a fragment is examined once no
+  // matter which extractor found it.
+  const nameSeen = new Set<string>()
+  const toNameCheck: UntranslatedCandidate[] = []
+  for (const candidate of [...allCandidates, ...nameCandidates]) {
+    const key = `${candidate.cueIndex}::${candidate.text.toLowerCase()}`
+    if (nameSeen.has(key)) continue
+    nameSeen.add(key)
+    toNameCheck.push(candidate)
+  }
+  // Longest first: "Carmine Corp" must be judged before the bare "Carmine", so
+  // the fuller name wins and the fragment inside it is then skipped.
+  toNameCheck.sort((a, b) => b.text.length - a.text.length)
+
   // Pass 2 — names, resolved against the roster. Deterministic and free, so it
-  // runs before the model gate. The three outcomes are mutually exclusive: a
-  // known name is never a translation problem.
+  // runs before the model gate. The outcomes are mutually exclusive: a known
+  // name is never a translation problem.
   const nameSuggestions: Suggestion[] = []
-  const candidates: UntranslatedCandidate[] = []
-  for (const candidate of allCandidates) {
-    if (roster) {
-      const hit = checkName(candidate.text, roster)
+  /** Fragments the roster settled — a fix, or confirmed correct. Never translated. */
+  const resolvedByRoster = new Set<string>()
+  /** Spans already settled in a cue, so a sub-word isn't judged separately. */
+  const claimedByCue = new Map<number, string[]>()
+
+  for (const candidate of toNameCheck) {
+    if (!roster) break
+    const key = `${candidate.cueIndex}::${candidate.text.toLowerCase()}`
+    // Skip a fragment sitting inside a span already handled — otherwise
+    // "Carmine Corp" and "Carmine" would both produce an edit for one name.
+    const claimed = claimedByCue.get(candidate.cueIndex) ?? []
+    if (claimed.some((span) => span.includes(candidate.text.toLowerCase()))) continue
+    {
+      const hit = checkName(candidate.text, roster, candidate.split === true)
       if (hit) {
+        resolvedByRoster.add(key)
+        claimedByCue.set(candidate.cueIndex, [...claimed, candidate.text.toLowerCase()])
         nameSuggestions.push({
           kind: "name",
           cueIndex: candidate.cueIndex,
@@ -735,10 +853,17 @@ export async function checkGlossary(
         continue
       }
       // Correctly spelled name: nothing to fix, and it must not be translated.
-      if (isKnownName(candidate.text, roster)) continue
+      if (isKnownName(candidate.text, roster)) {
+        resolvedByRoster.add(key)
+        claimedByCue.set(candidate.cueIndex, [...claimed, candidate.text.toLowerCase()])
+      }
     }
-    candidates.push(candidate)
   }
+
+  // What still goes to the model: fragments the roster didn't account for.
+  const candidates = allCandidates.filter(
+    (c) => !resolvedByRoster.has(`${c.cueIndex}::${c.text.toLowerCase()}`)
+  )
 
   const deterministic = [...literal, ...nameSuggestions].sort((a, b) => a.cueIndex - b.cueIndex)
 
@@ -924,7 +1049,7 @@ export async function checkGlossary(
     untranslatedCandidates: candidates.length,
     fromUntranslated: untranslated.length,
     // Fragments the roster resolved, so the model never saw them.
-    nameFragments: allCandidates.length - candidates.length,
+    nameFragments: resolvedByRoster.size,
     fromNameCheck: nameSuggestions.length,
     inputTokens: usage.input,
     cachedTokens: usage.cached,
