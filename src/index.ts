@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken"
 import app from "./app.js"
 import { setIo } from "./lib/socket.js"
 import { logger } from "./lib/logger.js"
+import { warmGlossary } from "./lib/glossary.js"
 import { prisma } from "./lib/prisma.js"
 
 // Fail fast — missing these env vars means auth is silently broken
@@ -86,6 +87,9 @@ const PORT = Number(process.env.PORT) || 4000
 
 httpServer.listen(PORT, () => {
   logger.info({ action: "SERVER_START", port: PORT })
+  // Pre-load the terminology glossary so the first translator to run a
+  // check does not wait on Google Sheets. Never throws.
+  warmGlossary()
 })
 
 process.on("SIGTERM", async () => {

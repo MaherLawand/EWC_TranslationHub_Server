@@ -34,10 +34,14 @@
  */
 
 import "dotenv/config" // loads server/.env so GOOGLE_* / DATABASE_URL / CLIENT_URL are available
-import { createSign } from "node:crypto"
 import { readFileSync, readdirSync, statSync } from "node:fs"
 import { basename, dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
+import {
+  getServiceAccount,
+  getGoogleAccessToken,
+  googleRequest,
+} from "../../src/lib/googleSheets.js"
 
 const DEFAULT_LOGS_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "logs")
 const REPORT_TAB_PREFIX = "Daily Report - "
@@ -340,84 +344,6 @@ function getOrder(orders: Map<string, OrderReport>, orderId: string): OrderRepor
 function tabNameFromFile(file: string): string {
   const base = basename(file).replace(/\.csv$/i, "")
   return base.replace(/[[\]:*?/\\]/g, "-").slice(0, 100) || "Report"
-}
-
-type ServiceAccount = { client_email: string; private_key: string }
-
-function getServiceAccount(): ServiceAccount {
-  const json = process.env.GOOGLE_SERVICE_ACCOUNT_JSON
-  if (json) {
-    try {
-      const parsed = JSON.parse(json)
-      if (parsed.client_email && parsed.private_key) {
-        return { client_email: parsed.client_email, private_key: parsed.private_key.replace(/\\n/g, "\n") }
-      }
-    } catch {
-      throw new Error("GOOGLE_SERVICE_ACCOUNT_JSON is not valid JSON.")
-    }
-  }
-
-  const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL
-  const privateKey = process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY
-  if (email && privateKey) return { client_email: email, private_key: privateKey.replace(/\\n/g, "\n") }
-
-  throw new Error(
-    "Missing Google service-account credentials. Set GOOGLE_SERVICE_ACCOUNT_JSON, or both GOOGLE_SERVICE_ACCOUNT_EMAIL and GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY."
-  )
-}
-
-function base64Url(value: string | Buffer): string {
-  return Buffer.from(value).toString("base64url")
-}
-
-async function getGoogleAccessToken(account: ServiceAccount): Promise<string> {
-  const now = Math.floor(Date.now() / 1000)
-  const header = base64Url(JSON.stringify({ alg: "RS256", typ: "JWT" }))
-  const claim = base64Url(JSON.stringify({
-    iss: account.client_email,
-    scope: "https://www.googleapis.com/auth/spreadsheets",
-    aud: "https://oauth2.googleapis.com/token",
-    iat: now,
-    exp: now + 3600,
-  }))
-  const unsigned = `${header}.${claim}`
-  const signer = createSign("RSA-SHA256")
-  signer.update(unsigned)
-  signer.end()
-  const assertion = `${unsigned}.${base64Url(signer.sign(account.private_key))}`
-
-  try {
-    const response = await fetch(
-      "https://oauth2.googleapis.com/token",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({ grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer", assertion }).toString(),
-      }
-    )
-    const body = await response.json() as { access_token?: string; error?: string; error_description?: string }
-    if (!response.ok || !body.access_token) throw new Error(body.error_description || body.error || response.statusText)
-    return body.access_token
-  } catch (error: any) {
-    const detail = error?.message
-    throw new Error(`Could not authenticate the Google service account: ${detail}`)
-  }
-}
-
-async function googleRequest<T>(method: "GET" | "POST", path: string, token: string, data?: unknown): Promise<T> {
-  try {
-    const response = await fetch(`https://sheets.googleapis.com/v4/${path}`, {
-      method,
-      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-      ...(data === undefined ? {} : { body: JSON.stringify(data) }),
-    })
-    const body = await response.json() as T & { error?: { message?: string } }
-    if (!response.ok) throw new Error(body.error?.message || response.statusText)
-    return body
-  } catch (error: any) {
-    const detail = error?.message
-    throw new Error(`Google Sheets API request failed: ${detail}`)
-  }
 }
 
 type GoogleSheetInfo = { properties: { sheetId: number; title: string }; conditionalFormats?: unknown[] }
