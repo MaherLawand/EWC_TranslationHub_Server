@@ -702,20 +702,36 @@ const ReviewSchema = z.object({
   ),
 })
 
-const REVIEW_INSTRUCTIONS = `You are checking proposed subtitle changes before they are shown to a translator. Each one replaces a piece of text in a specific subtitle line. Every proposal is tagged with its kind, and the two kinds are judged by DIFFERENT rules.
+const REVIEW_INSTRUCTIONS = `You are the last check before proposed subtitle changes are shown to a translator. Each proposal replaces a piece of text in one subtitle line. Decide, for each, whether applying it to THAT line would be correct. Use what you know about esports, the game being discussed, and the target language.
+
+Every proposal is tagged with a kind, and the kinds are judged differently.
 
 === kind: TERMINOLOGY ===
-Applies an approved glossary translation. Answer keep = false when:
-- The matched text is part of a PROPER NAME — a team, organisation, player, product, game title, or tournament. "Team Vitality", "Team Falcons", "League of Legends" and "Esports World Cup" are names; translating a word inside one renames the entity.
-- The replacement would DUPLICATE something the line already has, such as an article or preposition.
-- The result would be ungrammatical in the target language: wrong article, agreement, or word form for that position in the sentence.
+Applies an approved glossary translation.
+
+START FROM keep = true. The glossary is the team's approved terminology and this proposal is normally correct. In particular, when the matched text is ENGLISH sitting in a non-English subtitle and the glossary defines a translation for it, applying that translation is exactly the job — keep it. "The line already uses the English word" is never a reason to reject; that is the problem being fixed. Game terms, abilities and mechanics ARE meant to be translated when the glossary covers them.
+
+Answer keep = false only when:
+- The matched text is part of a PROPER NAME — team, organisation, player, product, game title, or tournament. "Team Vitality", "League of Legends", "Esports World Cup" are names; translating a word inside one renames the entity.
+- The replacement is a LONGER, more specific term than the line means. Replacing a general word with a specific compound ("creeps" -> "lane creeps", "tournament" -> "main tournament") is wrong unless the line clearly means that specific thing.
+- The replacement would DUPLICATE something the line already has, such as an article the sentence already carries.
+- The result would be ungrammatical: wrong article, agreement, or word form for that position.
 - The matched text is an ordinary word of the TARGET language that merely resembles the English source term, and is correct as written.
-- The line already conveys the approved term.
+- The line already carries the approved translation, so the change would do nothing or duplicate it.
 
 === kind: NAME SPELLING ===
-Corrects the SPELLING of a team or player name against an official roster. Here the matched text IS a proper name — that is the point, not a reason to reject. Answer keep = true when it is plainly the same entity, misspelled: a wrong letter, a missing space, wrong capitalisation. Answer keep = false only when the proposal points at a DIFFERENT entity, or the name as written is already correct.
+A roster lookup found an official name resembling text in the line, and proposes replacing it. The lookup compares letters only — it CANNOT tell a typo from a different word, so that judgement is yours.
 
-Judge each proposal only against the line it is attached to. A wrong change in a broadcast subtitle is worse than a missed one, so when a TERMINOLOGY proposal is unclear, answer keep = false.`
+Answer keep = true ONLY when the text is clearly a misspelling of that same entity: a wrong letter, missing space, or wrong capitalisation of a name the line is plainly referring to.
+
+Answer keep = false when:
+- The text is an ordinary word or a game term rather than a name. In Dota 2, "fountain", "creeps", "roshan", "courier" and "rune" are game concepts, not players — never rewrite them into a player's handle.
+- The text is ALREADY a real, correctly spelled name. Established handles like "KuroKy", "N0tail", "iceiceice", "Miracle-" are spelled unusually on purpose. If you recognise the text as a real competitor, keep it as written.
+- The proposal points at a DIFFERENT entity that merely looks similar.
+
+Both are one letter apart from something, so letter distance proves nothing. Ask instead: in this sentence, is the writer naming this competitor and misspelling it, or writing a different word entirely?
+
+A wrong change in a broadcast subtitle is worse than a missed one. When unsure, answer keep = false.`
 
 async function reviewSuggestions(
   suggestions: Suggestion[],
@@ -1118,27 +1134,24 @@ export async function checkGlossary(
   // for the sentence they sit in. Only these need it: the model's own
   // suggestions were produced with the line in front of it already.
   //
-  // Only GLOSSARY hits go to the review. Name fixes are settled against the
-  // Liquipedia roster, which the model cannot see — asked to judge them it has
-  // no way to know "Karmine Corp" is the real org, and in testing it rejected a
-  // correct fix while its own stated reason said to keep it. Roster data decides
-  // names; the model decides language.
+  // EVERY proposal is reviewed in context, whichever pass produced it. The scans
+  // find candidates by matching characters; only this step asks whether the
+  // change makes sense in the sentence. Name lookups need it most: "fountain" is
+  // one letter from the player "MounTain" and "KuroKy" one letter from "Kuroko",
+  // so distance alone cannot separate a typo from a different word.
   const cueText = new Map(cues.map((cue) => [cue.index, cue.textLines.join(" ")]))
-  const review = await reviewSuggestions(literal, cueText, languageLabel)
+  const toReview = [...literal, ...nameSuggestions, ...suggestions, ...untranslated]
+  const review = await reviewSuggestions(toReview, cueText, languageLabel)
   if (review.dropped.length > 0) {
     logger.info({
       action: "GLOSSARY_CONTEXT_REVIEW_DROPPED",
       dropped: review.dropped.length,
-      of: literal.length,
+      of: toReview.length,
       samples: review.dropped.slice(0, 6),
     })
   }
-  const reviewedDeterministic = [...review.kept, ...nameSuggestions].sort(
-    (a, b) => a.cueIndex - b.cueIndex
-  )
-
   const merged: Suggestion[] = []
-  for (const suggestion of [...reviewedDeterministic, ...suggestions, ...untranslated]) {
+  for (const suggestion of review.kept) {
     const key = `${suggestion.cueIndex}::${suggestion.find.toLowerCase()}`
     if (seen.has(key)) continue
     seen.add(key)
