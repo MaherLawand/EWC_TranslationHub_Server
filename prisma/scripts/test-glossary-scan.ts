@@ -12,6 +12,7 @@ import {
   findUntranslatedRuns,
   relatedGlossaryRows,
   isMorphologicalVariant,
+  absorbArabicArticle,
   type GlossaryRow,
 } from "../../src/lib/glossaryCheck.js"
 
@@ -322,6 +323,60 @@ check("a genuinely different term is STILL reported", () => {
 
 check("an English-to-Arabic fix is unaffected", () => {
   eq(isMorphologicalVariant("Rampage", "موجة قتل"), false, "different scripts entirely")
+})
+
+
+console.log("\nArabic article already attached to the term")
+
+function after(line: string, find: string, replace: string) {
+  const fixed = absorbArabicArticle(line, find, replace)
+  const at = line.indexOf(fixed.find)
+  return line.slice(0, at) + fixed.replace + line.slice(at + fixed.find.length)
+}
+
+check("THE LIVE BUG: does not double the article on الـcreeps", () => {
+  // From the user's file. Replacing only "creeps" left "الـ" stranded in front of
+  // a replacement that carries its own article: الـالكريبس.
+  const line = "كنت بس أـfarm الـcreeps، وفجأة معه Tiny Shadow Blade"
+  const result = after(line, "creeps", "الكريبس")
+  eq(result.includes("الـالكريبس"), false, "must not produce a doubled article")
+  eq(result.includes("الكريبس"), true, "the approved term is still applied")
+})
+
+check("keeps an existing article when the replacement has none", () => {
+  // ال stays and joins the new word directly, with no dangling connector.
+  const line = "الـcreeps هنا"
+  eq(after(line, "creeps", "كريبس"), "الكريبس هنا", "article reused, tatweel absorbed")
+})
+
+check("absorbs a bare connector with no article", () => {
+  const line = "كنت بس أـfarm هنا"
+  eq(after(line, "farm", "فارم").includes("ـفارم"), false, "no dangling tatweel")
+})
+
+check("handles the article joined with no tatweel", () => {
+  eq(after("الcreeps هنا", "creeps", "الكريبس"), "الكريبس هنا", "single article")
+})
+
+check("leaves a term with no attached article alone", () => {
+  const line = "حقق Rampage في المباراة"
+  const fixed = absorbArabicArticle(line, "Rampage", "موجة قتل")
+  eq(fixed.find, "Rampage", "find unchanged")
+  eq(fixed.replace, "موجة قتل", "replace unchanged")
+})
+
+check("does NOT treat a word ending in ال as an article", () => {
+  // "قال" ends in those letters. Absorbing them would corrupt real Arabic text.
+  const line = "قال creeps هنا"
+  const fixed = absorbArabicArticle(line, "creeps", "الكريبس")
+  eq(fixed.find, "creeps", "must not absorb the end of a real word")
+})
+
+check("the adjusted find still exists verbatim in the line", () => {
+  // applyEdits rejects any find it cannot locate, so this must always hold.
+  const line = "كنت بس أـfarm الـcreeps، وفجأة"
+  const fixed = absorbArabicArticle(line, "creeps", "الكريبس")
+  eq(line.includes(fixed.find), true, "find must remain applicable")
 })
 
 console.log(`\n${passed} passed, ${failed} failed\n`)

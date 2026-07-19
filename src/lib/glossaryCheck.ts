@@ -791,6 +791,63 @@ async function reviewSuggestions(
   return { kept, usage, dropped }
 }
 
+/**
+ * Absorb an Arabic definite article that is already attached to the matched text.
+ *
+ * Subtitles glue the article onto a Latin term with a tatweel connector, as in
+ * "الـcreeps". Replacing only the Latin part leaves the article and the connector
+ * stranded in front of a replacement that usually carries its own article:
+ *
+ *   الـcreeps  ->  الـ + الكريبس   =  الـالكريبس     (doubled article)
+ *
+ * Extending the replaced span to include the article fixes it at the source:
+ *
+ *   الـcreeps  ->  الكريبس
+ *
+ * When the approved term does NOT carry an article, only the connector is
+ * absorbed, so the existing article joins the new word directly:
+ *
+ *   الـcreeps  ->  ال + كريبس     =  الكريبس
+ *
+ * Only a TATWEEL (U+0640) or an article sitting directly against Latin script is
+ * treated as a connector — both are unambiguous. A bare "ال" after a space is
+ * left alone, because Arabic words legitimately end in those letters ("قال") and
+ * guessing there would corrupt real text.
+ */
+const TATWEEL = "ـ"
+const ARABIC_ARTICLE = "ال" // ال
+
+export function absorbArabicArticle(
+  line: string,
+  find: string,
+  replace: string
+): { find: string; replace: string } {
+  const at = line.indexOf(find)
+  if (at === -1) return { find, replace }
+
+  const before = line.slice(0, at)
+  const replacementHasArticle = replace.startsWith(ARABIC_ARTICLE)
+
+  // "الـcreeps" — article plus connector.
+  if (before.endsWith(ARABIC_ARTICLE + TATWEEL)) {
+    return replacementHasArticle
+      ? { find: ARABIC_ARTICLE + TATWEEL + find, replace }
+      : { find: TATWEEL + find, replace }
+  }
+
+  // "الcreeps" — article joined straight onto Latin, so it cannot be a word ending.
+  if (before.endsWith(ARABIC_ARTICLE) && replacementHasArticle) {
+    return { find: ARABIC_ARTICLE + find, replace }
+  }
+
+  // "أـfarm" — a bare connector with no article. Absorb it so nothing dangles.
+  if (before.endsWith(TATWEEL)) {
+    return { find: TATWEEL + find, replace }
+  }
+
+  return { find, replace }
+}
+
 function formatCues(cues: Cue[]): string {
   return cues
     .map((cue) => `[${cue.index}] ${cue.textLines.join("\n")}`)
@@ -1159,8 +1216,16 @@ export async function checkGlossary(
       samples: review.dropped.slice(0, 6),
     })
   }
+  // Fix up any article/connector already attached to the matched text, so the
+  // edit reads correctly in the sentence rather than doubling the article.
+  const adjusted = review.kept.map((suggestion) => {
+    const line = cueText.get(suggestion.cueIndex) ?? ""
+    const { find, replace } = absorbArabicArticle(line, suggestion.find, suggestion.replace)
+    return find === suggestion.find ? suggestion : { ...suggestion, find, replace }
+  })
+
   const merged: Suggestion[] = []
-  for (const suggestion of review.kept) {
+  for (const suggestion of adjusted) {
     const key = `${suggestion.cueIndex}::${suggestion.find.toLowerCase()}`
     if (seen.has(key)) continue
     seen.add(key)
