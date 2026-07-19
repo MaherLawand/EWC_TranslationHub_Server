@@ -28,7 +28,7 @@ import { getGlossary, entriesForColumn, describeGlossaryFailure } from "../lib/g
 import { glossaryColumnFor, COLUMN_TO_LABEL, usesNonLatinScript } from "../lib/glossaryLanguages.js"
 import { checkGlossary, isConfigured, GlossaryCheckUnavailable } from "../lib/glossaryCheck.js"
 import { wikiForGame } from "../lib/games.js"
-import { getRoster } from "../lib/liquipedia.js"
+import { getRoster, LiquipediaRateLimited } from "../lib/liquipedia.js"
 import { buildRosterIndex, type RosterIndex } from "../lib/nameCheck.js"
 
 /**
@@ -155,7 +155,10 @@ export async function checkSrt(req: AuthRequest, res: Response) {
         // timeout all need different responses, and "could not be reached" hides
         // which one happened.
         const reason = (error as Error).message
-        rosterNote = `Liquipedia could not be reached, so names were not checked. (${reason})`
+        rosterNote =
+          error instanceof LiquipediaRateLimited
+            ? `${reason}. The terminology check below still ran in full.`
+            : `Liquipedia could not be reached, so names were not checked. (${reason})`
         logger.warn({
           action: "LIQUIPEDIA_ROSTER_UNAVAILABLE",
           game,
