@@ -756,6 +756,11 @@ async function reviewSuggestions(
     input: [
       { role: "user", content: `Target language: ${languageLabel}\n\nProposed changes:\n\n${block}` },
     ],
+    // Deterministic as far as sampling allows. Without this the same file gives
+    // different answers between runs — an approved fix like "Rampage" survives
+    // one check and is dropped on the next, which reads as the tool being
+    // unreliable rather than strict.
+    temperature: 0,
     text: { format: zodTextFormat(ReviewSchema, "review_decisions") },
   })
 
@@ -1098,10 +1103,12 @@ export async function checkGlossary(
     const latin = s.find.match(LATIN_RUN)
     if (latin && latin.length > 0) {
       const source = row.source.trim().toLowerCase()
-      const related = latin.some((run) => {
-        const term = run.trim().toLowerCase()
-        return term.length > 0 && (source.includes(term) || term.includes(source))
-      })
+      // The English being replaced must BE the row's source term, not a fragment
+      // of it. A substring test let the compound row "Lane Creeps" be applied to
+      // the bare word "creeps", turning a general word into a specific one. That
+      // then survived or died depending on the model review, which is why the
+      // same file gave different answers on different runs.
+      const related = latin.some((run) => run.trim().toLowerCase() === source)
       if (!related) {
         invalid.push({
           reason: "find_unrelated_to_source_term",
