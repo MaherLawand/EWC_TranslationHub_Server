@@ -30,6 +30,7 @@ import { checkGlossary, isConfigured, GlossaryCheckUnavailable } from "../lib/gl
 import { wikiForGame } from "../lib/games.js"
 import { getRoster, LiquipediaRateLimited } from "../lib/liquipedia.js"
 import { buildRosterIndex, type RosterIndex } from "../lib/nameCheck.js"
+import { applyLearnedDecisions, recordDecisions, type TermDecision } from "../lib/termMemory.js"
 
 /**
  * express.json() caps bodies at 1mb. UTF-8 Arabic/CJK runs 2-3 bytes per
@@ -187,8 +188,15 @@ export async function checkSrt(req: AuthRequest, res: Response) {
     // do nothing.
     const probe = applyEdits(parsed, result.suggestions)
     const applicable = new Set(probe.applied.map((edit) => `${edit.cueIndex}::${edit.find}`))
-    const suggestions = result.suggestions.filter((s) => applicable.has(`${s.cueIndex}::${s.find}`))
-    const dropped = result.suggestions.length - suggestions.length
+    const applicableSuggestions = result.suggestions.filter((s) =>
+      applicable.has(`${s.cueIndex}::${s.find}`)
+    )
+    const dropped = result.suggestions.length - applicableSuggestions.length
+
+    // Honour what translators decided about these same suggestions before:
+    // corrections replace the wording, rejections remove the suggestion entirely.
+    const learned = await applyLearnedDecisions(applicableSuggestions, language)
+    const suggestions = learned.suggestions
 
     logger.info({
       action: "SRT_GLOSSARY_CHECK",
@@ -220,6 +228,7 @@ export async function checkSrt(req: AuthRequest, res: Response) {
         approvedTerm: s.approvedTerm,
         context: s.context,
         confidence: s.confidence,
+        learned: s.learned ?? false,
         relatedRows: s.relatedRows ?? [],
       })),
       stats: {
@@ -232,6 +241,8 @@ export async function checkSrt(req: AuthRequest, res: Response) {
         wiki: wiki ?? null,
         rosterAvailable: Boolean(roster),
         rosterNote,
+        learnedCorrections: learned.corrected,
+        learnedSuppressions: learned.suppressed,
         costUsd: result.cost,
         cacheHitPct: result.usage.input
           ? Math.round((result.usage.cached / result.usage.input) * 100)
@@ -282,6 +293,33 @@ export async function exportSrt(req: AuthRequest, res: Response) {
 
     const { next, applied, rejected } = applyEdits(before, edits)
     const changed = new Set(applied.map((edit) => edit.cueIndex))
+
+    // Remember what was decided, so the next file doesn't repeat a suggestion the
+    // translator has already corrected or turned down. Downloading is the moment
+    // of commitment, which makes it the honest place to learn from.
+    const language = typeof req.body?.language === "string" ? req.body.language.trim() : ""
+    const rawDecisions = Array.isArray(req.body?.decisions) ? req.body.decisions : []
+    if (language && rawDecisions.length > 0) {
+      const decisions: TermDecision[] = rawDecisions
+        .filter(
+          (d: any) =>
+            d &&
+            typeof d.findText === "string" &&
+            typeof d.suggestedText === "string" &&
+            ["accepted", "edited", "rejected"].includes(d.outcome)
+        )
+        .map((d: any) => ({
+          findText: d.findText,
+          suggestedText: d.suggestedText,
+          finalText: typeof d.finalText === "string" ? d.finalText : null,
+          outcome: d.outcome,
+          kind: typeof d.kind === "string" ? d.kind : "glossary",
+        }))
+      const saved = await recordDecisions(decisions, language, req.userId)
+      if (saved > 0) {
+        logger.info({ action: "SRT_TERM_DECISIONS_RECORDED", userId: req.userId, language, saved })
+      }
+    }
 
     // Serializes, re-parses, and re-checks every timestamp against the original.
     // Throws rather than returning anything it can't prove is intact.

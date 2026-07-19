@@ -180,7 +180,8 @@ model User {
 
   lastEditedOrders TranslationOrder[] @relation("LastEditedBy")
 
-  orderFeedback OrderFeedback[] @relation("FeedbackAuthor")
+  orderFeedback    OrderFeedback[]   @relation("FeedbackAuthor")
+  srtTermDecisions SrtTermDecision[] @relation("SrtTermDecider")
 
   feedbackReads FeedbackRead[]
 
@@ -561,3 +562,41 @@ model FeedbackRead {
   @@index([feedbackId])
 }
 
+/// What a translator actually did with a suggested terminology change.
+///
+/// The checker proposes; the translator decides. Recording that decision lets the
+/// same file stop producing the same wrong suggestion twice: a correction becomes
+/// the wording proposed next time, and a repeatedly rejected suggestion stops
+/// being offered at all. Scoped by language, since the right answer differs per
+/// language even for the same English term.
+model SrtTermDecision {
+  id String @id @default(cuid())
+
+  /// Target language label, e.g. "Arabic".
+  language String
+
+  /// The text in the subtitle that the change applies to.
+  findText String
+
+  /// What the checker proposed.
+  suggestedText String
+
+  /// What the translator settled on. Null when they rejected it outright.
+  finalText String?
+
+  /// "accepted" | "edited" | "rejected" — what happened to the suggestion.
+  outcome String
+
+  /// Which pass produced it: "glossary" | "untranslated" | "name".
+  kind String
+
+  decidedById String?
+  decidedBy   User?   @relation("SrtTermDecider", fields: [decidedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  /// One row per language + text + proposal, updated as opinions change.
+  @@unique([language, findText, suggestedText])
+  @@index([language])
+  @@index([decidedById])
+}

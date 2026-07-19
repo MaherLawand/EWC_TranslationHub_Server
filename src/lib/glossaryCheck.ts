@@ -92,6 +92,8 @@ export type Suggestion = SrtEdit & {
   approvedTerm: string
   confidence: "high" | "medium"
   context: string
+  /** True when this wording came from a past correction by the team. */
+  learned?: boolean
   /**
    * For "untranslated" suggestions: glossary rows that contain this term inside a
    * longer phrase. "Aegis" has no row of its own, but "AEGIS POWER PLAY" and
