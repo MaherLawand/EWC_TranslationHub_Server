@@ -100,6 +100,70 @@ const TIMESTAMP_LINE =
   /^(\d{1,2}:\d{2}:\d{2}[,.]\d{1,3})([ \t]*-->[ \t]*)(\d{1,2}:\d{2}:\d{2}[,.]\d{1,3})(.*)$/
 
 /**
+ * Real broadcast files arrive with corrupted timestamp lines. Two seen in the
+ * wild, both from sloppy tooling upstream:
+ *
+ *   "00�:00�:32,440 --> ..."   a U+FFFD replacement char from a bad
+ *                                        Windows-1252 → UTF-8 re-encode
+ *   "00:00:53,000 --> 00:00: 57,220"     a stray space wedged into the time
+ *
+ * A strict parser rejects the whole file over one of these, so the translator
+ * can't even check terminology. We tolerate them instead — but ONLY for the
+ * decision "is this a timestamp line". The captured strings stay RAW, corruption
+ * and all, because timestamps are never rewritten (see the module contract). The
+ * broken bytes ride straight through to the output; fixing them is the source
+ * file's problem, not ours to silently change.
+ */
+const SEPARATOR = /[ \t]*-->[ \t]*/
+const CLEAN_TIMESTAMP = /^\d{1,2}:\d{2}:\d{2}[,.]\d{1,3}/
+
+/** Remove only the two known corruptions, so a real bad line can still be recognised. */
+function stripTimestampNoise(part: string): string {
+  return (
+    part
+      // U+FFFD replacement characters.
+      .replace(/�/g, "")
+      // Whitespace wedged between timestamp characters ("00:00: 57").
+      .replace(/(?<=[\d:,.])[ \t]+(?=[\d:,.])/g, "")
+  )
+}
+
+type TimestampParts = { startRaw: string; separatorRaw: string; endRaw: string }
+
+/**
+ * Recognise a timestamp line, tolerating the corruptions above. Returns the parts
+ * VERBATIM (so `startRaw + separatorRaw + endRaw` reproduces the trimmed source
+ * line exactly), or null if the line isn't a timestamp even after allowing noise.
+ */
+function matchTimestampLine(rawLine: string): TimestampParts | null {
+  const line = rawLine.trim()
+
+  // Fast, exact path — the overwhelming majority of lines.
+  const strict = TIMESTAMP_LINE.exec(line)
+  if (strict) {
+    return { startRaw: strict[1], separatorRaw: strict[2], endRaw: strict[3] + strict[4] }
+  }
+
+  // Tolerant path: the "-->" arrow survives even in the broken files, so split on
+  // it and validate each side after removing known noise. The start must be a bare
+  // timestamp; the end may carry trailing positioning coords, so only its leading
+  // portion has to be one.
+  const sep = SEPARATOR.exec(line)
+  if (!sep) return null
+  const before = line.slice(0, sep.index)
+  const after = line.slice(sep.index + sep[0].length)
+  if (!before || !after) return null
+
+  const cleanBefore = stripTimestampNoise(before)
+  if (!CLEAN_TIMESTAMP.test(cleanBefore) || cleanBefore.replace(CLEAN_TIMESTAMP, "") !== "") {
+    return null // start side must be EXACTLY a timestamp, nothing trailing
+  }
+  if (!CLEAN_TIMESTAMP.test(stripTimestampNoise(after))) return null
+
+  return { startRaw: before, separatorRaw: sep[0], endRaw: after }
+}
+
+/**
  * Parse an SRT file into cues.
  *
  * @throws {SrtParseError} only when a cue's timestamp line is malformed.
@@ -130,7 +194,7 @@ export function parseSrt(text: string): ParsedSrt {
     // this as a number line if the NEXT line is a timestamp; otherwise assume the
     // number was omitted and this line is already the timestamp.
     let index: number
-    if (TIMESTAMP_LINE.test(numberLine)) {
+    if (matchTimestampLine(numberLine)) {
       index = cues.length + 1 // number omitted — synthesize a sequential one
     } else {
       const parsed = Number.parseInt(numberLine, 10)
@@ -146,16 +210,14 @@ export function parseSrt(text: string): ParsedSrt {
     }
 
     const timeLineNo = i + 1
-    const match = TIMESTAMP_LINE.exec(lines[i].trim())
-    if (!match) {
+    const parts = matchTimestampLine(lines[i])
+    if (!parts) {
       throw new SrtParseError(`Malformed timestamp line: "${truncate(lines[i])}"`, timeLineNo)
     }
-    // Captured verbatim: never reformatted, never re-padded. Concatenating
-    // startRaw + separatorRaw + endRaw reproduces the source line exactly; any
-    // trailing positioning coords ride along on endRaw.
-    const startRaw = match[1]
-    const separatorRaw = match[2]
-    const endRaw = match[3] + match[4]
+    // Captured verbatim: never reformatted, never re-padded, corruption preserved.
+    // Concatenating startRaw + separatorRaw + endRaw reproduces the source line
+    // exactly; any trailing positioning coords ride along on endRaw.
+    const { startRaw, separatorRaw, endRaw } = parts
     i++
 
     // Collect text until a blank line or EOF.

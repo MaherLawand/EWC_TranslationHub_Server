@@ -254,6 +254,15 @@ export async function checkSrt(req: AuthRequest, res: Response) {
       return res.status(503).json({ message: error.message })
     }
     logger.error({ action: "SRT_GLOSSARY_CHECK_ERROR", userId: req.userId, userName: req.userName, err: error })
+    // A rate limit is temporary and self-correcting; say so rather than implying
+    // the file or the configuration is at fault.
+    const message = (error as Error).message || ""
+    if (/rate limit|429/i.test(message)) {
+      return res.status(429).json({
+        message:
+          "OpenAI is rate limiting this account right now. Wait a minute and run the check again.",
+      })
+    }
     return res.status(502).json({ message: "The glossary check could not complete. Please try again." })
   }
 }

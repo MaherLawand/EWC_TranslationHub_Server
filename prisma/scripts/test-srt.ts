@@ -315,5 +315,51 @@ check("tolerates a cue with no text", () => {
 
 /* ── Summary ────────────────────────────────────────────────────────────── */
 
+console.log("\nCorrupted timestamp tolerance (real broadcast files)")
+
+const FFFD = "�"
+
+check("U+FFFD in the timestamp parses and round-trips byte-exact", () => {
+  // From a Windows-1252 → UTF-8 re-encode: "00�:00�:32,440".
+  const src = `8\n00${FFFD}:00${FFFD}:32,440 --> 00${FFFD}:00${FFFD}:34,580\nAvec des avis\n`
+  const parsed = parseSrt(src)
+  eq(parsed.cues.length, 1, "one cue")
+  eq(parsed.cues[0].startRaw, `00${FFFD}:00${FFFD}:32,440`, "start kept verbatim")
+  eq(serializeSrt(parsed), src, "byte-exact round-trip")
+})
+
+check("a stray space inside the timestamp parses and round-trips", () => {
+  const src = `13\n00:00:53,000 --> 00:00: 57,220\nNicole\n`
+  const parsed = parseSrt(src)
+  eq(parsed.cues[0].endRaw, "00:00: 57,220", "end kept verbatim, space and all")
+  eq(serializeSrt(parsed), src, "byte-exact round-trip")
+})
+
+check("a corrupted timestamp with the cue number omitted still parses", () => {
+  const src = `00${FFFD}:00:01,000 --> 00:00:02,000\nText\n`
+  eq(parseSrt(src).cues.length, 1, "one cue")
+})
+
+check("trailing positioning coords survive on a corrupted line", () => {
+  const src = `1\n00${FFFD}:00:01,000 --> 00:00:02,000 X1:1 X2:2\nHi\n`
+  eq(parseSrt(src).cues[0].endRaw, "00:00:02,000 X1:1 X2:2", "coords ride on endRaw")
+  eq(serializeSrt(parseSrt(src)), src, "round-trip")
+})
+
+check("subtitle text that merely looks time-ish is NOT parsed as a timestamp", () => {
+  // No "-->" arrow, so it can never be mistaken for one.
+  const src = `1\n00:00:01,000 --> 00:00:02,000\nScore 3:2 at 00:45\n`
+  eq(parseSrt(src).cues[0].textLines[0], "Score 3:2 at 00:45", "kept as text")
+})
+
+check("timings are still verified on a corrupted-timestamp cue", () => {
+  // Editing text in a cue whose timestamp is corrupted must still pass the guard.
+  const src = `1\n00${FFFD}:00:01,000 --> 00:00:02,000\nAvec\n`
+  const before = parseSrt(src)
+  const { next, applied } = applyEdits(before, [{ cueIndex: 1, find: "Avec", replace: "AVEC" }])
+  const out = serializeVerified(before, next, new Set(applied.map((e) => e.cueIndex)))
+  eq(out.includes(`00${FFFD}:00:01,000`), true, "corrupted timestamp preserved through export")
+})
+
 console.log(`\n${passed} passed, ${failed} failed\n`)
 if (failed > 0) process.exit(1)

@@ -63,8 +63,16 @@ function estimateCost(usage: Usage): number | null {
 /** Cues per request. Small enough that the model attends to each one properly. */
 const CUES_PER_CHUNK = 120
 
-/** Parallel requests. Beyond ~3 you're just queueing at the rate limiter. */
-const MAX_CONCURRENCY = 3
+/**
+ * Parallel requests per check.
+ *
+ * Kept at 1. Each request carries the whole glossary (~45k tokens for Arabic), so
+ * three in flight is ~135k tokens in the same instant against a 200k
+ * tokens-per-minute account limit — enough to 429 on its own, and certain to when
+ * two people check at once. Sequential chunks cost latency only on long files;
+ * most subtitle files are a single chunk and see no difference at all.
+ */
+const MAX_CONCURRENCY = 1
 
 export type GlossaryRow = { key: string; context: string; source: string; target: string }
 
@@ -129,7 +137,17 @@ function getClient(): OpenAI {
       "The glossary checker is not configured (OPENAI_API_KEY is missing)."
     )
   }
-  if (!client) client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+  if (!client) {
+    client = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+      // The glossary block is ~45k tokens per request, so a busy minute can brush
+      // the 200k tokens-per-minute ceiling. Those 429s clear in well under a
+      // second ("try again in 406ms"), and the SDK honours Retry-After — so
+      // retrying turns a failed check into a slightly slower one. The default of
+      // 2 is not enough headroom when several chunks are queued behind each other.
+      maxRetries: 5,
+    })
+  }
   return client
 }
 
@@ -170,14 +188,19 @@ Set confidence to "high" only when the concept match is unambiguous; otherwise "
 const MAX_CONTEXT_CHARS = 60
 
 function formatGlossary(rows: GlossaryRow[]): string {
-  const lines = rows.map((r) => {
+  // A row whose approved translation IS the English term has nothing to enforce,
+  // so it only costs tokens. French has 275 of these.
+  const enforceable = rows.filter(
+    (r) => r.source.trim().toLowerCase() !== r.target.trim().toLowerCase()
+  )
+  const lines = enforceable.map((r) => {
     const trimmed = r.context.length > MAX_CONTEXT_CHARS
       ? `${r.context.slice(0, MAX_CONTEXT_CHARS)}…`
       : r.context
     const context = trimmed ? ` (${trimmed})` : ""
     return `${r.key}${context}: "${r.source}" => "${r.target}"`
   })
-  return `APPROVED GLOSSARY (${rows.length} terms)\n${lines.join("\n")}`
+  return `APPROVED GLOSSARY (${enforceable.length} terms)\n${lines.join("\n")}`
 }
 
 /**
