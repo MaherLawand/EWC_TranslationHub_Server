@@ -10,6 +10,7 @@ import {
   createSubOrders,
   duplicateOrder,
   deleteOrder,
+  bulkDeleteOrders,
   getOrderById,
   getOrderCounts,
   getOrders,
@@ -49,6 +50,14 @@ router.post(
   "/",
   requireAuth,
   createOrder
+)
+
+// Delete several orders at once. A static path, so it's declared before the
+// "/:id/..." routes and can never be swallowed as an :id.
+router.post(
+  "/bulk-delete",
+  requireAuth,
+  bulkDeleteOrders
 )
 
 // Bulk-create sub-orders under an existing parent ("big order")

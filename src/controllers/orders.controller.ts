@@ -3650,6 +3650,114 @@ export async function deleteOrder(
 }
 
 /**
+ * POST /orders/bulk-delete   body: { ids: string[] }
+ *
+ * Delete several orders at once. Mirrors deleteOrder for each id — same
+ * permission gate, same logging, source-removed notifications, parent status
+ * rollup, and socket emits — but resolves the parent recompute ONCE per affected
+ * parent at the end, so deleting a run of sub-orders under the same parent
+ * doesn't recompute it N times.
+ *
+ * Deleting a parent cascades to its sub-orders at the database level
+ * (onDelete: Cascade), so ids may name a parent without its children.
+ */
+const MAX_BULK_DELETE = 200
+
+export async function bulkDeleteOrders(req: AuthRequest, res: Response) {
+  try {
+    if (!req.userId) return res.status(401).json({ message: "Unauthorized" })
+
+    const user = await prisma.user.findUnique({
+      where: { id: req.userId },
+      select: { role: true, position: true },
+    })
+    if (!user) return res.status(404).json({ message: "User not found" })
+    if (!canManageOrders(user)) return res.status(403).json({ message: "Unauthorized" })
+
+    const rawIds = Array.isArray(req.body?.ids) ? req.body.ids : []
+    const validIds = rawIds.filter((id: unknown): id is string => typeof id === "string" && id.length > 0)
+    const ids: string[] = [...new Set<string>(validIds)]
+    if (ids.length === 0) return res.status(400).json({ message: "No orders selected." })
+    if (ids.length > MAX_BULK_DELETE) {
+      return res.status(413).json({ message: `Too many orders selected (max ${MAX_BULK_DELETE}).` })
+    }
+
+    const io = (() => { try { return getIo() } catch { return null } })()
+    const deletedIds: string[] = []
+    const failed: { id: string; reason: string }[] = []
+    // Parents to reconcile after the fact. A parent deleted in this batch is
+    // skipped, since it no longer exists.
+    const affectedParents = new Set<string>()
+
+    for (const id of ids) {
+      try {
+        const fullOrder = await prisma.translationOrder.findUnique({
+          where: { id },
+          select: orderSelectCore,
+        })
+        if (!fullOrder) {
+          failed.push({ id, reason: "not_found" })
+          continue
+        }
+
+        const deleted = await prisma.translationOrder.delete({
+          where: { id },
+          select: { id: true, type: true, parentId: true },
+        })
+
+        deletedIds.push(deleted.id)
+        logger.info({
+          action: "DELETE_ORDER",
+          userId: req.userId,
+          userName: req.userName,
+          orderId: id,
+          bulk: true,
+          deleted: orderSnapshot(fullOrder),
+        })
+
+        try { io?.emit("order-deleted", { id: deleted.id, type: deleted.type }) } catch {}
+
+        const sourceLink =
+          fullOrder.type === "BROADCAST"
+            ? (fullOrder as any).broadcast?.sourceFileLink
+            : (fullOrder as any).marketing?.sourceFileLink
+        if (sourceLink) notifyTranslatorsOrderDeleted(fullOrder).catch(() => {})
+
+        if (deleted.parentId) affectedParents.add(deleted.parentId)
+      } catch (error: any) {
+        // P2025 = already gone; treat as success so a double-click is harmless.
+        if (error?.code === "P2025") {
+          deletedIds.push(id)
+          continue
+        }
+        failed.push({ id, reason: "delete_failed" })
+        logger.error({ action: "DELETE_ORDER_ERROR", userId: req.userId, orderId: id, bulk: true, err: error })
+      }
+    }
+
+    ordersCache.invalidate()
+
+    // Reconcile each surviving parent once, skipping any that were themselves
+    // deleted in this batch.
+    for (const parentId of affectedParents) {
+      if (deletedIds.includes(parentId)) continue
+      try {
+        const parentStatus = await recomputeParentStatus(parentId)
+        const nearestSubDeadline = await nearestSubDeadlineFor(parentId)
+        const parent = await prisma.translationOrder.findUnique({ where: { id: parentId }, select: { type: true } })
+        io?.emit("order-patched", { id: parentId, type: parent?.type, status: parentStatus, nearestSubDeadline })
+      } catch { /* parent gone or already consistent */ }
+    }
+    if (affectedParents.size > 0) ordersCache.invalidate()
+
+    return res.json({ success: true, deleted: deletedIds.length, deletedIds, failed })
+  } catch (error: any) {
+    logger.error({ action: "BULK_DELETE_ORDERS_ERROR", userId: req.userId, err: error })
+    return res.status(500).json({ message: "Failed to delete the selected orders." })
+  }
+}
+
+/**
  * GET /orders/counts
  * Returns { PENDING, IN_PROGRESS, COMPLETED, total } for the current filter set
  * (intentionally excludes statusFilter so all statuses are always counted).
