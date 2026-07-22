@@ -7,6 +7,7 @@ import app from "./app.js"
 import { setIo } from "./lib/socket.js"
 import { logger } from "./lib/logger.js"
 import { warmGlossary } from "./lib/glossary.js"
+import { warmArabicPriority } from "./lib/arabicPriorityGlossary.js"
 import { prisma } from "./lib/prisma.js"
 
 // Fail fast — missing these env vars means auth is silently broken
@@ -90,6 +91,7 @@ httpServer.listen(PORT, () => {
   // Pre-load the terminology glossary so the first translator to run a
   // check does not wait on Google Sheets. Never throws.
   warmGlossary()
+  warmArabicPriority()
 })
 
 process.on("SIGTERM", async () => {

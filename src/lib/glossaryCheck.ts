@@ -74,7 +74,19 @@ const CUES_PER_CHUNK = 120
  */
 const MAX_CONCURRENCY = 1
 
-export type GlossaryRow = { key: string; context: string; source: string; target: string }
+export type GlossaryRow = {
+  key: string
+  context: string
+  source: string
+  target: string
+  /**
+   * A high-priority term the team explicitly mandated (the priority Arabic
+   * glossary). A whole-term match against one of these is authoritative and is
+   * exempt from the context review, which must not veto a deliberate decision —
+   * the review is for catching the scans' mistakes, not overruling the glossary.
+   */
+  priority?: boolean
+}
 
 /**
  * Where a suggestion came from, which is also how much authority it carries:
@@ -737,7 +749,7 @@ Applies an approved glossary translation.
 START FROM keep = true. The glossary is the team's approved terminology and this proposal is normally correct. In particular, when the matched text is ENGLISH sitting in a non-English subtitle and the glossary defines a translation for it, applying that translation is exactly the job — keep it. "The line already uses the English word" is never a reason to reject; that is the problem being fixed. Game terms, abilities and mechanics ARE meant to be translated when the glossary covers them.
 
 Answer keep = false only when:
-- The matched text is part of a PROPER NAME — team, organisation, player, product, game title, or tournament. "Team Vitality", "League of Legends", "Esports World Cup" are names; translating a word inside one renames the entity.
+- The matched text is only PART of a longer proper name in the line — translating that fragment would leave a half-translated name. "Team" inside "Team Vitality", "Legends" inside "League of Legends", "World Cup" inside "Esports World Cup" — reject those, because the surrounding words complete a single name. But if the matched text stands on its own as the whole approved term, keep it: the glossary deliberately localises some titles (a game name rendered in the target script), and that is correct, not a partial rename.
 - The replacement is a LONGER, more specific term than the line means. Replacing a general word with a specific compound ("creeps" -> "lane creeps", "tournament" -> "main tournament") is wrong unless the line clearly means that specific thing.
 - The replacement would DUPLICATE something the line already has, such as an article the sentence already carries.
 - The result would be ungrammatical: wrong article, agreement, or word form for that position.
@@ -1229,7 +1241,18 @@ export async function checkGlossary(
   // one letter from the player "MounTain" and "KuroKy" one letter from "Kuroko",
   // so distance alone cannot separate a typo from a different word.
   const cueText = new Map(cues.map((cue) => [cue.index, cue.textLines.join(" ")]))
-  const toReview = [...literal, ...nameSuggestions, ...suggestions, ...untranslated]
+  // Whole-term matches against a priority glossary row are authoritative and
+  // skip the review — the team mandated them, so the model must not veto them.
+  const priorityKeys = new Set(
+    glossaryRows.filter((r) => r.priority).map((r) => (r.key || "").toLowerCase())
+  )
+  const isPriorityHit = (s: Suggestion) =>
+    s.kind === "glossary" && priorityKeys.has((s.glossaryKey || "").toLowerCase())
+
+  const exemptFromReview = literal.filter(isPriorityHit)
+  const toReview = [...literal, ...nameSuggestions, ...suggestions, ...untranslated].filter(
+    (s) => !isPriorityHit(s)
+  )
   const review = await reviewSuggestions(toReview, cueText, languageLabel)
   if (review.dropped.length > 0) {
     logger.info({
@@ -1241,7 +1264,7 @@ export async function checkGlossary(
   }
   // Fix up any article/connector already attached to the matched text, so the
   // edit reads correctly in the sentence rather than doubling the article.
-  const adjusted = review.kept.map((suggestion) => {
+  const adjusted = [...review.kept, ...exemptFromReview].map((suggestion) => {
     const line = cueText.get(suggestion.cueIndex) ?? ""
     const { find, replace } = absorbArabicArticle(line, suggestion.find, suggestion.replace)
     return find === suggestion.find ? suggestion : { ...suggestion, find, replace }

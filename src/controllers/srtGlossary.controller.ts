@@ -25,6 +25,7 @@ import {
   type SrtEdit,
 } from "../lib/srt.js"
 import { getGlossary, entriesForColumn, describeGlossaryFailure } from "../lib/glossary.js"
+import { getArabicPriority, applyArabicPriority } from "../lib/arabicPriorityGlossary.js"
 import { glossaryColumnFor, COLUMN_TO_LABEL, usesNonLatinScript } from "../lib/glossaryLanguages.js"
 import { checkGlossary, isConfigured, GlossaryCheckUnavailable } from "../lib/glossaryCheck.js"
 import { wikiForGame } from "../lib/games.js"
@@ -111,9 +112,27 @@ export async function checkSrt(req: AuthRequest, res: Response) {
     if (!glossary.languageColumns.includes(column)) {
       return res.status(409).json({ message: `No glossary is available for ${language}.` })
     }
-    const rows = entriesForColumn(glossary, column)
+    let rows = entriesForColumn(glossary, column)
     if (rows.length === 0) {
       return res.status(409).json({ message: `The glossary has no terms for ${language}.` })
+    }
+
+    // Arabic has a second, higher-priority glossary that overrides the main one.
+    // A failure here must not fail the check — fall back to the main glossary.
+    if (column === "ara") {
+      try {
+        const priority = await getArabicPriority()
+        const before = rows.length
+        rows = applyArabicPriority(rows, priority)
+        logger.info({
+          action: "ARABIC_PRIORITY_APPLIED",
+          mainTerms: before,
+          totalTerms: rows.length,
+          priorityTerms: priority.entries.length,
+        })
+      } catch (error) {
+        logger.warn({ action: "ARABIC_PRIORITY_UNAVAILABLE", err: (error as Error).message })
+      }
     }
 
     let parsed
