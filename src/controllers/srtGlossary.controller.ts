@@ -248,6 +248,7 @@ export async function checkSrt(req: AuthRequest, res: Response) {
         context: s.context,
         confidence: s.confidence,
         learned: s.learned ?? false,
+        glossarySource: s.glossarySource ?? null,
         relatedRows: s.relatedRows ?? [],
       })),
       stats: {

@@ -115,6 +115,12 @@ export type Suggestion = SrtEdit & {
   /** True when this wording came from a past correction by the team. */
   learned?: boolean
   /**
+   * For a glossary suggestion: which glossary the term came from.
+   *   "priority" — the new, high-priority Arabic glossary
+   *   "main"     — the original glossary
+   */
+  glossarySource?: "main" | "priority"
+  /**
    * For "untranslated" suggestions: glossary rows that contain this term inside a
    * longer phrase. "Aegis" has no row of its own, but "AEGIS POWER PLAY" and
    * "AEGIS EXPIRED" do — so the house rendering already exists and the reviewer
@@ -1265,9 +1271,17 @@ export async function checkGlossary(
   // Fix up any article/connector already attached to the matched text, so the
   // edit reads correctly in the sentence rather than doubling the article.
   const adjusted = [...review.kept, ...exemptFromReview].map((suggestion) => {
-    const line = cueText.get(suggestion.cueIndex) ?? ""
-    const { find, replace } = absorbArabicArticle(line, suggestion.find, suggestion.replace)
-    return find === suggestion.find ? suggestion : { ...suggestion, find, replace }
+    // Tag which glossary a glossary-kind term came from, so the UI can show it.
+    const withSource: Suggestion =
+      suggestion.kind === "glossary"
+        ? {
+            ...suggestion,
+            glossarySource: isPriorityHit(suggestion) ? "priority" : "main",
+          }
+        : suggestion
+    const line = cueText.get(withSource.cueIndex) ?? ""
+    const { find, replace } = absorbArabicArticle(line, withSource.find, withSource.replace)
+    return find === withSource.find ? withSource : { ...withSource, find, replace }
   })
 
   const merged: Suggestion[] = []
