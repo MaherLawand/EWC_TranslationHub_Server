@@ -23,6 +23,34 @@ export function isTranslatorPosition(position?: string | null): boolean {
   return !!position && (TRANSLATOR_POSITIONS as readonly string[]).includes(position)
 }
 
+/**
+ * Which vendor's delivery links a user may see.
+ *
+ * A delivery link carries a `vendor` of "TRANSLATOR" | "TRANSPERFECT" | "TARJAMA",
+ * or "" for a shared "General" set. Admins/PPMs/Producers see every vendor; a
+ * translator-side user sees only the General set plus their OWN vendor's links.
+ *
+ * Returns null to mean "no restriction — show all vendors".
+ */
+export function canSeeAllDeliveryVendors(role?: string | null, position?: string | null): boolean {
+  if (role === "ADMIN") return true
+  // Only the three vendor roles are restricted; everyone else (Producer, PPM,
+  // Video Editor, Viewer, Editor) sees everything.
+  return !isTranslatorPosition(position)
+}
+
+/** Whether a user may see a delivery link with the given vendor tag. */
+export function canSeeDeliveryVendor(
+  vendor: string | null | undefined,
+  role?: string | null,
+  position?: string | null
+): boolean {
+  if (canSeeAllDeliveryVendors(role, position)) return true
+  const v = (vendor ?? "").trim()
+  // General ("") is shared; otherwise it must match the user's own position.
+  return v === "" || v === position
+}
+
 /** The positions the pills offer as email recipients (order matters for display). */
 export const NOTIFY_POSITION_OPTIONS = ["TRANSLATOR", "TRANSPERFECT", "TARJAMA"] as const
 

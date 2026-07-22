@@ -12,7 +12,19 @@ import { triggerNotifications, getIo } from "../lib/socket.js"
 import { notifyTranslatorsSourceReady, notifyTranslatorsOrderDeleted, notifyTranslatorsSourceRemoved } from "./notification.controller.js"
 import { logger } from "../lib/logger.js"
 import { ordersCache } from "../lib/ordersCache.js"
-import { isTranslatorPosition, sanitizeNotifyPositions, orderVisibilityWhere, canSeeOrder } from "../lib/positions.js"
+import { isTranslatorPosition, sanitizeNotifyPositions, orderVisibilityWhere, canSeeOrder, canSeeDeliveryVendor, canSeeAllDeliveryVendors, NOTIFY_POSITION_OPTIONS } from "../lib/positions.js"
+
+/** Normalise a delivery-link vendor tag: a valid vendor role, or "" for shared. */
+function sanitizeVendor(input: unknown): string {
+  const v = typeof input === "string" ? input.trim() : ""
+  return (NOTIFY_POSITION_OPTIONS as readonly string[]).includes(v) ? v : ""
+}
+
+/** Strip delivery links the viewer isn't allowed to see, in place on a detail object. */
+function filterDeliveryVisibility(detail: any, role?: string | null, position?: string | null): void {
+  if (!detail?.deliveries) return
+  detail.deliveries = detail.deliveries.filter((d: any) => canSeeDeliveryVendor(d?.vendor, role, position))
+}
 import {
   Prisma,
   DeliveryFormat,
@@ -261,6 +273,7 @@ const orderSelectCore = {
         select: {
           id: true,
           language: true,
+          vendor: true,
           deliveryLink: true,
         },
       },
@@ -289,6 +302,7 @@ const orderSelectCore = {
         select: {
           id: true,
           language: true,
+          vendor: true,
           deliveryLink: true,
         },
       },
@@ -359,7 +373,7 @@ function orderAuditFields(o: any): Record<string, any> {
     deliveryDate: o.broadcast?.deliveryDate ? new Date(o.broadcast.deliveryDate).toISOString() : null,
     deadline: d?.deadlineDate ? new Date(d.deadlineDate).toISOString() : null,
     deliveryFormats: (d?.deliveryFormats ?? []).map((f: any) => f.format),
-    deliveries: (d?.deliveries ?? []).map((x: any) => ({ language: x.language, link: x.deliveryLink ?? "" })),
+    deliveries: (d?.deliveries ?? []).map((x: any) => ({ language: x.language, vendor: x.vendor ?? "", link: x.deliveryLink ?? "" })),
   }
 }
 
@@ -1158,6 +1172,10 @@ export async function getOrderById(
         .catch(() => {})
     }
 
+    // Hide delivery links belonging to vendors this viewer isn't allowed to see.
+    filterDeliveryVisibility((order as any).broadcast, req.userRole, req.userPosition)
+    filterDeliveryVisibility((order as any).marketing, req.userRole, req.userPosition)
+
     return res.json({ ...order, editHistory })
   } catch (error) {
     logger.error({ action: "GET_ORDER_BY_ID_ERROR", userId: req.userId, userName: req.userName, orderId: req.params.id, err: error })
@@ -1334,6 +1352,9 @@ function buildOrderData(
         .filter((delivery) => typeof delivery?.language === "string")
         .map((delivery: any) => ({
           language: delivery.language,
+          // "" is the shared/"General" vendor. Only the three vendor roles are
+          // valid; anything else collapses to General.
+          vendor: sanitizeVendor(delivery.vendor),
           deliveryLink: delivery.deliveryLink || "",
         }))
     : []
@@ -1777,7 +1798,7 @@ export async function duplicateOrder(req: AuthRequest, res: Response) {
             estimatedMinutes: true, sourceLanguage: true, targetLanguages: true,
             sourceFileLink: true, srtAvailableLink: true, deliveryDate: true,
             deadlineDate: true, deadlineHasTime: true, deliveryType: true, contentCategory: true, gameId: true,
-            deliveries: { select: { language: true, deliveryLink: true } },
+            deliveries: { select: { language: true, vendor: true, deliveryLink: true } },
             deliveryFormats: { select: { format: true, deliveryLink: true } },
           },
         },
@@ -1785,7 +1806,7 @@ export async function duplicateOrder(req: AuthRequest, res: Response) {
           select: {
             contentTitle: true, aspectRatios: true, sourceLanguage: true, targetLanguages: true,
             sourceFileLink: true, srtAvailableLink: true, deadlineDate: true, deadlineHasTime: true,
-            deliveries: { select: { language: true, deliveryLink: true } },
+            deliveries: { select: { language: true, vendor: true, deliveryLink: true } },
             deliveryFormats: { select: { format: true, deliveryLink: true } },
           },
         },
@@ -1869,7 +1890,7 @@ export async function duplicateOrder(req: AuthRequest, res: Response) {
           deliveryType: dType,
           contentCategory: b.contentCategory,
           game: { connect: { id: b.gameId } },
-          deliveries: { create: b.deliveries.map((d) => ({ language: d.language, deliveryLink: d.deliveryLink })) },
+          deliveries: { create: b.deliveries.map((d) => ({ language: d.language, vendor: d.vendor, deliveryLink: d.deliveryLink })) },
           deliveryFormats: { create: formats.map((f) => ({ format: f.format, deliveryLink: f.deliveryLink })) },
         },
       }
@@ -1885,7 +1906,7 @@ export async function duplicateOrder(req: AuthRequest, res: Response) {
           srtAvailableLink: m.srtAvailableLink,
           deadlineDate: m.deadlineDate,
           deadlineHasTime: m.deadlineHasTime,
-          deliveries: { create: m.deliveries.map((d) => ({ language: d.language, deliveryLink: d.deliveryLink })) },
+          deliveries: { create: m.deliveries.map((d) => ({ language: d.language, vendor: d.vendor, deliveryLink: d.deliveryLink })) },
           deliveryFormats: { create: m.deliveryFormats.map((f) => ({ format: f.format, deliveryLink: f.deliveryLink })) },
         },
       }
@@ -2380,10 +2401,12 @@ try {
         const broadcastId =
             existingOrder.broadcast.id
 
+            // Only delete rows the editor is ALLOWED to see. A vendor user
+            // submits just their own + General links, so links for vendors they
+            // can't see must be preserved rather than wiped.
             await tx.broadcastDelivery.deleteMany({
   where: {
     broadcastId,
-
     id: {
       notIn:
         deliveries
@@ -2394,6 +2417,9 @@ try {
             (d: any) => d.id
           ),
     },
+    ...(canSeeAllDeliveryVendors(user.role, user.position)
+      ? {}
+      : { vendor: { in: ["", user.position as string] } }),
   },
 })
 
@@ -2413,6 +2439,8 @@ try {
                       language:
                         delivery.language,
 
+                      vendor: sanitizeVendor(delivery.vendor),
+
                       deliveryLink:
                         delivery.deliveryLink ||
                         "",
@@ -2426,6 +2454,8 @@ try {
                   data: {
                     language:
                       delivery.language,
+
+                    vendor: sanitizeVendor(delivery.vendor),
 
                     deliveryLink:
                       delivery.deliveryLink ||
@@ -2450,7 +2480,6 @@ const marketingId =
   await tx.marketingDelivery.deleteMany({
   where: {
     marketingId,
-
     id: {
       notIn:
         deliveries
@@ -2461,6 +2490,10 @@ const marketingId =
             (d: any) => d.id
           ),
     },
+    // Preserve links for vendors the editor can't see (see broadcast note).
+    ...(canSeeAllDeliveryVendors(user.role, user.position)
+      ? {}
+      : { vendor: { in: ["", user.position as string] } }),
   },
 })
         await Promise.all(
@@ -2479,6 +2512,8 @@ const marketingId =
                       language:
                         delivery.language,
 
+                      vendor: sanitizeVendor(delivery.vendor),
+
                       deliveryLink:
                         delivery.deliveryLink ||
                         "",
@@ -2492,6 +2527,8 @@ const marketingId =
                   data: {
                     language:
                       delivery.language,
+
+                    vendor: sanitizeVendor(delivery.vendor),
 
                     deliveryLink:
                       delivery.deliveryLink ||

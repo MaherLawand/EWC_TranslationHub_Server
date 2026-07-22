@@ -448,13 +448,17 @@ model BroadcastDelivery {
 
   language String
 
+  /// Which vendor these links belong to: "TRANSLATOR" | "TRANSPERFECT" | "TARJAMA",
+  /// or "" for a shared/"General" set visible to everyone who can see the order.
+  vendor String @default("")
+
   deliveryLink String?
 
   broadcastId String
 
   broadcast BroadcastDetails @relation(fields: [broadcastId], references: [id], onDelete: Cascade)
 
-  @@unique([broadcastId, language])
+  @@unique([broadcastId, language, vendor])
   @@index([broadcastId])
 }
 
@@ -463,13 +467,17 @@ model MarketingDelivery {
 
   language String
 
+  /// Which vendor these links belong to: "TRANSLATOR" | "TRANSPERFECT" | "TARJAMA",
+  /// or "" for a shared/"General" set visible to everyone who can see the order.
+  vendor String @default("")
+
   deliveryLink String?
 
   marketingId String
 
   marketing MarketingDetails @relation(fields: [marketingId], references: [id], onDelete: Cascade)
 
-  @@unique([marketingId, language])
+  @@unique([marketingId, language, vendor])
   @@index([marketingId])
 }
 
