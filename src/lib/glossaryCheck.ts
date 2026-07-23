@@ -975,6 +975,65 @@ async function mapWithConcurrency<T, R>(
 }
 
 /**
+ * Match English subtitle lines to their translation among a few candidates.
+ *
+ * The EN reference and the corrected file are the same video but can be segmented
+ * differently, so timestamp overlap alone drops a term onto a line that merely
+ * shares a time span, not meaning (e.g. "blue"/"red" landing on a "to the right"
+ * line). Given each English line and a handful of time-overlapping candidate
+ * translated lines, the model picks the one that is actually the translation, or
+ * null when none of them is.
+ */
+const AlignSchema = z.object({
+  pairs: z.array(
+    z.object({
+      en: z.number().int().describe("The English line id."),
+      target: z.number().int().nullable().describe("The matching translated line id, or null if none corresponds."),
+    })
+  ),
+})
+
+const ALIGN_INSTRUCTIONS = `You align English subtitle lines to their translation.
+
+You are given English lines, each with an id, and for each a small set of CANDIDATE translated lines (each with its own id). For EVERY English line, return the id of the candidate that is its translation — the line conveying the same meaning. If none of the candidates is a translation of that English line, return null.
+
+Be strict: only match a candidate that genuinely says the same thing as the English line. A candidate that merely overlaps in time but talks about something else is NOT a match — return null for it. Return exactly one entry per English line.`
+
+export async function alignEnglishToTarget(
+  enCues: { index: number; text: string; candidates: { index: number; text: string }[] }[],
+  languageLabel: string
+): Promise<Map<number, number | null>> {
+  const out = new Map<number, number | null>()
+  if (enCues.length === 0) return out
+
+  const client = getClient()
+  const block = enCues
+    .map(
+      (c) =>
+        `EN #${c.index}: "${c.text}"\n  candidates:\n` +
+        (c.candidates.length
+          ? c.candidates.map((cand) => `    [${cand.index}] "${cand.text}"`).join("\n")
+          : "    (none)")
+    )
+    .join("\n\n")
+
+  const response = await client.responses.parse({
+    model: MODEL,
+    temperature: 0,
+    instructions: ALIGN_INSTRUCTIONS,
+    input: [{ role: "user", content: `Target language: ${languageLabel}\n\n${block}` }],
+    text: { format: zodTextFormat(AlignSchema, "alignment") },
+  })
+
+  const valid = new Set(enCues.flatMap((c) => c.candidates.map((cand) => cand.index)))
+  for (const p of response.output_parsed?.pairs ?? []) {
+    // Only accept an id the model was actually offered.
+    out.set(p.en, p.target != null && valid.has(p.target) ? p.target : null)
+  }
+  return out
+}
+
+/**
  * Check every cue against the glossary for one target language.
  *
  * Throws on failure rather than returning partial results — a check that silently

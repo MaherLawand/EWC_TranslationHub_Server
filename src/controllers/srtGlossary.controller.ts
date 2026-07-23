@@ -27,7 +27,14 @@ import {
 import { describeGlossaryFailure } from "../lib/glossary.js"
 import { getArabicPriority, applyArabicPriority } from "../lib/arabicPriorityGlossary.js"
 import { glossaryColumnFor, COLUMN_TO_LABEL, usesNonLatinScript } from "../lib/glossaryLanguages.js"
-import { checkGlossary, scanLiteralTerms, isConfigured, GlossaryCheckUnavailable } from "../lib/glossaryCheck.js"
+import { checkGlossary, scanLiteralTerms, alignEnglishToTarget, isConfigured, GlossaryCheckUnavailable } from "../lib/glossaryCheck.js"
+
+/** "HH:MM:SS,mmm" (or ".mmm") → milliseconds. NaN if unparseable. */
+function tsToMs(t: string): number {
+  const m = /(\d{1,2}):(\d{2}):(\d{2})[,.](\d{1,3})/.exec(t || "")
+  if (!m) return NaN
+  return +m[1] * 3600000 + +m[2] * 60000 + +m[3] * 1000 + Number(m[4].padEnd(3, "0"))
+}
 import { getEnReference, entriesForTarget, type EnReferenceTarget } from "../lib/enReferenceGlossary.js"
 import { wikiForGame } from "../lib/games.js"
 import { getRoster, LiquipediaRateLimited } from "../lib/liquipedia.js"
@@ -523,6 +530,49 @@ export async function enReferenceCheck(req: AuthRequest, res: Response) {
       })
       .sort((a, b) => a.cueIndex - b.cueIndex)
 
+    // When the caller sends the target-language cues (from the corrected file),
+    // pin each term to the Arabic/French line that is actually the translation of
+    // its English line — timestamp overlap alone misplaces terms onto lines that
+    // merely share a time span. Terms with no genuine counterpart are dropped.
+    const rawArCues = Array.isArray(req.body?.arCues) ? req.body.arCues : []
+    let aligned = matches.map((m) => ({ ...m, arCueIndex: null as number | null }))
+    if (rawArCues.length > 0 && matches.length > 0) {
+      const arCues = rawArCues
+        .filter((c: any) => c && Number.isInteger(c.index) && typeof c.text === "string")
+        .map((c: any) => ({
+          index: c.index as number,
+          text: String(c.text),
+          s: tsToMs(String(c.start ?? "")),
+          e: tsToMs(String(c.end ?? "")),
+        }))
+
+      // One entry per English cue that has terms, with its time-overlapping
+      // candidate target lines.
+      const enByCue = new Map<number, { text: string; s: number; e: number }>()
+      for (const m of matches) {
+        if (!enByCue.has(m.cueIndex)) {
+          enByCue.set(m.cueIndex, { text: m.line, s: tsToMs(m.start), e: tsToMs(m.end) })
+        }
+      }
+      const enCues = [...enByCue.entries()].map(([index, en]) => ({
+        index,
+        text: en.text,
+        candidates: arCues
+          .filter((c: { s: number; e: number }) => c.s < en.e && c.e > en.s)
+          .map((c: { index: number; text: string }) => ({ index: c.index, text: c.text })),
+      }))
+
+      try {
+        const mapping = await alignEnglishToTarget(enCues, target === "ar" ? "Arabic" : "French")
+        aligned = matches
+          .map((m) => ({ ...m, arCueIndex: mapping.get(m.cueIndex) ?? null }))
+          .filter((m) => m.arCueIndex !== null)
+      } catch (error) {
+        // If alignment fails, fall back to unaligned matches rather than nothing.
+        logger.warn({ action: "SRT_EN_REFERENCE_ALIGN_FAILED", err: (error as Error).message })
+      }
+    }
+
     logger.info({
       action: "SRT_EN_REFERENCE",
       userId: req.userId,
@@ -530,13 +580,14 @@ export async function enReferenceCheck(req: AuthRequest, res: Response) {
       target,
       cues: parsed.cues.length,
       glossaryTerms: rows.length,
-      matches: matches.length,
+      matches: aligned.length,
+      aligned: rawArCues.length > 0,
     })
 
     return res.json({
       target,
-      stats: { cueCount: parsed.cues.length, glossaryTerms: rows.length, matches: matches.length },
-      matches,
+      stats: { cueCount: parsed.cues.length, glossaryTerms: rows.length, matches: aligned.length },
+      matches: aligned,
     })
   } catch (error) {
     logger.error({ action: "SRT_EN_REFERENCE_ERROR", userId: req.userId, userName: req.userName, err: error })
