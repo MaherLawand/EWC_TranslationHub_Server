@@ -75,13 +75,25 @@ export function sanitizeNotifyPositions(input: unknown): string[] {
 export function orderVisibilityWhere(
   role?: string | null,
   position?: string | null
-): { OR: ({ notifyPositions: { isEmpty: true } } | { notifyPositions: { has: string } })[] } | null {
+): Record<string, unknown> | null {
   if (role === "ADMIN") return null
   if (!isTranslatorPosition(position)) return null
+  const pos = position as string
+
+  // Whether a single order's own selection makes it visible: unassigned (no
+  // selection yet) or explicitly assigned to this role.
+  const ownMatch = {
+    OR: [{ notifyPositions: { isEmpty: true } }, { notifyPositions: { has: pos } }],
+  }
+
+  // A big order (parent) has no selection of its own — it's an aggregator — so it
+  // must NOT be treated as "unassigned = visible to all". It's visible only when
+  // at least one of its sub-orders is visible to this role. A standalone order or
+  // a sub-order is judged by its own selection.
   return {
     OR: [
-      { notifyPositions: { isEmpty: true } },
-      { notifyPositions: { has: position as string } },
+      { isParent: false, ...ownMatch },
+      { isParent: true, subOrders: { some: ownMatch } },
     ],
   }
 }
