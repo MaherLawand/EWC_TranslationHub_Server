@@ -128,6 +128,13 @@ export async function notifyTranslatorsSourceReady(
       return
     }
 
+    // The link is stored exactly as entered. If it's missing a scheme, an <a href>
+    // would be treated as relative and wouldn't open — prepend https:// for the href
+    // while keeping the original text for display.
+    const sourceFileHref = /^https?:\/\//i.test(sourceFileLink.trim())
+      ? sourceFileLink.trim()
+      : `https://${sourceFileLink.trim()}`
+
     /*
       GET TRANSLATORS
     */
@@ -262,6 +269,9 @@ ${
 Priority:
 ${order.priority}
 
+Source File:
+${sourceFileLink}
+
 View Order:
 ${orderLink}
 
@@ -328,11 +338,16 @@ ${orderLink}
           }
         </p>
 
-        <p style="margin:0; color:#8E8E8E; font-size:13px; line-height:1.6;">
+        <p style="margin:0 0 8px 0; color:#8E8E8E; font-size:13px; line-height:1.6;">
           <strong style="color:#F5F1E8;">Priority:</strong>
           <strong style="color:${order.priority === "HIGH" ? "#f87171" : order.priority === "MEDIUM" ? "#facc15" : "#4ade80"};">
             ${order.priority}
           </strong>
+        </p>
+
+        <p style="margin:0; color:#8E8E8E; font-size:13px; line-height:1.6;">
+          <strong style="color:#F5F1E8;">Source File:</strong>
+          <a href="${sourceFileHref}" style="color:#D6B36A; word-break:break-all;">${sourceFileLink}</a>
         </p>
       </div>
 
