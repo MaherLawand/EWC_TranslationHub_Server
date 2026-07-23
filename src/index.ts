@@ -6,8 +6,8 @@ import jwt from "jsonwebtoken"
 import app from "./app.js"
 import { setIo } from "./lib/socket.js"
 import { logger } from "./lib/logger.js"
-import { warmGlossary } from "./lib/glossary.js"
 import { warmArabicPriority } from "./lib/arabicPriorityGlossary.js"
+import { warmEnReference } from "./lib/enReferenceGlossary.js"
 import { prisma } from "./lib/prisma.js"
 
 // Fail fast — missing these env vars means auth is silently broken
@@ -90,8 +90,10 @@ httpServer.listen(PORT, () => {
   logger.info({ action: "SERVER_START", port: PORT })
   // Pre-load the terminology glossary so the first translator to run a
   // check does not wait on Google Sheets. Never throws.
-  warmGlossary()
+  // The old main glossary (glossary.ts) is no longer used by the checker; the
+  // reference glossary + Arabic priority are the sources now.
   warmArabicPriority()
+  warmEnReference()
 })
 
 process.on("SIGTERM", async () => {

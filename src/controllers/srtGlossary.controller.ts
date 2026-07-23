@@ -24,10 +24,11 @@ import {
   SrtInvariantError,
   type SrtEdit,
 } from "../lib/srt.js"
-import { getGlossary, entriesForColumn, describeGlossaryFailure } from "../lib/glossary.js"
+import { describeGlossaryFailure } from "../lib/glossary.js"
 import { getArabicPriority, applyArabicPriority } from "../lib/arabicPriorityGlossary.js"
 import { glossaryColumnFor, COLUMN_TO_LABEL, usesNonLatinScript } from "../lib/glossaryLanguages.js"
-import { checkGlossary, isConfigured, GlossaryCheckUnavailable } from "../lib/glossaryCheck.js"
+import { checkGlossary, scanLiteralTerms, isConfigured, GlossaryCheckUnavailable } from "../lib/glossaryCheck.js"
+import { getEnReference, entriesForTarget, type EnReferenceTarget } from "../lib/enReferenceGlossary.js"
 import { wikiForGame } from "../lib/games.js"
 import { getRoster, LiquipediaRateLimited } from "../lib/liquipedia.js"
 import { buildRosterIndex, type RosterIndex } from "../lib/nameCheck.js"
@@ -66,10 +67,12 @@ export async function getGlossaryLanguages(req: AuthRequest, res: Response) {
       return res.status(403).json({ message: "This tool is available to translators and admins only." })
     }
 
-    const glossary = await getGlossary()
-    const languages = glossary.languageColumns
-      .map((column) => ({ column, label: COLUMN_TO_LABEL[column] ?? column }))
-      .sort((a, b) => a.label.localeCompare(b.label))
+    // The checker sources from the EN/AR/FR reference glossary now, so it offers
+    // exactly the languages that sheet fills in.
+    const glossary = await getEnReference()
+    const languages: { column: string; label: string }[] = []
+    if (glossary.entries.some((e) => e.ar)) languages.push({ column: "ara", label: "Arabic" })
+    if (glossary.entries.some((e) => e.fr)) languages.push({ column: "fra", label: "French" })
 
     return res.json({ languages, configured: isConfigured() })
   } catch (error) {
@@ -104,15 +107,14 @@ export async function checkSrt(req: AuthRequest, res: Response) {
     }
 
     const column = glossaryColumnFor(language)
-    if (!column) {
+    // The reference glossary only fills Arabic and French.
+    const refTarget: EnReferenceTarget | null = column === "ara" ? "ar" : column === "fra" ? "fr" : null
+    if (!column || !refTarget) {
       return res.status(409).json({ message: `No glossary is available for ${language}.` })
     }
 
-    const glossary = await getGlossary()
-    if (!glossary.languageColumns.includes(column)) {
-      return res.status(409).json({ message: `No glossary is available for ${language}.` })
-    }
-    let rows = entriesForColumn(glossary, column)
+    const glossary = await getEnReference()
+    let rows = entriesForTarget(glossary, refTarget)
     if (rows.length === 0) {
       return res.status(409).json({ message: `The glossary has no terms for ${language}.` })
     }
@@ -383,5 +385,161 @@ export async function exportSrt(req: AuthRequest, res: Response) {
     }
     logger.error({ action: "SRT_GLOSSARY_EXPORT_ERROR", userId: req.userId, userName: req.userName, err: error })
     return res.status(500).json({ message: "The corrected file could not be produced." })
+  }
+}
+
+/**
+ * English function words. A glossary "term" made up only of these (e.g. "to the")
+ * is noise in a reference list, so it's dropped.
+ */
+const EN_STOPWORDS = new Set([
+  "a", "an", "the", "to", "of", "in", "on", "at", "for", "and", "or", "but", "is",
+  "are", "be", "by", "with", "as", "it", "this", "that", "from", "into",
+])
+
+/**
+ * Trim reference-scan noise, per cue:
+ *   - drop a match whose text is entirely function words ("to the")
+ *   - when two matches overlap in the same line, keep the longer phrase
+ *     ("Upper Bracket" over "Bracket", "Grand Final" over "Final")
+ */
+function cleanReferenceHits<T extends { cueIndex: number; find: string }>(hits: T[]): T[] {
+  const allStop = (term: string) =>
+    term
+      .toLowerCase()
+      .split(/\s+/)
+      .filter(Boolean)
+      .every((w) => EN_STOPWORDS.has(w))
+
+  const byCue = new Map<number, T[]>()
+  for (const h of hits) {
+    if (allStop(h.find)) continue
+    const list = byCue.get(h.cueIndex) ?? []
+    list.push(h)
+    byCue.set(h.cueIndex, list)
+  }
+
+  const out: T[] = []
+  for (const list of byCue.values()) {
+    // Longest first, so a phrase is kept before the shorter terms inside it.
+    const sorted = [...list].sort((a, b) => b.find.length - a.find.length)
+    const kept: T[] = []
+    const seen = new Set<string>()
+    for (const h of sorted) {
+      const lower = h.find.toLowerCase()
+      if (seen.has(lower)) continue
+      // Skip if a longer kept term already contains this one as a whole word.
+      const contained = kept.some((k) =>
+        new RegExp(`(?<![\\p{L}\\p{N}])${escapeForRegex(lower)}(?![\\p{L}\\p{N}])`, "u").test(
+          k.find.toLowerCase()
+        )
+      )
+      if (contained) continue
+      seen.add(lower)
+      kept.push(h)
+    }
+    out.push(...kept)
+  }
+  return out
+}
+
+function escapeForRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+}
+
+/**
+ * POST /srt/en-reference — body: { srtText, target: "ar" | "fr" }
+ *
+ * The "EN reference" tab: given an ENGLISH subtitle, list every reference-glossary
+ * term found in it with its approved Arabic/French translation and the line it
+ * appears in. A read-only lookup — no model call, no file output, no persistence.
+ * Reuses the same deterministic literal scan the checker uses.
+ */
+export async function enReferenceCheck(req: AuthRequest, res: Response) {
+  try {
+    if (!req.userId) return res.status(401).json({ message: "Unauthorized" })
+    if (!canUseSrtChecker(req.userRole, req.userPosition)) {
+      return res.status(403).json({ message: "This tool is available to translators and admins only." })
+    }
+
+    const srtText = typeof req.body?.srtText === "string" ? req.body.srtText : ""
+    const target = (typeof req.body?.target === "string" ? req.body.target.trim().toLowerCase() : "") as EnReferenceTarget
+
+    if (!srtText.trim()) return res.status(400).json({ message: "No subtitle file content was received." })
+    if (target !== "ar" && target !== "fr") {
+      return res.status(400).json({ message: "Choose a target language (Arabic or French)." })
+    }
+    if (srtText.length > MAX_SRT_CHARS) {
+      return res.status(413).json({ message: "That subtitle file is too large to check." })
+    }
+
+    let parsed
+    try {
+      parsed = parseSrt(srtText)
+    } catch (error) {
+      if (error instanceof SrtParseError) {
+        return res.status(400).json({ message: "That .srt file could not be read.", detail: error.message })
+      }
+      throw error
+    }
+    if (parsed.cues.length === 0) return res.status(400).json({ message: "That file contains no subtitles." })
+    if (parsed.cues.length > MAX_CUES) {
+      return res.status(413).json({ message: "That subtitle file has too many lines to check." })
+    }
+
+    let glossary
+    try {
+      glossary = await getEnReference()
+    } catch (error) {
+      logger.warn({ action: "EN_REFERENCE_UNAVAILABLE", err: (error as Error).message })
+      return res.status(503).json({ message: "The reference glossary is temporarily unavailable." })
+    }
+
+    const rows = entriesForTarget(glossary, target)
+    if (rows.length === 0) {
+      return res.status(409).json({ message: `The reference glossary has no ${target === "ar" ? "Arabic" : "French"} terms.` })
+    }
+
+    // Same deterministic scan the checker uses: find each English source term in
+    // the (English) subtitle text; the "replace" it returns is the translation.
+    const hits = scanLiteralTerms(parsed.cues, rows)
+    const cueText = new Map(parsed.cues.map((c) => [c.index, c.textLines.join("\n")]))
+    const cueTiming = new Map(parsed.cues.map((c) => [c.index, { start: c.startRaw, end: c.endRaw }]))
+
+    const cleaned = cleanReferenceHits(hits)
+
+    const matches = cleaned
+      .map((h, i) => {
+        const timing = cueTiming.get(h.cueIndex)
+        return {
+          id: `${h.cueIndex}-${i}`,
+          cueIndex: h.cueIndex,
+          term: h.find,
+          translation: h.replace,
+          start: timing?.start ?? "",
+          end: timing?.end ?? "",
+          line: cueText.get(h.cueIndex) ?? "",
+        }
+      })
+      .sort((a, b) => a.cueIndex - b.cueIndex)
+
+    logger.info({
+      action: "SRT_EN_REFERENCE",
+      userId: req.userId,
+      userName: req.userName,
+      target,
+      cues: parsed.cues.length,
+      glossaryTerms: rows.length,
+      matches: matches.length,
+    })
+
+    return res.json({
+      target,
+      stats: { cueCount: parsed.cues.length, glossaryTerms: rows.length, matches: matches.length },
+      matches,
+    })
+  } catch (error) {
+    logger.error({ action: "SRT_EN_REFERENCE_ERROR", userId: req.userId, userName: req.userName, err: error })
+    return res.status(500).json({ message: "The reference check could not complete. Please try again." })
   }
 }

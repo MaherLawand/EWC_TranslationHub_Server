@@ -3,7 +3,7 @@ import rateLimit, { ipKeyGenerator } from "express-rate-limit"
 
 import { requireAuth } from "../middleware/auth.middleware.js"
 import type { AuthRequest } from "../middleware/auth.middleware.js"
-import { checkSrt, exportSrt, getGlossaryLanguages } from "../controllers/srtGlossary.controller.js"
+import { checkSrt, exportSrt, getGlossaryLanguages, enReferenceCheck } from "../controllers/srtGlossary.controller.js"
 
 /**
  * Each check costs real money at the model provider, so it gets its own limiter
@@ -29,5 +29,8 @@ router.post("/check", requireAuth, srtCheckLimiter, checkSrt)
 // Export is pure local computation (no model call), so it isn't rate limited —
 // a reviewer may legitimately re-export several times while adjusting choices.
 router.post("/export", requireAuth, exportSrt)
+// EN → AR/FR reference lookup. Deterministic and free (no model call), so it is
+// not rate limited.
+router.post("/en-reference", requireAuth, enReferenceCheck)
 
 export default router
