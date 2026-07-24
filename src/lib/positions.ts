@@ -76,15 +76,8 @@ export function orderVisibilityWhere(
   role?: string | null,
   position?: string | null
 ): Record<string, unknown> | null {
-  if (role === "ADMIN") return null
-  if (!isTranslatorPosition(position)) return null
-  const pos = position as string
-
-  // Whether a single order's own selection makes it visible: unassigned (no
-  // selection yet) or explicitly assigned to this role.
-  const ownMatch = {
-    OR: [{ notifyPositions: { isEmpty: true } }, { notifyPositions: { has: pos } }],
-  }
+  const ownMatch = translatorNotifyMatch(role, position)
+  if (!ownMatch) return null
 
   // A big order (parent) has no selection of its own — it's an aggregator — so it
   // must NOT be treated as "unassigned = visible to all". It's visible only when
@@ -95,6 +88,31 @@ export function orderVisibilityWhere(
       { isParent: false, ...ownMatch },
       { isParent: true, subOrders: { some: ownMatch } },
     ],
+  }
+}
+
+/**
+ * The bare "own selection" match for a translator-side role: the order is
+ * unassigned (no pills yet) or explicitly names this role. Returns null for
+ * roles that see everything (admins and every non-translator position), meaning
+ * "no restriction".
+ *
+ * Exposed on its own so the order list can fold it into a SINGLE sub-order
+ * `some` together with a status filter. A parent must have one sub-order that is
+ * both in the active status AND visible to the role — using two independent
+ * `some` clauses would let a parent through when one sub matches the status and a
+ * different sub is the visible one, showing the big order with zero rows on
+ * expand.
+ */
+export function translatorNotifyMatch(
+  role?: string | null,
+  position?: string | null
+): Record<string, unknown> | null {
+  if (role === "ADMIN") return null
+  if (!isTranslatorPosition(position)) return null
+  const pos = position as string
+  return {
+    OR: [{ notifyPositions: { isEmpty: true } }, { notifyPositions: { has: pos } }],
   }
 }
 

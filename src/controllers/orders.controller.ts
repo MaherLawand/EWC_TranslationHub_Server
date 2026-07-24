@@ -12,7 +12,7 @@ import { triggerNotifications, getIo } from "../lib/socket.js"
 import { notifyTranslatorsSourceReady, notifyTranslatorsOrderDeleted, notifyTranslatorsSourceRemoved } from "./notification.controller.js"
 import { logger } from "../lib/logger.js"
 import { ordersCache } from "../lib/ordersCache.js"
-import { isTranslatorPosition, sanitizeNotifyPositions, orderVisibilityWhere, canSeeOrder, canSeeDeliveryVendor, canSeeAllDeliveryVendors, NOTIFY_POSITION_OPTIONS } from "../lib/positions.js"
+import { isTranslatorPosition, sanitizeNotifyPositions, orderVisibilityWhere, translatorNotifyMatch, canSeeOrder, canSeeDeliveryVendor, canSeeAllDeliveryVendors, NOTIFY_POSITION_OPTIONS } from "../lib/positions.js"
 
 /** Normalise a delivery-link vendor tag: a valid vendor role, or "" for shared. */
 function sanitizeVendor(input: unknown): string {
@@ -983,9 +983,35 @@ if (
     //    COUNT + nearest deadline are narrowed to only the matching sub-orders,
     //    and getSubOrders filters the expanded rows the same way.
     const statusActive = isOrderStatus(status)
+    // Translator-side "own selection" match, or null for roles that see all.
+    const ownMatch = translatorNotifyMatch(req.userRole, req.userPosition)
+    // True when the status filter below already carries the visibility match, so
+    // the generic visibility clause must NOT be added again afterwards.
+    const visibilityFoldedIntoStatus = statusActive && !flatten && !!ownMatch
+
     if (statusActive) {
       if (flatten) {
         where.status = status as OrderStatus
+      } else if (ownMatch) {
+        // Grouped + status + translator: a parent is visible only when it has a
+        // SINGLE sub-order that is both in this status AND visible to the role.
+        // Combining status and visibility in one `some` is what stops a big order
+        // from appearing with no rows on expand (see translatorNotifyMatch).
+        const statusVisibility: Prisma.TranslationOrderWhereInput = {
+          OR: [
+            { isParent: false, status: status as OrderStatus, ...ownMatch },
+            {
+              isParent: true,
+              subOrders: { some: { status: status as OrderStatus, ...ownMatch } },
+            },
+          ],
+        }
+        const currentAnd = Array.isArray(where.AND)
+          ? where.AND
+          : where.AND
+          ? [where.AND]
+          : []
+        where.AND = [...currentAnd, statusVisibility]
       } else {
         const statusOr: Prisma.TranslationOrderWhereInput = {
           OR: [
@@ -1005,24 +1031,33 @@ if (
     // In grouped mode with an active status filter, narrow the parent's sub-order
     // COUNT badge and the nearest-deadline sub-select to only the matching
     // sub-orders (so a big order under "Pending" reflects just its pending subs).
-    const groupedSelect: Prisma.TranslationOrderSelect = statusActive
-      ? {
-          ...listOrderSelectGrouped,
-          _count: {
-            select: {
-              subOrders: { where: { status: status as OrderStatus } },
-              feedback: true,
-            },
-          },
-          subOrders: {
-            where: { status: status as OrderStatus },
-            select: {
-              broadcast: { select: { deadlineDate: true, deadlineHasTime: true } },
-              marketing: { select: { deadlineDate: true, deadlineHasTime: true } },
-            },
-          },
-        }
-      : listOrderSelectGrouped
+    // Badge count + nearest-deadline pull. For a translator these must be scoped
+    // to their VISIBLE sub-orders (fold in ownMatch), so the count on a collapsed
+    // parent matches the rows it actually shows on expand — otherwise the badge
+    // would include another vendor's sub-orders the user can't see.
+    const countSubWhere: Prisma.TranslationOrderWhereInput | undefined = statusActive
+      ? { status: status as OrderStatus, ...(ownMatch ?? {}) }
+      : ownMatch ?? undefined
+    const deadlineSubWhere: Prisma.TranslationOrderWhereInput = statusActive
+      ? { status: status as OrderStatus, ...(ownMatch ?? {}) }
+      : { status: { not: OrderStatus.COMPLETED }, ...(ownMatch ?? {}) }
+
+    const groupedSelect: Prisma.TranslationOrderSelect = {
+      ...listOrderSelectGrouped,
+      _count: {
+        select: {
+          subOrders: countSubWhere ? { where: countSubWhere } : true,
+          feedback: true,
+        },
+      },
+      subOrders: {
+        where: deadlineSubWhere,
+        select: {
+          broadcast: { select: { deadlineDate: true, deadlineHasTime: true } },
+          marketing: { select: { deadlineDate: true, deadlineHasTime: true } },
+        },
+      },
+    }
 
     const listSelect = flatten ? listOrderSelectFlat : groupedSelect
     const mode = flatten ? "flat" : "grouped"
@@ -1033,10 +1068,14 @@ if (
       selection yet). Admins/other positions are unrestricted. Folded into `where`
       BEFORE the cache key is built, so each audience caches separately.
     */
-    const visibility = orderVisibilityWhere(req.userRole, req.userPosition)
-    if (visibility) {
-      const currentAnd = Array.isArray(where.AND) ? where.AND : where.AND ? [where.AND] : []
-      where.AND = [...currentAnd, visibility]
+    // Skip when the grouped status filter already folded visibility in above —
+    // adding it again would re-introduce the independent-`some` mismatch.
+    if (!visibilityFoldedIntoStatus) {
+      const visibility = orderVisibilityWhere(req.userRole, req.userPosition)
+      if (visibility) {
+        const currentAnd = Array.isArray(where.AND) ? where.AND : where.AND ? [where.AND] : []
+        where.AND = [...currentAnd, visibility]
+      }
     }
 
     /*
