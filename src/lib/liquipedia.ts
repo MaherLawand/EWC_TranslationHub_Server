@@ -43,8 +43,13 @@ const USER_AGENT =
 /** Their documented floor is 1 request / 2s. The extra second is deliberate slack. */
 const MIN_REQUEST_GAP_MS = 3_000
 
-/** Rosters move slowly; a stale name is far cheaper than a ban. */
-const CACHE_TTL_MS = 24 * 60 * 60 * 1000
+/**
+ * Rosters move slowly; a stale name is far cheaper than a ban. 72h is a
+ * deliberate balance — long enough that a game is refetched at most once every
+ * three days (paired with the persistent cache dir, redeploys cost nothing),
+ * short enough to still pick up mid-event roster swaps.
+ */
+const CACHE_TTL_MS = 72 * 60 * 60 * 1000
 
 /**
  * Where the roster cache is persisted between processes.
@@ -387,6 +392,9 @@ export async function getRoster(wiki: string): Promise<Roster> {
   const onDisk = readDiskCache(wiki)
   if (onDisk && Date.now() - onDisk.fetchedAt < CACHE_TTL_MS) {
     cache.set(wiki, { value: onDisk, expiresAt: onDisk.fetchedAt + CACHE_TTL_MS })
+    // Logged so a redeploy visibly serves from the (persisted) cache instead of
+    // refetching — the signal that the cache dir survived the deploy.
+    logger.info({ action: "LIQUIPEDIA_CACHE_HIT_DISK", wiki, ageMs: Date.now() - onDisk.fetchedAt })
     return onDisk
   }
 
