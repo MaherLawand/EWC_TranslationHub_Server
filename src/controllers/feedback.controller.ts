@@ -27,7 +27,9 @@ const feedbackSelect = {
   was added.
   Broadcast → PPMs/Producers assigned to the order's game.
   Marketing → users assigned to the order.
-  Plus every active translator (so they always see new feedback threads).
+  Plus every active translator WHO CAN SEE THIS ORDER (its Notify pills name their
+  vendor role, or it has no selection yet) — a translator who can't open the order
+  is not notified, so the alert never dead-ends on "no order found".
   The author is never notified.
   Uses upsert because Notification has @@unique([orderId, userId, type]) —
   a new feedback re-raises (unreads + bumps) the existing notification.
@@ -45,6 +47,7 @@ async function notifyFeedback(
         id: true,
         title: true,
         type: true,
+        notifyPositions: true,
         broadcast: {
           select: {
             game: {
@@ -87,15 +90,20 @@ async function notifyFeedback(
         .filter((u) => u && u.isActive)
     }
 
-    // Always notify every active translator, so they see new feedback threads
-    // even on orders they aren't assigned to / haven't commented on yet.
-    const translators = await prisma.user.findMany({
+    // Notify active translators who can actually SEE this order. The Notify pills
+    // (notifyPositions) assign an order to specific vendor roles; a translator not
+    // named on the order can't open it, so blasting all of them just produces a
+    // notification that dead-ends on "no order found" (same gate as getOrderFeedback).
+    const allTranslators = await prisma.user.findMany({
       where: { isActive: true, position: { in: TRANSLATOR_POSITIONS as any } },
-      select: { id: true, email: true },
+      select: { id: true, email: true, position: true },
     })
+    const translators = allTranslators.filter((t) =>
+      canSeeOrder(null, t.position, order.notifyPositions)
+    )
     recipients = [...recipients, ...translators.map((t) => ({ id: t.id }))]
 
-    // Email the translators (only) every time feedback is added — never the
+    // Email those same visible translators every time feedback is added — never the
     // author of this comment. Fire-and-forget; suppressed outside production.
     const page = order.type === "BROADCAST" ? "Broadcast" : "marketing"
     const feedbackUrl = `${process.env.CLIENT_URL ?? ""}/?page=${page}&orderId=${order.id}`
