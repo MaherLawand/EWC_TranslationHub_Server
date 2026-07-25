@@ -135,11 +135,6 @@ export async function notifyTranslatorsSourceReady(
       ? sourceFileLink.trim()
       : `https://${sourceFileLink.trim()}`
 
-    // TEMPORARY: the source-file link is withheld from the email while we chase a
-    // recipient-side quarantine issue (an extra external link can push a message
-    // into BULK/spam). Flip back to true to restore it in both the HTML and text.
-    const INCLUDE_SOURCE_LINK = false
-
     /*
       GET TRANSLATORS
     */
@@ -273,10 +268,10 @@ ${
 
 Priority:
 ${order.priority}
-${INCLUDE_SOURCE_LINK ? `
+
 Source File:
 ${sourceFileLink}
-` : ""}
+
 View Order:
 ${orderLink}
 
@@ -349,11 +344,11 @@ ${orderLink}
             ${order.priority}
           </strong>
         </p>
-        ${INCLUDE_SOURCE_LINK ? `
+
         <p style="margin:8px 0 0 0; color:#8E8E8E; font-size:13px; line-height:1.6;">
           <strong style="color:#F5F1E8;">Source File:</strong>
           <a href="${sourceFileHref}" style="color:#D6B36A; word-break:break-all;">${sourceFileLink}</a>
-        </p>` : ""}
+        </p>
       </div>
 
       <div style="margin-top:35px; margin-bottom:35px; text-align:center;">
