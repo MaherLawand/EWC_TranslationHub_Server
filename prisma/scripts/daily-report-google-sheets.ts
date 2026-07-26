@@ -36,7 +36,7 @@
 import "dotenv/config" // loads server/.env so GOOGLE_* / DATABASE_URL / CLIENT_URL are available
 import { readFileSync, readdirSync, statSync } from "node:fs"
 import { basename, dirname, join } from "node:path"
-import { fileURLToPath } from "node:url"
+import { fileURLToPath, pathToFileURL } from "node:url"
 import {
   getServiceAccount,
   getGoogleAccessToken,
@@ -341,7 +341,7 @@ function getOrder(orders: Map<string, OrderReport>, orderId: string): OrderRepor
 
 // Each CSV becomes its own tab, named after the file (minus extension). Sheets
 // tab names can't contain []:*?/\ and cap at 100 chars.
-function tabNameFromFile(file: string): string {
+export function tabNameFromFile(file: string): string {
   const base = basename(file).replace(/\.csv$/i, "")
   return base.replace(/[[\]:*?/\\]/g, "-").slice(0, 100) || "Report"
 }
@@ -592,33 +592,52 @@ async function publishGoogleSheets(
   return spreadsheet
 }
 
-async function main() {
-  const args = process.argv.slice(2)
-  const inputArg = args.find((arg) => !arg.startsWith("--"))
-  const dateFilter = findArgument(args, "date")
-  const sheetId = findArgument(args, "sheet") || process.env.GOOGLE_SHEETS_SPREADSHEET_ID || ""
-  const sheetTitle = findArgument(args, "title") || "EWC Daily Orders Report"
-  // Prefer a report-specific / production URL. CLIENT_URL is usually localhost in
-  // a dev .env, so it's the LAST fallback — set REPORT_BASE_URL (or SITE_URL) to
-  // the real site so order links point to production.
-  const siteBase = findArgument(args, "base") || process.env.REPORT_BASE_URL || process.env.SITE_URL || process.env.CLIENT_URL || ""
-  const dryRun = args.includes("--dry-run")
-  const { files } = gatherCsvFiles(inputArg)
+export type DailyReportInput = { tabName: string; csvText: string }
+export type DailyReportOptions = {
+  sheetId: string
+  sheetTitle?: string
+  siteBase?: string
+  dateFilter?: string
+  dryRun?: boolean
+}
+export type DailyReportResult = {
+  spreadsheetUrl: string
+  tabs: { name: string; rows: number }[]
+  orders: number
+  events: number
+  delayed: number
+}
 
-  // Parse each CSV into its OWN event list. Every file becomes its own report tab
-  // (named after the file), so download windows are never merged, split by day, or
-  // deleted — dropping a new CSV just adds/updates that one tab.
+/**
+ * Core generator, shared by the CLI wrapper below and the /reports/daily endpoint.
+ * Works from already-read CSV TEXT — it never reads files, parses argv, calls
+ * process.exit, or disconnects Prisma (callers own the process lifecycle). Throws
+ * on failure instead of exiting.
+ */
+export async function runDailyReport(
+  inputs: DailyReportInput[],
+  opts: DailyReportOptions
+): Promise<DailyReportResult> {
+  const sheetId = opts.sheetId
+  const sheetTitle = opts.sheetTitle || "EWC Daily Orders Report"
+  const siteBase = opts.siteBase || ""
+  const dateFilter = opts.dateFilter || ""
+  const dryRun = opts.dryRun || false
+
+  // Parse each CSV into its OWN event list. Every input becomes its own report tab
+  // (named by the caller), so download windows are never merged, split by day, or
+  // deleted — a new CSV just adds/updates that one tab.
   type FileReport = { tab: string; events: CsvEvent[]; orderIds: Set<string> }
   const fileReports: FileReport[] = []
   const allOrderIds = new Set<string>()
 
-  for (const file of files) {
-    const rows = parseCsv(readFileSync(file, "utf8"))
+  for (const input of inputs) {
+    const rows = parseCsv(input.csvText)
     if (rows.length === 0) continue
     const header = rows[0].map((cell) => cell.trim().toLowerCase())
     const attributesIndex = header.indexOf("attributes")
     const timestampIndex = header.indexOf("timestamp")
-    if (attributesIndex === -1) { console.warn(`Skipping ${basename(file)} — no attributes column.`); continue }
+    if (attributesIndex === -1) { console.warn(`Skipping ${input.tabName} — no attributes column.`); continue }
 
     const events: CsvEvent[] = []
     const seen = new Set<string>()
@@ -645,12 +664,11 @@ async function main() {
       //   allOrderIds.add(attrs.orderId)
       // }
     }
-    if (events.length > 0) fileReports.push({ tab: tabNameFromFile(file), events, orderIds })
+    if (events.length > 0) fileReports.push({ tab: input.tabName, events, orderIds })
   }
 
   if (fileReports.length === 0) {
-    console.error(`No order events found${dateFilter ? ` for ${dateFilter}` : ""} in ${files.length} CSV file(s).`)
-    process.exit(1)
+    throw new Error(`No order events found${dateFilter ? ` for ${dateFilter}` : ""} in ${inputs.length} CSV input(s).`)
   }
 
   // One global order map from every event (across all files), sorted by time.
@@ -847,14 +865,17 @@ async function main() {
   }
 
   const delayed = [...orders.values()].filter((order) => { const d = getDelay(order); return d && (d.kind === "late" || d.kind === "overdue") }).length
-  console.log(`\n📊 Daily Orders Report (Google Sheets)`)
-  console.log(`   Source : ${files.length} file(s) — ${files.map((file) => basename(file)).join(", ")}`)
-  console.log(`   Orders : ${orders.size}   Events: ${allEvents.length}   Reports: ${fileReports.length}`)
-  console.log(`   Delayed orders (incl. ongoing): ${delayed}`)
 
   if (dryRun) {
-    console.log("   Dry run: Google Sheets was not contacted.\n")
-    return
+    // Overview tab isn't built in a dry run (it needs the live sheet), so tabs
+    // here are the per-CSV report tabs only.
+    return {
+      spreadsheetUrl: "",
+      tabs: reportSheets.map((sheet) => ({ name: sheet.name, rows: sheet.rows.length })),
+      orders: orders.size,
+      events: allEvents.length,
+      delayed,
+    }
   }
 
   const token = await getGoogleAccessToken(getServiceAccount())
@@ -884,15 +905,58 @@ async function main() {
   })
 
   const spreadsheet = await publishGoogleSheets(token, sheetId, sheetTitle, reportSheets)
-  console.log(`   Sheet  : ${spreadsheet.spreadsheetUrl}`)
-  console.log(`   Tabs   : ${reportSheets.map((sheet) => sheet.name).join(", ")}\n`)
+  return {
+    spreadsheetUrl: spreadsheet.spreadsheetUrl,
+    tabs: reportSheets.map((sheet) => ({ name: sheet.name, rows: sheet.rows.length })),
+    orders: orders.size,
+    events: allEvents.length,
+    delayed,
+  }
 }
 
-main()
-  .catch((error) => { console.error(error); process.exit(1) })
-  .finally(async () => {
-    try {
-      const prisma = (await import("../../src/lib/prisma.js")).prisma
-      await prisma.$disconnect().catch(() => {})
-    } catch { /* Prisma was unavailable. */ }
-  })
+/**
+ * CLI wrapper: read CSVs from disk / argv, run the report, print a summary. Only
+ * runs when this file is executed directly (see the entry guard) — importing the
+ * module (e.g. from the /reports endpoint) has no side effects.
+ */
+async function main() {
+  const args = process.argv.slice(2)
+  const inputArg = args.find((arg) => !arg.startsWith("--"))
+  const dateFilter = findArgument(args, "date")
+  const sheetId = findArgument(args, "sheet") || process.env.GOOGLE_SHEETS_SPREADSHEET_ID || ""
+  const sheetTitle = findArgument(args, "title") || "EWC Daily Orders Report"
+  // Prefer a report-specific / production URL. CLIENT_URL is usually localhost in
+  // a dev .env, so it's the LAST fallback — set REPORT_BASE_URL (or SITE_URL) to
+  // the real site so order links point to production.
+  const siteBase = findArgument(args, "base") || process.env.REPORT_BASE_URL || process.env.SITE_URL || process.env.CLIENT_URL || ""
+  const dryRun = args.includes("--dry-run")
+  const { files } = gatherCsvFiles(inputArg)
+  const inputs = files.map((file) => ({ tabName: tabNameFromFile(file), csvText: readFileSync(file, "utf8") }))
+
+  const result = await runDailyReport(inputs, { sheetId, sheetTitle, siteBase, dateFilter, dryRun })
+
+  console.log(`\n📊 Daily Orders Report (Google Sheets)`)
+  console.log(`   Source : ${files.length} file(s) — ${files.map((file) => basename(file)).join(", ")}`)
+  console.log(`   Orders : ${result.orders}   Events: ${result.events}   Tabs: ${result.tabs.length}`)
+  console.log(`   Delayed orders (incl. ongoing): ${result.delayed}`)
+  if (dryRun) {
+    console.log("   Dry run: Google Sheets was not contacted.\n")
+    return
+  }
+  console.log(`   Sheet  : ${result.spreadsheetUrl}`)
+  console.log(`   Tabs   : ${result.tabs.map((tab) => tab.name).join(", ")}\n`)
+}
+
+// Run the CLI only when executed directly (`tsx daily-report-google-sheets.ts`),
+// never when imported by the server — an import must have no side effects.
+const isCliEntry = !!process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href
+if (isCliEntry) {
+  main()
+    .catch((error) => { console.error(error); process.exit(1) })
+    .finally(async () => {
+      try {
+        const prisma = (await import("../../src/lib/prisma.js")).prisma
+        await prisma.$disconnect().catch(() => {})
+      } catch { /* Prisma was unavailable. */ }
+    })
+}

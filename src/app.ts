@@ -13,6 +13,7 @@ import orderRoutes from "./routes/orders.js"
 import gameRoutes from "./routes/games.routes.js"
 import srtRoutes from "./routes/srt.js"
 import devRoutes from "./routes/dev.routes.js"
+import reportRoutes from "./routes/reports.js"
 import { logger } from "./lib/logger.js"
 
 const app = express()
@@ -28,6 +29,12 @@ app.use(cors({
 
 // Security headers
 app.use(helmet())
+
+// Reports accept an uploaded Railway-logs CSV, which can exceed the global 1 MB
+// body limit. Mount this route with its own larger JSON parser (+ cookie parsing
+// for auth) BEFORE the global 1 MB parser so it isn't rejected first; the global
+// express.json below is a no-op once the body is already parsed here.
+app.use("/reports", express.json({ limit: "25mb" }), cookieParser(), reportRoutes)
 
 // 1 MB body limit — prevents memory exhaustion from large payloads
 app.use(express.json({ limit: "1mb" }))
