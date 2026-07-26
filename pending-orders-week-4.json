@@ -1,0 +1,2542 @@
+[
+  {
+    "type": "broadcast",
+    "title": "Don't Press The Bell - 4",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": false,
+    "game": "Mobile Legends: MSC",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "Indonesian"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-25T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Core Content - Format Explainer",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-26T18:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Opening Video",
+    "contentCategory": "RAW",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "Korean"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-28T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Club Chapmionship Feature",
+    "contentCategory": "RAW",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "Korean"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-28T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Club Chapmionship Feature",
+    "contentCategory": "RAW",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "Korean"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-28T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Opening Video",
+    "contentCategory": "RAW",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "Korean"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-28T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Format Explainer",
+    "contentCategory": "EXPLAINER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-28T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Secret Labs Questions",
+    "contentCategory": "RAW",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "Korean"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-28T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Club Chapmionship Feature 1",
+    "contentCategory": "RAW",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "Korean"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-28T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Opening video",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-28T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Boulevard / Festival FOMO (Biffle's Nightmare)",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-28T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "LOW"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW - Allianz - Mental Fortitude",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Street Fighter 6",
+    "sourceLanguages": [
+      "Japanese"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-28T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Core Content - Opening Video",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-28T18:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Sponsored - QIDDIYA Title Defender Hype",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-28T20:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Sponsored - LENOVO PC Setup",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-28T20:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Sponsored - Secret Lab Chair Questions",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-28T20:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Sponsored - ARAMCO Power Ranking",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-28T20:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Club Championship",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Street Fighter 6",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Chinese",
+      "French",
+      "Japanese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-28T21:45:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "QIDDIYA - Title Defender Hype piece",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Street Fighter 6",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Chinese",
+      "French",
+      "Japanese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-28T21:45:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW - PS5 - Supercuts",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Street Fighter 6",
+    "sourceLanguages": [
+      "Japanese"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-28T21:45:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "QIDDIYA - Title Defender Hype piece",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-29T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "SONY - Media Day Tour",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-29T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Raw Interview Translation - Buriram United Esports",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Filipino"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-29T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Raw Interview Translation - INFLUENCE RAGE",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Portuguese (Brazil)"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-29T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Raw Interview Translation - OG Esports",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Indonesian"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-29T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Raw Interview Translation - Nongshim RedForce",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Korean"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-29T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Raw Interview Translation - Blacklist International",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Filipino"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-29T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Raw Interview Translation - Deep Cross Gaming",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-29T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Raw Interview Translation - S8UL Esports",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Hindi"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-29T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Raw Interview Translation - Team Flash",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Vietnamese"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-29T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Club Championship Feature",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-29T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "LENOVO - PC Setup",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-29T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "SAUDIA Radio Comms Day 1",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-29T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Daily Hype Teaser Day 1",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-29T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW - SAUDIA Radio Comms - Day 1",
+    "contentCategory": "LONG_FORM",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "Korean",
+      "Chinese",
+      "Arabic"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-29T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Post-Match Player Interview - Day 1",
+    "contentCategory": "RAW",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "Korean",
+      "Chinese",
+      "Arabic"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-29T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "The Hot Drop - Quick fire top stories",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-29T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "LOW"
+  },
+  {
+    "type": "broadcast",
+    "title": "Games and Challenges - 1 (Art - Falcons)",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-29T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Soundbite PiPs",
+    "contentCategory": "LONG_FORM",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-29T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Core Content - Club Championship Feature",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-29T12:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Entertainment - Translation Mayhem",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-29T17:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Entertainment - BTS - Player & Talent",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-29T17:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "LOW"
+  },
+  {
+    "type": "broadcast",
+    "title": "Entertainment - Where is NA?",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-29T17:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Sponsored - SAUDIA Superfan Content",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-29T20:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Allianz - Mental Fortitude",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Street Fighter 6",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Chinese",
+      "Japanese",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-29T21:45:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "PS5 - Supercuts",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Street Fighter 6",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Chinese",
+      "French",
+      "Japanese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-29T21:45:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "ARAMCO - Ranking / Pickem / Fantasy League / Tier List",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-30T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Daily Hype Teaser - 7",
+    "contentCategory": "OPENER",
+    "tier": 1,
+    "tier1CN": false,
+    "game": "Mobile Legends: MSC",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "Indonesian"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-30T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Daily Hype Teaser - 8",
+    "contentCategory": "OPENER",
+    "tier": 1,
+    "tier1CN": false,
+    "game": "Mobile Legends: MSC",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "Indonesian"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-30T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Daily Hype Teaser - 9",
+    "contentCategory": "OPENER",
+    "tier": 1,
+    "tier1CN": false,
+    "game": "Mobile Legends: MSC",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "Indonesian"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-30T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW - Team Comms - Day 8",
+    "contentCategory": "LONG_FORM",
+    "tier": 1,
+    "tier1CN": false,
+    "game": "Mobile Legends: MSC",
+    "sourceLanguages": [],
+    "targetLanguages": [
+      "English",
+      "Arabic",
+      "Indonesian"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-30T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Who's that hero? 1",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-30T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "LOW"
+  },
+  {
+    "type": "broadcast",
+    "title": "SAUDIA Radio Comms Day 2",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-30T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW - Team Comms - Day 5",
+    "contentCategory": "LONG_FORM",
+    "tier": 1,
+    "tier1CN": false,
+    "game": "Mobile Legends: MSC",
+    "sourceLanguages": [],
+    "targetLanguages": [
+      "English",
+      "Arabic",
+      "Indonesian"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-30T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW - Team Comms - Day 6",
+    "contentCategory": "LONG_FORM",
+    "tier": 1,
+    "tier1CN": false,
+    "game": "Mobile Legends: MSC",
+    "sourceLanguages": [],
+    "targetLanguages": [
+      "English",
+      "Arabic",
+      "Indonesian"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-30T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW - Team Comms - Day 7",
+    "contentCategory": "LONG_FORM",
+    "tier": 1,
+    "tier1CN": false,
+    "game": "Mobile Legends: MSC",
+    "sourceLanguages": [],
+    "targetLanguages": [
+      "English",
+      "Arabic",
+      "Indonesian"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-30T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Daily Hype Teaser Day 2",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-30T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW - SAUDIA Radio Comms - Day 2",
+    "contentCategory": "LONG_FORM",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "Korean",
+      "Chinese",
+      "Arabic"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-30T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Post-Match Player Interview - Day 2",
+    "contentCategory": "RAW",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "Korean",
+      "Chinese",
+      "Arabic"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-30T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "SAUDIA - Radio Comms 1",
+    "contentCategory": "LONG_FORM",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-30T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Daily Hype Teaser Day 2",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-30T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Games and Challenges - 1 (Art - Godlike)",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-30T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Games and Challenges - 4 (Guess the career path)",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-30T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Games and Challenges - 2 (Viral French Food - AG)",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-30T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Games and Challenges - 2 (Viral French Food - Heretics)",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-30T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fun Bumper - 1 (Art snobs)",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-30T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fun Bumper - 2 Netflix Doc",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-30T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fun Bumper - 3 Check please",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-30T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW - Team Comms - Day 4d",
+    "contentCategory": "LONG_FORM",
+    "tier": 1,
+    "tier1CN": false,
+    "game": "Mobile Legends: MSC",
+    "sourceLanguages": [],
+    "targetLanguages": [
+      "English",
+      "Arabic",
+      "Indonesian"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-30T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Entertainment - Festival Fomo",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-30T17:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "LOW"
+  },
+  {
+    "type": "broadcast",
+    "title": "Raw Interview Translation - MIBR.LOS",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Portuguese (Brazil)"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-31T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Raw Interview Translation - Revenant XSpark",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Hindi"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-31T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Raw Interview Translation - Team Nemesis",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Indonesian"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-31T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Raw Interview Translation - Titan Esports Club",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Filipino"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-31T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Raw Interview Translation - ROC Esports",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-31T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Raw Interview Translation - Team Vitality",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Indonesian"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-31T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Raw Interview Translation - Virtus.pro",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "French"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-31T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "SAUDIA - Superfan Content",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-31T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Who's that hero? 2",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-31T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "LOW"
+  },
+  {
+    "type": "broadcast",
+    "title": "SAUDIA Radio Comms Day 3",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-31T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Daily Hype Teaser Day 3",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-31T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW - SAUDIA Radio Comms - Day 3",
+    "contentCategory": "LONG_FORM",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "Korean",
+      "Chinese",
+      "Arabic"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-31T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Post-Match Player Interview - Day 3",
+    "contentCategory": "RAW",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "Korean",
+      "Chinese",
+      "Arabic"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-31T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "SAUDIA - Radio Comms 2",
+    "contentCategory": "LONG_FORM",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-31T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Mike Interviews Coodly About Trains",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-31T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "LOW"
+  },
+  {
+    "type": "broadcast",
+    "title": "Survival Stage Hype Tease (Day 3)",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-31T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Games and Challenges - 1 (Art - Faze Clan)",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-31T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Games and Challenges - 2 (Viral French Food - Geekay)",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-31T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Games and Challenges - 1 (Art - NiP)",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-31T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fun Bumper - 4 Self Revive",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-31T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fun Bumper - 5 Where we dropping",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-31T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "SAUDIA - Radio Comms Day 1",
+    "contentCategory": null,
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [],
+    "targetLanguages": [
+      "English",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-31T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Core Content - Playoffs Hypes",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-31T18:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Raw Interview Translation - AG.AL",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-01T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Raw Interview Translation - Kuaishou Gaming",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-01T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "SAUDIA Radio Comms Day 4",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-01T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Daily Hype Teaser Day 4",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-01T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW - SAUDIA Radio Comms - Day 4",
+    "contentCategory": "LONG_FORM",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "Korean",
+      "Chinese",
+      "Arabic"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-01T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Post-Match Player Interview - Day 4",
+    "contentCategory": "RAW",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "Korean",
+      "Chinese",
+      "Arabic"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-01T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "SAUDIA - Radio Comms 3",
+    "contentCategory": "LONG_FORM",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-01T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Daily Hype Teaser Day 4",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-01T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Games and Challenges - 3 (Big Croissant)",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-01T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Games and Challenges - 2 (Viral French Food - For Fun)",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-01T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fun Bumper - 6 Third Party",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-01T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fun Bumper - 7 Final Circle",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-01T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fun Bumper - 8 TBD",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-01T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "SAUDIA - Radio Comms Day 2",
+    "contentCategory": null,
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-01T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Core Content - Crosscut Grand Final",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Overwatch 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-01T18:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "LENOVO - Crosscut Grand Final",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Warzone",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-02T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "SAUDIA - Radio Comms Day 3",
+    "contentCategory": null,
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-02T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "QIDDIYA - Title Defender Hype piece - AG.AL",
+    "contentCategory": null,
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "English",
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "Chinese",
+      "Arabic",
+      "English"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-02T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "SAUDIA - Radio Comms Day 4",
+    "contentCategory": null,
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-03T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "SAUDIA - Radio Comms Day 5",
+    "contentCategory": null,
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "BURNED_IN",
+      "SRT"
+    ],
+    "deadline": "2026-08-04T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "SAUDIA - Radio Comms Day 6",
+    "contentCategory": null,
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "SAUDIA - Radio Comms Day 7",
+    "contentCategory": null,
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [],
+    "targetLanguages": [
+      "English",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-06T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "SAUDIA - Radio Comms Day 8",
+    "contentCategory": null,
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [],
+    "targetLanguages": [
+      "English",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-07T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "SAUDIA - Radio Comms Day 9",
+    "contentCategory": null,
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [],
+    "targetLanguages": [
+      "English",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-08T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  }
+]

@@ -14,6 +14,13 @@ import { prisma } from "./lib/prisma.js"
 if (!process.env.JWT_SECRET) throw new Error("Missing env var: JWT_SECRET")
 if (!process.env.CLIENT_URL) throw new Error("Missing env var: CLIENT_URL")
 
+// Identifies this deployed build. Railway sets RAILWAY_GIT_COMMIT_SHA on every
+// deploy, so it changes only when new code ships (a plain restart keeps the same
+// SHA and won't force client reloads). Falls back to APP_VERSION, then to the
+// boot time as a last resort. Sent to clients so they can auto-reload on deploy.
+const APP_VERSION =
+  process.env.RAILWAY_GIT_COMMIT_SHA || process.env.APP_VERSION || String(Date.now())
+
 // Environment banner — prints the DB host (NEVER the password) on every boot so
 // you can always confirm at a glance which database this process is pointed at.
 ;(() => {
@@ -79,6 +86,13 @@ io.use((socket, next) => {
 io.on("connection", (socket) => {
   // Each user gets their own room — notifications are emitted to io.to(userId)
   socket.join(socket.data.userId)
+
+  // Tell the client which build it's now talking to. The client anchors on the
+  // first value it sees and reloads if it ever changes — so a redeploy (server
+  // restarts → sockets reconnect → new SHA) hard-refreshes every open tab onto
+  // the freshly deployed frontend. Uses the git SHA so a plain restart (same
+  // code) does NOT force a reload; falls back to boot time only if unset.
+  socket.emit("server-version", APP_VERSION)
 })
 
 // Make the io instance available to controllers via the socket lib module
@@ -87,7 +101,14 @@ setIo(io)
 const PORT = Number(process.env.PORT) || 4000
 
 httpServer.listen(PORT, () => {
-  logger.info({ action: "SERVER_START", port: PORT })
+  // `versionSource` tells you whether the deploy SHA was found (good) or we fell
+  // back to boot time (which would re-prompt clients on every restart).
+  const versionSource = process.env.RAILWAY_GIT_COMMIT_SHA
+    ? "RAILWAY_GIT_COMMIT_SHA"
+    : process.env.APP_VERSION
+    ? "APP_VERSION"
+    : "boot-time (fallback)"
+  logger.info({ action: "SERVER_START", port: PORT, appVersion: APP_VERSION, versionSource })
   // Pre-load the terminology glossary so the first translator to run a
   // check does not wait on Google Sheets. Never throws.
   // The old main glossary (glossary.ts) is no longer used by the checker; the
