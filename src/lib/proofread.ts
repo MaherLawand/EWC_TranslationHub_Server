@@ -60,12 +60,14 @@ export type QcCorrection = { index: number; corrected: string; changes: QcChange
 function instructions(language: string): string {
   const isEnglish = /english/i.test(language)
   const isArabic = /arabic|العربية/i.test(language)
+  const isFrench = /french|fran[çc]ais/i.test(language)
 
   // English (USA) Timed Text Style Guide — text-level conventions only.
   const englishRules = `
 ${language.toUpperCase()} STYLE (Netflix English Timed Text Style Guide):
 - Use consistent U.S. English spelling and vocabulary; do not mix in British spellings.
 - The pronoun "i" must be "I". Start every sentence with a capital letter; keep proper nouns capitalized.
+- If a cue ends a complete sentence, make sure it has terminal punctuation — add a period to a declarative sentence that ends with none. Do NOT add end punctuation when the sentence continues into the next cue (the line is cut mid-sentence), or for non-sentence fragments (labels, on-screen text, song-lyric lines).
 - Prefer "okay" over "OK"/"Ok".
 - Use a single smart ellipsis character "…" (U+2026), never three dots "...".
 - Never leave double spaces; exactly one space between words.
@@ -86,9 +88,21 @@ ${language.toUpperCase()} STYLE (Netflix Arabic Timed Text Style Guide):
 - Numbers: write 1–10 in words (except in times/dates), 11 and above as numerals. Four-plus-digit numbers use a comma as the thousands separator, EXCEPT years (1940, not 1,940). Decimals use "." with a leading zero (0.5).
 - Keep the definite article "الـ" OUTSIDE quotation marks, e.g. الـ"برونكس".
 - Do NOT use italics in Arabic.
+- Do NOT add a period (or other terminal punctuation) at the end of a cue just because a sentence ends — that end-of-sentence-period rule does NOT apply to Arabic.
 - Do NOT reproduce deliberate misspellings unless they are plot-relevant.`
 
-  const languageBlock = isEnglish ? englishRules : isArabic ? arabicRules : `
+  // French subtitle conventions (no dedicated Netflix guide supplied — general
+  // French orthography + the sentence-ending-period rule, which does NOT apply to
+  // Arabic).
+  const frenchRules = `
+${language.toUpperCase()} STYLE (French subtitle conventions):
+- Use correct French spelling, accents (é è ê ë à â ç ï î ô û ù), and grammar; fix missing or wrong accents.
+- Start sentences with a capital letter; keep proper nouns capitalized.
+- If a cue ends a complete sentence, make sure it has terminal punctuation — add a period to a declarative sentence that ends with none. Do NOT add end punctuation when the sentence continues into the next cue (the line is cut mid-sentence), or for non-sentence fragments (labels, on-screen text, song-lyric lines).
+- Use a single smart ellipsis "…" (U+2026), not three dots; never leave double spaces.
+- Follow standard French usage for numbers and punctuation.`
+
+  const languageBlock = isEnglish ? englishRules : isArabic ? arabicRules : isFrench ? frenchRules : `
 ${language.toUpperCase()} STYLE:
 - Apply the standard grammar, spelling, capitalization, and punctuation conventions of ${language}, following Netflix Timed Text Style Guide norms for that language.
 - Use a single smart ellipsis "…" (U+2026) rather than three dots; never leave double spaces; start sentences with a capital where the script has case.`
