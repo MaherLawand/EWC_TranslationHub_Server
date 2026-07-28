@@ -3,7 +3,7 @@ import rateLimit, { ipKeyGenerator } from "express-rate-limit"
 
 import { requireAuth } from "../middleware/auth.middleware.js"
 import type { AuthRequest } from "../middleware/auth.middleware.js"
-import { checkSrt, exportSrt, getGlossaryLanguages, enReferenceCheck } from "../controllers/srtGlossary.controller.js"
+import { checkSrt, exportSrt, getGlossaryLanguages, enReferenceCheck, qcCheck } from "../controllers/srtGlossary.controller.js"
 
 /**
  * Each check costs real money at the model provider, so it gets its own limiter
@@ -26,6 +26,8 @@ const router = Router()
 
 router.get("/languages", requireAuth, getGlossaryLanguages)
 router.post("/check", requireAuth, srtCheckLimiter, checkSrt)
+// QC proofread — a model call per file, so it shares the same per-user limiter.
+router.post("/qc", requireAuth, srtCheckLimiter, qcCheck)
 // Export is pure local computation (no model call), so it isn't rate limited —
 // a reviewer may legitimately re-export several times while adjusting choices.
 router.post("/export", requireAuth, exportSrt)

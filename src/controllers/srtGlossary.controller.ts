@@ -28,6 +28,7 @@ import { describeGlossaryFailure } from "../lib/glossary.js"
 import { getArabicPriority, applyArabicPriority } from "../lib/arabicPriorityGlossary.js"
 import { glossaryColumnFor, COLUMN_TO_LABEL, usesNonLatinScript } from "../lib/glossaryLanguages.js"
 import { checkGlossary, scanLiteralTerms, alignEnglishToTarget, isConfigured, GlossaryCheckUnavailable } from "../lib/glossaryCheck.js"
+import { proofreadCues, isConfigured as qcConfigured, ProofreadUnavailable } from "../lib/proofread.js"
 
 /** "HH:MM:SS,mmm" (or ".mmm") → milliseconds. NaN if unparseable. */
 function tsToMs(t: string): number {
@@ -592,5 +593,74 @@ export async function enReferenceCheck(req: AuthRequest, res: Response) {
   } catch (error) {
     logger.error({ action: "SRT_EN_REFERENCE_ERROR", userId: req.userId, userName: req.userName, err: error })
     return res.status(500).json({ message: "The reference check could not complete. Please try again." })
+  }
+}
+
+/*
+  QC PROOFREADER
+  ==============
+  Drop in a subtitle file + its language; the model fixes mechanical grammar,
+  spelling, capitalization, and punctuation — leaving proper nouns (player/team
+  names, brands, game terms) untouched. Returns the per-cue corrections
+  (full corrected text + individual before/after/reason changes). Timings are
+  never touched; the client applies changes to text only.
+*/
+export async function qcCheck(req: AuthRequest, res: Response) {
+  try {
+    if (!req.userId) return res.status(401).json({ message: "Unauthorized" })
+    if (!canUseSrtChecker(req.userRole, req.userPosition)) {
+      return res.status(403).json({ message: "This tool is available to translators and admins only." })
+    }
+    if (!qcConfigured()) {
+      return res.status(503).json({ message: "The QC proofreader is not configured yet." })
+    }
+
+    const srtText = typeof req.body?.srtText === "string" ? req.body.srtText : ""
+    const language = typeof req.body?.language === "string" ? req.body.language.trim() : ""
+    if (!srtText.trim()) return res.status(400).json({ message: "No subtitle file content was received." })
+    if (!language) return res.status(400).json({ message: "Choose a language first." })
+    if (srtText.length > MAX_SRT_CHARS) {
+      return res.status(413).json({ message: "That subtitle file is too large to check." })
+    }
+
+    let parsed
+    try {
+      parsed = parseSrt(srtText)
+    } catch (error) {
+      if (error instanceof SrtParseError) {
+        return res.status(400).json({ message: "That .srt file could not be read.", detail: error.message })
+      }
+      throw error
+    }
+    if (parsed.cues.length === 0) return res.status(400).json({ message: "That file contains no subtitles." })
+    if (parsed.cues.length > MAX_CUES) {
+      return res.status(413).json({ message: "That subtitle file has too many lines to check." })
+    }
+
+    const cues = parsed.cues.map((c) => ({ index: c.index, text: c.textLines.join("\n") }))
+    let corrections
+    try {
+      corrections = await proofreadCues(cues, language)
+    } catch (error) {
+      if (error instanceof ProofreadUnavailable) {
+        return res.status(503).json({ message: error.message })
+      }
+      logger.error({ action: "SRT_QC_ERROR", userId: req.userId, userName: req.userName, err: error })
+      return res.status(502).json({ message: "The proofreader could not complete. Please try again." })
+    }
+
+    return res.json({
+      cues: parsed.cues.map((cue) => ({
+        index: cue.index,
+        start: cue.startRaw,
+        end: cue.endRaw,
+        text: cue.textLines.join("\n"),
+      })),
+      corrections,
+      stats: { cueCount: parsed.cues.length, changedCues: corrections.length },
+    })
+  } catch (error) {
+    logger.error({ action: "SRT_QC_UNEXPECTED", userId: req.userId, userName: req.userName, err: error })
+    return res.status(500).json({ message: "Something went wrong while proofreading." })
   }
 }
