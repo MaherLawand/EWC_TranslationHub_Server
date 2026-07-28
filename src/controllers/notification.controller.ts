@@ -96,12 +96,21 @@ export async function notifyTranslatorsSourceReady(
               deliveryFormats:true,
             },
           },
+
+          // Parent (big order) title, so a sub-order's email reads
+          // "Sub-order Title - Parent Title".
+          parent: { select: { title: true } },
         },
       })
 
     if (!order) {
       return
     }
+
+    // For a sub-order, show its parent big-order title alongside its own.
+    const displayTitle = order.parentId && order.parent
+      ? `${order.title} - ${order.parent.title}`
+      : order.title
 
     /*
       VALIDATION
@@ -200,8 +209,8 @@ export async function notifyTranslatorsSourceReady(
       ? "The source file for this order has been changed. Please use the updated source below — your previous copy may be out of date."
       : "A new source file has been added for translation. Click the button below to view the order and get started."
     const emailSubject = changed
-      ? `Translation Source Updated — ${order.title}`
-      : `New Translation Source Available — ${order.title}`
+      ? `Translation Source Updated — ${displayTitle}`
+      : `New Translation Source Available — ${displayTitle}`
     const emailTextLead = changed
       ? "The source file for this order has been CHANGED. Please use the updated source."
       : "A new source file is available for translation."
@@ -238,7 +247,7 @@ ${emailHeading}
 ${emailTextLead}
 
 Order:
-${order.title}
+${displayTitle}
 
 Department:
 ${order.type === "BROADCAST" ? "Broadcast" : "Marketing"}
@@ -305,7 +314,7 @@ ${orderLink}
         <p style="margin:0 0 10px 0; color:#D6B36A; font-weight:bold; font-size:14px;">Order Details</p>
 
         <p style="margin:0 0 8px 0; color:#8E8E8E; font-size:13px; line-height:1.6;">
-          <strong style="color:#F5F1E8;">Order:</strong> ${order.title}
+          <strong style="color:#F5F1E8;">Order:</strong> ${displayTitle}
         </p>
 
         <p style="margin:0 0 8px 0; color:#8E8E8E; font-size:13px; line-height:1.6;">
@@ -401,6 +410,11 @@ export async function notifyTranslatorsOrderDeleted(order: any) {
     // Only notify when the deleted order actually had a source file.
     if (!sourceFileLink) return
 
+    // For a sub-order, show its parent big-order title alongside its own.
+    const displayTitle = order.parentId && order.parent
+      ? `${order.title} - ${order.parent.title}`
+      : order.title
+
     const translators = await prisma.user.findMany({
       where: { position: { in: resolveNotifyPositions((order as any).notifyPositions) as any }, isActive: true },
       select: { id: true, email: true },
@@ -412,7 +426,7 @@ export async function notifyTranslatorsOrderDeleted(order: any) {
     const heading = "Order Deleted"
     const intro =
       "The order below which had a source file for translation has been deleted. Please stop any work on it as it is no longer active."
-    const subject = `Translation Order Removed — ${order.title}`
+    const subject = `Translation Order Removed — ${displayTitle}`
 
     const gameOrContentLabel = order.type === "BROADCAST" ? "Game" : "Content"
     const gameOrContentValue =
@@ -438,7 +452,7 @@ ${heading}
 ${intro}
 
 Order:
-${order.title}
+${displayTitle}
 
 Department:
 ${order.type === "BROADCAST" ? "Broadcast" : "Marketing"}
@@ -479,7 +493,7 @@ ${order.priority}
         <p style="margin:0 0 10px 0; color:#D6B36A; font-weight:bold; font-size:14px;">Order Details</p>
 
         <p style="margin:0 0 8px 0; color:#8E8E8E; font-size:13px; line-height:1.6;">
-          <strong style="color:#F5F1E8;">Order:</strong> ${order.title}
+          <strong style="color:#F5F1E8;">Order:</strong> ${displayTitle}
         </p>
 
         <p style="margin:0 0 8px 0; color:#8E8E8E; font-size:13px; line-height:1.6;">
@@ -536,9 +550,15 @@ export async function notifyTranslatorsSourceRemoved(orderId: string) {
       include: {
         broadcast: { include: { game: true, deliveryFormats: true } },
         marketing: { include: { deliveryFormats: true } },
+        parent: { select: { title: true } },
       },
     })
     if (!order) return
+
+    // For a sub-order, show its parent big-order title alongside its own.
+    const displayTitle = order.parentId && order.parent
+      ? `${order.title} - ${order.parent.title}`
+      : order.title
 
     // Same audience as the source-ready email (vendor roles in full; translators
     // filtered by specialty against the order's target languages).
@@ -553,7 +573,7 @@ export async function notifyTranslatorsSourceRemoved(orderId: string) {
     const heading = "Source File Removed"
     const intro =
       "The source file for this order has been removed. Please stop using the previous source — there is currently no source available for translation on this order."
-    const subject = `Translation Source Removed — ${order.title}`
+    const subject = `Translation Source Removed — ${displayTitle}`
 
     const gameOrContentLabel = order.type === "BROADCAST" ? "Game" : "Content"
     const gameOrContentValue =
@@ -579,7 +599,7 @@ ${heading}
 ${intro}
 
 Order:
-${order.title}
+${displayTitle}
 
 Department:
 ${order.type === "BROADCAST" ? "Broadcast" : "Marketing"}
@@ -623,7 +643,7 @@ ${orderLink}
         <p style="margin:0 0 10px 0; color:#D6B36A; font-weight:bold; font-size:14px;">Order Details</p>
 
         <p style="margin:0 0 8px 0; color:#8E8E8E; font-size:13px; line-height:1.6;">
-          <strong style="color:#F5F1E8;">Order:</strong> ${order.title}
+          <strong style="color:#F5F1E8;">Order:</strong> ${displayTitle}
         </p>
 
         <p style="margin:0 0 8px 0; color:#8E8E8E; font-size:13px; line-height:1.6;">

@@ -1,0 +1,1431 @@
+[
+  {
+    "type": "broadcast",
+    "title": "RAW - Core Character Building - Craime",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Street Fighter 6",
+    "sourceLanguages": [
+      "Spanish"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-28T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW - PS5 - Supercuts 1",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Street Fighter 6",
+    "sourceLanguages": [
+      "Japanese"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-28T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW - PS5 - Supercuts 2",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Street Fighter 6",
+    "sourceLanguages": [
+      "Japanese"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-28T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW - PS5 - Supercuts 3",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Street Fighter 6",
+    "sourceLanguages": [
+      "Japanese"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-28T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Opening video",
+    "contentCategory": "OPENER",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Street Fighter 6",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Chinese",
+      "Japanese",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-28T21:45:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Core Character Building - Craime",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Street Fighter 6",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Chinese",
+      "Japanese",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-28T21:45:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW - Road to EWC SFL",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Street Fighter 6",
+    "sourceLanguages": [
+      "Japanese"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-28T22:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW - Road to EWC CC",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Street Fighter 6",
+    "sourceLanguages": [
+      "Japanese"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-28T22:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW - Core Character Building - Daigo",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Street Fighter 6",
+    "sourceLanguages": [
+      "Japanese"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-28T22:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Games and Challenges - Mash fighter",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Street Fighter 6",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Japanese",
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-28T22:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Core Character Building - Kilzyou",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Street Fighter 6",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Japanese",
+      "Chinese",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-28T22:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Core Character Building - Daigo",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Street Fighter 6",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Chinese",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-29T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW - Games and Challenges - Trashy Street Hoops",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Street Fighter 6",
+    "sourceLanguages": [
+      "Spanish"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-29T08:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW - Games and Challenges -  Rock Paper Scissors",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Street Fighter 6",
+    "sourceLanguages": [
+      "Japanese"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-29T08:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW - Aramco",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Street Fighter 6",
+    "sourceLanguages": [
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-07-29T21:45:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Road to EWC SFL",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Street Fighter 6",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Japanese",
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-29T21:45:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Boulevard / Festival FOMO",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Street Fighter 6",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Chinese",
+      "French",
+      "Japanese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-29T21:45:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Road to EWC CC",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Street Fighter 6",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Japanese",
+      "Chinese",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-29T22:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Games and Challenges - Trashy Street Hoops",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Street Fighter 6",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Chinese",
+      "Japanese",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-29T22:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Play-ins Day 1 Hype Tease",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Thai",
+      "Vietnamese",
+      "English",
+      "Korean",
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-30T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Who's it? w/ Buriram",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "English",
+      "Thai"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-30T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Who's Most Likely To... w/ Nongshim RedForce",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Korean",
+      "English"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-30T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Who's Most Likely To... w/ Deep Cross Gaming",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "English",
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-30T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Who's it? w/ Team Flash",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "English",
+      "Vietnamese"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-30T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Format Explainer",
+    "contentCategory": "EXPLAINER",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-30T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "SAUDIA - Superfan Content",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Street Fighter 6",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Japanese",
+      "Chinese",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-30T06:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Aramco",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Street Fighter 6",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Japanese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-30T21:45:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Games and Challenges -  Rock Paper Scissors",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Street Fighter 6",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Chinese",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-30T22:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Play-ins Day 2 Hype Tease",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Thai",
+      "Vietnamese",
+      "English",
+      "Korean",
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-31T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Road to EWC - OG Esports",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-31T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Core Character Building - BLCK.Juschie",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-31T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Who's Most Likely To... w/ OG Esports",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-31T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Who's Most Likely To... w/ Blacklist International",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-31T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Who's it? w/ S8UL Esports",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "English",
+      "Hindi"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-31T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Who's it? w/ Influence Rage",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "English",
+      "Portuguese (Brazil)"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-31T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Cold Open Finals Day",
+    "contentCategory": "OPENER",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Street Fighter 6",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese",
+      "Japanese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-07-31T21:45:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Road to EWC - Titan Esports Club",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-01T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Groups Day 1 Hype Tease",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Thai",
+      "Vietnamese",
+      "English",
+      "Korean",
+      "Chinese",
+      "Portuguese (Brazil)",
+      "Indonesian",
+      "Filipino"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-01T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Who's it? w/ BOOM Esports",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "English",
+      "Filipino"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-01T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Who's it? w/ MIBR.LOS",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "English",
+      "Portuguese (Brazil)"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-01T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Build-a-1v1 w/ Zhihong & Shisan",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "English",
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-01T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "STC - Quickdraw w/ Team Vitality",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Chinese",
+      "English",
+      "Indonesian"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-01T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Groups Day 2 Hype Tease",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Thai",
+      "Vietnamese",
+      "English",
+      "Korean",
+      "Chinese",
+      "Portuguese (Brazil)",
+      "Indonesian",
+      "Filipino"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-02T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Who's it? w/ Titan Esports Club",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "English",
+      "Chinese",
+      "Filipino"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-02T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Build-a-1v1 w/ JenMyth & JerL",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "English",
+      "Indonesian"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-02T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Groups Day 3 Hype Tease",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Thai",
+      "Vietnamese",
+      "English",
+      "Korean",
+      "Chinese",
+      "Portuguese (Brazil)",
+      "Indonesian",
+      "Filipino"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-03T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Build-a-1v1 w/ Katsu & Tatsurii",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-03T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Build-a-1v1 w/ 0NE & hai1ang",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-03T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "SAUDIA - Superfan Content - Titan Esports Club",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "English",
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-03T01:30:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Groups Day 4 Hype Tease",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Thai",
+      "Vietnamese",
+      "English",
+      "Korean",
+      "Chinese",
+      "Portuguese (Brazil)",
+      "Indonesian",
+      "Filipino"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-04T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Playoffs Day 1 Hype Tease",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Thai",
+      "Vietnamese",
+      "English",
+      "Korean",
+      "Chinese",
+      "Portuguese (Brazil)",
+      "Indonesian",
+      "Filipino"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Paris Cultural Experience w/ KSG",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Paris Cultural Experience w/ AG.AL",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Playoffs Opening Video",
+    "contentCategory": "OPENER",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "English",
+      "Chinese",
+      "Indonesian",
+      "Filipino",
+      "Portuguese (Brazil)"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "ARAMCO - Guess the Tier List w/ AG.AL",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Build-a-1v1 w/ Sheng & Liulang",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "SAUDIA - Superfan Content - AG.AL",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T01:30:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Playoffs Day 2 Hype Tease",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Thai",
+      "Vietnamese",
+      "English",
+      "Korean",
+      "Chinese",
+      "Portuguese (Brazil)",
+      "Indonesian",
+      "Filipino"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-06T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Playoffs Day 3 Hype Tease",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Thai",
+      "Vietnamese",
+      "English",
+      "Korean",
+      "Chinese",
+      "Portuguese (Brazil)",
+      "Indonesian",
+      "Filipino"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-07T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Final Day Hype Tease",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Thai",
+      "Vietnamese",
+      "English",
+      "Korean",
+      "Chinese",
+      "Portuguese (Brazil)",
+      "Indonesian",
+      "Filipino"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-08T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  }
+]
