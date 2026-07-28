@@ -67,7 +67,7 @@ function instructions(language: string): string {
 ${language.toUpperCase()} STYLE (Netflix English Timed Text Style Guide):
 - Use consistent U.S. English spelling and vocabulary; do not mix in British spellings.
 - The pronoun "i" must be "I". Start every sentence with a capital letter; keep proper nouns capitalized.
-- If a cue ends a complete sentence, make sure it has terminal punctuation — add a period to a declarative sentence that ends with none. Do NOT add end punctuation when the sentence continues into the next cue (the line is cut mid-sentence), or for non-sentence fragments (labels, on-screen text, song-lyric lines).
+- TERMINAL PUNCTUATION (apply decisively): a cue that COMPLETES a sentence must end with the correct terminal mark — if a declarative sentence ends with no punctuation, ADD a period. Use the NEXT cue as the signal: if the following cue begins a NEW sentence (a capital letter starting a new clause, not a mid-sentence proper noun), then the current cue ended a sentence, so add the period. ONLY skip it when the line is genuinely cut mid-sentence — it ends with a comma or a conjunction (and, but, so, or…), or the next cue clearly continues the same clause — or for non-sentence fragments (labels, on-screen text, song-lyric lines). Examples: "i like it" → "I like it." and "He is here" → "He is here."; but "For me," stays "For me," because the comma shows it continues.
 - Prefer "okay" over "OK"/"Ok".
 - Use a single smart ellipsis character "…" (U+2026), never three dots "...".
 - Never leave double spaces; exactly one space between words.
@@ -98,7 +98,7 @@ ${language.toUpperCase()} STYLE (Netflix Arabic Timed Text Style Guide):
 ${language.toUpperCase()} STYLE (French subtitle conventions):
 - Use correct French spelling, accents (é è ê ë à â ç ï î ô û ù), and grammar; fix missing or wrong accents.
 - Start sentences with a capital letter; keep proper nouns capitalized.
-- If a cue ends a complete sentence, make sure it has terminal punctuation — add a period to a declarative sentence that ends with none. Do NOT add end punctuation when the sentence continues into the next cue (the line is cut mid-sentence), or for non-sentence fragments (labels, on-screen text, song-lyric lines).
+- TERMINAL PUNCTUATION (apply decisively): a cue that COMPLETES a sentence must end with the correct terminal mark — if a declarative sentence ends with no punctuation, ADD a period. Use the NEXT cue as the signal: if the following cue begins a NEW sentence (a capital letter starting a new clause), the current cue ended a sentence, so add the period. ONLY skip it when the line is genuinely cut mid-sentence — it ends with a comma or a conjunction (et, mais, donc, ou…), or the next cue clearly continues the same clause — or for non-sentence fragments (labels, on-screen text, song-lyric lines).
 - Use a single smart ellipsis "…" (U+2026), not three dots; never leave double spaces.
 - Follow standard French usage for numbers and punctuation.`
 
