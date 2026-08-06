@@ -410,6 +410,10 @@ export async function notifyTranslatorsOrderDeleted(order: any) {
     // Only notify when the deleted order actually had a source file.
     if (!sourceFileLink) return
 
+    // A completed order needs no "stop work" notice — the translation is already
+    // done, so deleting it shouldn't email anyone.
+    if (order.status === "COMPLETED") return
+
     // For a sub-order, show its parent big-order title alongside its own.
     const displayTitle = order.parentId && order.parent
       ? `${order.title} - ${order.parent.title}`
