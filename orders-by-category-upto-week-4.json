@@ -1,0 +1,109 @@
+{
+  "generatedAt": "2026-08-04T11:27:23.322Z",
+  "categories": [
+    "RAW",
+    "OPENER",
+    "HYPE_PROMO",
+    "ENGAGEMENT",
+    "LONG_FORM",
+    "EXPLAINER",
+    "Uncategorized"
+  ],
+  "scope": "All non-parent broadcast orders, all statuses",
+  "weeks": [
+    {
+      "week": "0",
+      "games": [
+        "Mobile Legends: Wildcard",
+        "Valorant"
+      ],
+      "total": 120,
+      "byContentCategory": {
+        "RAW": 27,
+        "OPENER": 3,
+        "HYPE_PROMO": 18,
+        "ENGAGEMENT": 68,
+        "LONG_FORM": 1,
+        "EXPLAINER": 3,
+        "Uncategorized": 0
+      }
+    },
+    {
+      "week": "1",
+      "games": [
+        "Valorant",
+        "Apex Legends",
+        "Dota 2",
+        "Fatal Fury"
+      ],
+      "total": 313,
+      "byContentCategory": {
+        "RAW": 48,
+        "OPENER": 13,
+        "HYPE_PROMO": 43,
+        "ENGAGEMENT": 132,
+        "LONG_FORM": 56,
+        "EXPLAINER": 21,
+        "Uncategorized": 0
+      }
+    },
+    {
+      "week": "2",
+      "games": [
+        "League of Legends",
+        "Free Fire",
+        "Dota 2",
+        "Mobile Legends: MWI"
+      ],
+      "total": 296,
+      "byContentCategory": {
+        "RAW": 87,
+        "OPENER": 16,
+        "HYPE_PROMO": 38,
+        "ENGAGEMENT": 76,
+        "LONG_FORM": 60,
+        "EXPLAINER": 19,
+        "Uncategorized": 0
+      }
+    },
+    {
+      "week": "3",
+      "games": [
+        "EA Sports FC 26",
+        "Pubg Battlegrounds",
+        "Teamfight Tactics",
+        "Mobile Legends: MSC"
+      ],
+      "total": 189,
+      "byContentCategory": {
+        "RAW": 8,
+        "OPENER": 30,
+        "HYPE_PROMO": 35,
+        "ENGAGEMENT": 98,
+        "LONG_FORM": 16,
+        "EXPLAINER": 2,
+        "Uncategorized": 0
+      }
+    },
+    {
+      "week": "4",
+      "games": [
+        "Overwatch 2",
+        "Call of Duty: Warzone",
+        "Mobile Legends: MSC",
+        "Street Fighter 6",
+        "Honor of Kings"
+      ],
+      "total": 240,
+      "byContentCategory": {
+        "RAW": 39,
+        "OPENER": 18,
+        "HYPE_PROMO": 40,
+        "ENGAGEMENT": 118,
+        "LONG_FORM": 20,
+        "EXPLAINER": 5,
+        "Uncategorized": 0
+      }
+    }
+  ]
+}

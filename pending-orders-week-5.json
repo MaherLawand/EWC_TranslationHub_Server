@@ -1,0 +1,3295 @@
+[
+  {
+    "type": "broadcast",
+    "title": "Road to EWC - Titan Esports Club",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-01T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "STC - Quickdraw w/ QF Team",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Chinese",
+      "English",
+      "Indonesian"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-01T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "QIDDIYA - Title Defender Hype piece - AG.AL",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "English",
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "Chinese",
+      "Arabic",
+      "English"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-02T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Groups Day 2 Hype Tease",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Thai",
+      "Vietnamese",
+      "English",
+      "Korean",
+      "Chinese",
+      "Portuguese (Brazil)",
+      "Indonesian",
+      "Filipino"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-02T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Build-a-1v1 w/ JenMyth & JerL",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "English",
+      "Indonesian"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-02T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Guess the Hero w/ ROC Esports",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "BURNED_IN",
+      "SRT"
+    ],
+    "deadline": "2026-08-02T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Guess the Hero w/ Titan Esports Club",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "BURNED_IN",
+      "SRT"
+    ],
+    "deadline": "2026-08-03T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Club Championship Feature",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "English",
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-03T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Groups Day 3 Hype Tease",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Thai",
+      "Vietnamese",
+      "English",
+      "Korean",
+      "Chinese",
+      "Portuguese (Brazil)",
+      "Indonesian",
+      "Filipino"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-03T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Build-a-1v1 w/ Katsu & Tatsurii",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-03T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Build-a-1v1 w/ 0NE & hai1ang",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-03T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "SAUDIA - Superfan Content - Titan Esports Club",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "English",
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-03T01:30:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Format Explainer - cutdown 1 & cutdown 2",
+    "contentCategory": "OPENER",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "Chinese",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-03T08:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Format Explainer",
+    "contentCategory": "OPENER",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-03T10:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Format explainer",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-03T16:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Road to EWC - Shopify",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-03T21:30:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "R6 opening video",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-03T21:30:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "road to EWC Fnatic",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Chinese",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-03T21:30:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Format Explainer",
+    "contentCategory": "EXPLAINER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Tekken 8",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-03T22:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW - Club Championship Feature",
+    "contentCategory": "RAW",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Tekken 8",
+    "sourceLanguages": [
+      "Korean"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-04T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW - Dance mat - Keisuke+Matsuba",
+    "contentCategory": "RAW",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Tekken 8",
+    "sourceLanguages": [
+      "Japanese"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-04T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW - ARAMCO - Ranking / Pickem / Fantasy League / Tier List",
+    "contentCategory": "RAW",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Tekken 8",
+    "sourceLanguages": [
+      "Korean"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-04T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Guess the Hero w/ Team Vitality",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "BURNED_IN",
+      "SRT"
+    ],
+    "deadline": "2026-08-04T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Groups Day 4 Hype Tease",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Thai",
+      "Vietnamese",
+      "English",
+      "Korean",
+      "Chinese",
+      "Portuguese (Brazil)",
+      "Indonesian",
+      "Filipino"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-04T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Guess the Hero w/ Geekay Esports",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "BURNED_IN",
+      "SRT"
+    ],
+    "deadline": "2026-08-04T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "fit test Fnatic",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-04T10:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW Core Character Building - Eren ULF",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [
+      "Turkish"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-04T13:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW - QIDDIYA - Title Defender Hype piece",
+    "contentCategory": "RAW",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Tekken 8",
+    "sourceLanguages": [
+      "Korean"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-04T13:15:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW Road to EWC - Aurora Gaming",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [
+      "Mongolian"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-04T16:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Road to EWC - Aurora Gaming",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [
+      "Mongolian"
+    ],
+    "targetLanguages": [
+      "English",
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-04T16:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW Road to EWC - 4Thrives",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [
+      "Urdu"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-04T17:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW Aramco AG.AL",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-04T19:30:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "daily hype teaser1",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-04T21:30:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW - PS5 - Supercuts",
+    "contentCategory": "RAW",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Tekken 8",
+    "sourceLanguages": [
+      "Japanese"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-04T22:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Club Championship Feature",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Tekken 8",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Opening video",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Black Ops 7",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Character Building - FaZe strikes Vitaking RAW 1",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "Portuguese (Brazil)"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-05T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Character Building - FaZe strikes Vitaking RAW 2",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "Portuguese (Brazil)"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-05T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Roster shuffles RAW 1 FaZe 1",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "Portuguese (Brazil)"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-05T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Roster shuffles RAW 2 Furia 2",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "Portuguese (Brazil)"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-05T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Roster shuffles RAW 3 Liquid",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "Portuguese (Brazil)"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-05T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Storytelling 3 - Scrap (100 Thieves)",
+    "contentCategory": "LONG_FORM",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Black Ops 7",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Format Explainer 1",
+    "contentCategory": "EXPLAINER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Black Ops 7",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fun Bumper - 3 SND Macaron 3",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Black Ops 7",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fun Bumper - 4 Touch Grass 4",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Black Ops 7",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fun Bumper - 8 Final Bite Cam 7",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Black Ops 7",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fun Bumper - 10 Espresso Snaking (gentle mates)",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Black Ops 7",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Club Championship Feature",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Black Ops 7",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "LCQ Recap",
+    "contentCategory": "LONG_FORM",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Black Ops 7",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "QIDDIYA - Title Defender Hype piece",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Black Ops 7",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Dance mat - CBM+Mangja",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Tekken 8",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "PS5 - Supercuts",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Tekken 8",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Guess the Hero w/ Kuaishou Gaming",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "English"
+    ],
+    "format": [
+      "BURNED_IN",
+      "SRT"
+    ],
+    "deadline": "2026-08-05T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Playoffs Day 1 Hype Tease",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Thai",
+      "Vietnamese",
+      "English",
+      "Korean",
+      "Chinese",
+      "Portuguese (Brazil)",
+      "Indonesian",
+      "Filipino"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Paris Cultural Experience w/ KSG",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Playoffs Opening Video",
+    "contentCategory": "OPENER",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "English",
+      "Chinese",
+      "Indonesian",
+      "Filipino",
+      "Portuguese (Brazil)"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "ARAMCO - Guess the Tier List w/ AG.AL",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Build-a-1v1 w/ Sheng & Liulang",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "SAUDIA - Superfan Content - AG.AL",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T01:30:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Dance mat - Keisuke+Matsuba",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Tekken 8",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T07:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "ARAMCO - Ranking / Pickem / Fantasy League / Tier List",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Tekken 8",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T07:30:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW - Dance mat - CBM+Mangja",
+    "contentCategory": "RAW",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Tekken 8",
+    "sourceLanguages": [
+      "Korean"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-05T07:30:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Aramco AG.AL",
+    "contentCategory": "OPENER",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English",
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T08:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW Games 4 ULF",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [
+      "Turkish"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-05T08:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW Game - 3 ETSH",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [
+      "Arabic"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-05T08:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Allianz - Mental Fortitude",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Tekken 8",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T08:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW Games - 2 CN ThunderTalk",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-05T10:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Core Character Building - Eren ULF",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "Chinese",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T10:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Road to EWC - 4Thrives",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [
+      "Urdu"
+    ],
+    "targetLanguages": [
+      "English",
+      "Arabic",
+      "Chinese",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T12:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "SONY - Media Day Tour",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "Chinese",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T12:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Games - 1 Nigma",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T14:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW Core Character Building - Revo Alpha7",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [
+      "Portuguese (Brazil)"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-05T16:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW QIDDIYA - Title Defender Hype piece",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [
+      "Burmese"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-05T18:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Opening Video",
+    "contentCategory": "OPENER",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T18:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW Games- 5 CN Tianba",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-05T18:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW Games - 6 Alpha7",
+    "contentCategory": "RAW",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [
+      "Portuguese (Brazil)"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-05T18:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "QIDDIYA - Title Defender Hype piece",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T20:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Title defender - Team Secret",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T21:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Aramco pickem ranking",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T21:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "fit test FaZe RAW",
+    "contentCategory": "RAW",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "Portuguese (Brazil)"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-05T21:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "fit test Liquid RAW",
+    "contentCategory": "RAW",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "Portuguese (Brazil)"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-05T21:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "character building - roster shuffles",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T21:30:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "daily hype teaser 2",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T21:30:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "SAUDIA - Superfan Content",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Tekken 8",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-05T22:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Daily Hype Teaser Day 2",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Black Ops 7",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-06T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Storytelling 1 - Alluka (Team Falcons)",
+    "contentCategory": "LONG_FORM",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Black Ops 7",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-06T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Games and Challenges - 1 Perfect Baguette",
+    "contentCategory": "LONG_FORM",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Black Ops 7",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-06T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Games and Challenges - 2 Paris Layout",
+    "contentCategory": "LONG_FORM",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Black Ops 7",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-06T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fun Bumper - 1 Croissant Controller 1",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Black Ops 7",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-06T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fun Bumper - 2 Baguette Check 2",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Black Ops 7",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-06T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "SAUDIA - Radio Comms Day 1",
+    "contentCategory": "LONG_FORM",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Black Ops 7",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-06T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "SAUDIA - Radio Comms Day 7",
+    "contentCategory": null,
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [],
+    "targetLanguages": [
+      "English",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-06T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Playoffs Day 2 Hype Tease",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Thai",
+      "Vietnamese",
+      "English",
+      "Korean",
+      "Chinese",
+      "Portuguese (Brazil)",
+      "Indonesian",
+      "Filipino"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-06T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Core Character Building - Revo Alpha7",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "Chinese",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-06T07:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Games - 7 Hustler crew",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-06T08:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "fit test Shopify",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-06T10:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fantasy R6 Faze RAW",
+    "contentCategory": "RAW",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "Portuguese (Brazil)"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-06T13:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "fit test Falcons",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-06T14:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Character Building - FaZe",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-06T21:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "fantasy R6 furia RAW",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "Portuguese (Brazil)"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-06T21:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "daily hype teaser3",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-06T21:30:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fantasy R6 Faze",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Chinese",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-06T21:30:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Daily Hype Teaser Day 3",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Black Ops 7",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-07T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Storytelling 2 - Kremp (G2)",
+    "contentCategory": "LONG_FORM",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Black Ops 7",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-07T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fun Bumper - 6  TBD 5",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Black Ops 7",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-07T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fun Bumper - 7 It's shells 6",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Black Ops 7",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-07T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "SAUDIA - Radio Comms Day 2",
+    "contentCategory": "LONG_FORM",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Black Ops 7",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-07T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "ARAMCO - Tier List",
+    "contentCategory": "LONG_FORM",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Black Ops 7",
+    "sourceLanguages": [],
+    "targetLanguages": [],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-07T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "SAUDIA - Superfan Content",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Black Ops 7",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-07T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "SAUDIA - Radio Comms Day 8",
+    "contentCategory": null,
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [],
+    "targetLanguages": [
+      "English",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-07T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Playoffs Day 3 Hype Tease",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Thai",
+      "Vietnamese",
+      "English",
+      "Korean",
+      "Chinese",
+      "Portuguese (Brazil)",
+      "Indonesian",
+      "Filipino"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-07T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Daily Hype Teaser Day 2",
+    "contentCategory": "OPENER",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Chinese",
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-07T07:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "fit test FaZe",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Chinese",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-07T13:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "fit test Liquid",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Chinese",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-07T18:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "drone mania Wildcard",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-07T21:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fantasy R6 Furia",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Chinese",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-07T21:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fantasy R6 Falcons",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-07T21:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "drone mania Secret",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Chinese",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-07T21:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "daily hype teaser 4",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-07T21:30:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "LENOVO - Crosscut Grand Final",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Tekken 8",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-08T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Format Explainer 2",
+    "contentCategory": "EXPLAINER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Black Ops 7",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-08T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fun Bumper - 9 One Shot 8",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Black Ops 7",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-08T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "SAUDIA - Radio Comms Day 3",
+    "contentCategory": "LONG_FORM",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Black Ops 7",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-08T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Playoffs Hype Tease (Day 4)",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Black Ops 7",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-08T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "SAUDIA - Radio Comms Day 9",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "English",
+      "Chinese",
+      "Indonesian",
+      "Filipino"
+    ],
+    "targetLanguages": [
+      "English",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-08T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Final Day Hype Tease",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Honor of Kings",
+    "sourceLanguages": [
+      "Thai",
+      "Vietnamese",
+      "English",
+      "Korean",
+      "Chinese",
+      "Portuguese (Brazil)",
+      "Indonesian",
+      "Filipino"
+    ],
+    "targetLanguages": [
+      "English",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-08T01:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Daily Hype Teaser Day 3",
+    "contentCategory": "OPENER",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Chinese",
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-08T07:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Festival experience/Paris EN",
+    "contentCategory": "OPENER",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-08T08:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "daily hypeteaser5",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-08T21:30:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Daily Hype Teaser Day 5",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Black Ops 7",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-09T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Format Explainer 3",
+    "contentCategory": "EXPLAINER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Black Ops 7",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-09T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "LENOVO - Crosscut Grand Final",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Black Ops 7",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-09T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "SAUDIA - Radio Comms Day 4",
+    "contentCategory": "LONG_FORM",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Call of Duty: Black Ops 7",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-09T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Daily Hype Teaser Day 4",
+    "contentCategory": "OPENER",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Chinese",
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-09T07:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "playoffs hypeteaser",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-09T21:30:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Survival Stage Hype Tease",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "Chinese",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-10T12:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fabian skit",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-10T12:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Survival Stage Hype Tease - cutdown 1 & 2",
+    "contentCategory": "OPENER",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "Chinese",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-10T14:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Club Championship Feature",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-11T10:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Lenovo PC setup",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-11T14:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "playoffs podcast",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-11T18:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Daily Hype Teaser Day 5",
+    "contentCategory": "OPENER",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Chinese",
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-12T07:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "daily hypeteaser6",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-12T21:30:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Saudia superfan content",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-13T13:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "daily hypeteaser7",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-13T21:30:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "daily hypeteaser8",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Chinese",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-14T21:30:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Daily Hype Teaser Day 6",
+    "contentCategory": "OPENER",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Chinese",
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-15T07:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Daily Hype Teaser Day 7",
+    "contentCategory": "OPENER",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Chinese",
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-16T07:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  }
+]
