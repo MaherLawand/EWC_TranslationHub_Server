@@ -14,6 +14,8 @@ import gameRoutes from "./routes/games.routes.js"
 import srtRoutes from "./routes/srt.js"
 import devRoutes from "./routes/dev.routes.js"
 import reportRoutes from "./routes/reports.js"
+// ── ADMIN STATISTICS DASHBOARD (removable feature) ──
+import analyticsRoutes from "./routes/analytics.js"
 import { logger } from "./lib/logger.js"
 
 const app = express()
@@ -78,6 +80,9 @@ app.use("/games", apiLimiter, gameRoutes)
 // SRT glossary checker. Has its own per-user limiter on the expensive route
 // (see routes/srt.ts), so it is not wrapped in the global apiLimiter.
 app.use("/srt", srtRoutes)
+
+// ── ADMIN STATISTICS DASHBOARD (removable feature) ──
+app.use("/analytics", apiLimiter, analyticsRoutes)
 
 app.use(
   "/game-logos",
