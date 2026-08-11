@@ -144,6 +144,13 @@ export async function notifyTranslatorsSourceReady(
       ? sourceFileLink.trim()
       : `https://${sourceFileLink.trim()}`
 
+    // Optional order note — shown in the email only when present. Escaped since
+    // it's free user text; line breaks preserved.
+    const noteText = (order.notes || "").trim()
+    const noteHtml = noteText
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/\n/g, "<br/>")
+
     /*
       GET TRANSLATORS
     */
@@ -280,7 +287,10 @@ ${order.priority}
 
 Source File:
 ${sourceFileLink}
-
+${noteText ? `
+Note:
+${noteText}
+` : ""}
 View Order:
 ${orderLink}
 
@@ -358,6 +368,10 @@ ${orderLink}
           <strong style="color:#F5F1E8;">Source File:</strong>
           <a href="${sourceFileHref}" style="color:#D6B36A; word-break:break-all;">${sourceFileLink}</a>
         </p>
+        ${noteText ? `
+        <p style="margin:8px 0 0 0; color:#8E8E8E; font-size:13px; line-height:1.6;">
+          <strong style="color:#F5F1E8;">Note:</strong> ${noteHtml}
+        </p>` : ""}
       </div>
 
       <div style="margin-top:35px; margin-bottom:35px; text-align:center;">

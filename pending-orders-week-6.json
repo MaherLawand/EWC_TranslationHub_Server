@@ -1,0 +1,2716 @@
+[
+  {
+    "type": "broadcast",
+    "title": "Fun Bumpers 3",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-04T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "LOW"
+  },
+  {
+    "type": "broadcast",
+    "title": "Roster shuffles RAW 3 Liquid 1",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "Portuguese (Brazil)"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-05T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Roster shuffles RAW 2 Furia 2",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "Portuguese (Brazil)"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-05T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Roster shuffles RAW 3 Liquid",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "Portuguese (Brazil)"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-05T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fantasy R6 Faze RAW",
+    "contentCategory": "RAW",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "Portuguese (Brazil)"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-06T13:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Character Building - FaZe",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-06T21:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "fantasy R6 furia RAW",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "Portuguese (Brazil)"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-06T21:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "daily hype teaser3",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-06T21:30:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Saudia Radio comms 4",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [],
+    "targetLanguages": [
+      "English",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-08T22:05:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Core - Format Explainer",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rocket League",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-09T18:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "playoffs hypeteaser",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-09T21:30:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Survival Stage Hype Tease",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "Chinese",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-10T12:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW - Kiileerrz",
+    "contentCategory": "RAW",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rocket League",
+    "sourceLanguages": [
+      "Arabic"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-11T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW - MonkeyMoon",
+    "contentCategory": "RAW",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rocket League",
+    "sourceLanguages": [
+      "French"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-11T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW - Rw9",
+    "contentCategory": "RAW",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rocket League",
+    "sourceLanguages": [
+      "Arabic"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-11T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "RAW - Team Falcons",
+    "contentCategory": "RAW",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rocket League",
+    "sourceLanguages": [
+      "Arabic"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-11T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Club Championship Feature",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-11T10:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Lenovo PC setup",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-11T14:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "BB Team - Raw interview 11.08 - Media day",
+    "contentCategory": "RAW",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "Russian"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-11T15:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "MAGIC - Raw interview 11.08 - Media day",
+    "contentCategory": "RAW",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "Russian"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-11T15:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "TYLOO - Raw interview 11.08 - Media day",
+    "contentCategory": "RAW",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-11T15:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "LYNN VISION - Raw interview 11.08 - Media day",
+    "contentCategory": "RAW",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-11T15:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "PVISION - Raw interview 11.08 - Media day",
+    "contentCategory": "RAW",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "Russian"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-11T15:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "The MongolZ - Raw interview 11.08 - Media day",
+    "contentCategory": "RAW",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "Mongolian"
+    ],
+    "targetLanguages": [
+      "English"
+    ],
+    "format": [
+      "SRT"
+    ],
+    "deadline": "2026-08-11T15:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Sponsor - ARAMCO Tier List",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rocket League",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-11T18:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "playoffs podcast",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-11T18:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Sponsor - QIDDIYA Title Defender",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rocket League",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-11T18:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Sponsor - Crunchyroll Supercuts",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rocket League",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-11T18:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Sponsor - Sony Media Day Tour",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rocket League",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-11T18:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Storytelling - Opening Video",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rocket League",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-11T20:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Daily - SAUDIA Radio Comms Day 1",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rocket League",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-12T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Daily - Daily Hype Teaser Day 2",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rocket League",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-12T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Daily - Daily Hype Teaser Day 3",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rocket League",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-12T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Daily - Daily Hype Teaser Day 5",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rocket League",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-12T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Cold Opens - Whole tournament 1",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-12T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fill in the blanks episode 1",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French",
+      "Chinese",
+      "English"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-12T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fun Bumpers 1",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-12T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Daily Hype Teaser Day 5",
+    "contentCategory": "OPENER",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Chinese",
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-12T07:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Title Defender Hype piece - The Mongolz",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "Mongolian",
+      "English"
+    ],
+    "targetLanguages": [
+      "English",
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-12T07:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Core - Club Championship Feature",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rocket League",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-12T18:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Entertainment - Spaceship Federation",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rocket League",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-12T20:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Entertainment - Rocket League out of Context",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rocket League",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-12T20:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Entertainment - Family Feud Rocket League",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rocket League",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-12T20:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Daily - SAUDIA Radio Comms Day 2",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rocket League",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-13T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Cold Opens - Whole tournament 2",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-13T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fill in the blanks episode 2",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French",
+      "Chinese",
+      "English"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-13T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fun Bumpers 2",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-13T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Chicken in a box game 1",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-13T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Chicken in a box game 2",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-13T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Chicken in a box game 3",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-13T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Chicken in a box game 4",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-13T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Chicken in a box game 5",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-13T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "1v1  Secret Opponent 1 - TYLOO vs Lynn Vision (CN teams) 1",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English",
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French",
+      "Chinese",
+      "English"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-13T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Saudia superfan content",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-13T13:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Sponsor - SAUDIA Superfan Content",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rocket League",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-13T18:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Entertainment - BTS",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rocket League",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-13T20:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "daily hypeteaser7",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-13T21:30:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Daily - SAUDIA Radio Comms Day 3",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rocket League",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-14T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Cold Opens - Whole tournament 3",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-14T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Core Character Building - The day my family knew I made it professionally",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English",
+      "Mongolian",
+      "Russian",
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-14T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fill in the blanks episode 3",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French",
+      "Chinese",
+      "English"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-14T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fun Bumpers 3",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-14T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "1v1  Secret Opponent 2",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English",
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French",
+      "Chinese",
+      "English"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-14T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "1v1  Secret Opponent 3",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English",
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French",
+      "Chinese",
+      "English"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-14T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "1v1  Secret Opponent 4",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English",
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French",
+      "Chinese",
+      "English"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-14T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Road to EWC - MOUZ",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-14T09:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Storytelling - Playoffs Hype Tease",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rocket League",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-14T20:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "daily hypeteaser8",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rainbow Six Siege",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Chinese",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-14T21:30:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Daily - SAUDIA Radio Comms Day 4",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rocket League",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-15T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Cold Opens - Whole tournament 4",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-15T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Core Character Building - The day I lifted my first trophy",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English",
+      "Mongolian",
+      "Russian",
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-15T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fill in the blanks episode 4",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French",
+      "Chinese",
+      "English"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-15T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fun Bumpers 4",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-15T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "1v1  Secret Opponent 5",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English",
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French",
+      "Chinese",
+      "English"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-15T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "1v1  Secret Opponent 6",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English",
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French",
+      "Chinese",
+      "English"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-15T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "1v1  Secret Opponent 7",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English",
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French",
+      "Chinese",
+      "English"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-15T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Daily Hype Teaser Day 6",
+    "contentCategory": "OPENER",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Chinese",
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-15T07:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Road to EWC - FALCONS",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-15T09:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Road to EWC - VIT",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-15T09:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Road to EWC - Last Chance qualifier team",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-15T09:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Cold Opens - Whole tournament 5",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-16T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Core Character Building - The day I played the first LAN",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English",
+      "Mongolian",
+      "Russian",
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-16T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fill in the blanks episode 5",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French",
+      "Chinese",
+      "English"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-16T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fun Bumpers 5",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-16T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "1v1  Secret Opponent 8",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English",
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French",
+      "Chinese",
+      "English"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-16T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Daily Hype Teaser Day 7",
+    "contentCategory": "OPENER",
+    "tier": 2,
+    "tier1CN": true,
+    "game": "Pubg Mobile",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Chinese",
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-16T07:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Sponsor - LENOVO Crosscut Grand Final",
+    "contentCategory": "OPENER",
+    "tier": 3,
+    "tier1CN": false,
+    "game": "Rocket League",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-16T09:30:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "ARAMCO - CS2 Pickem challenge",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English",
+      "Mongolian",
+      "Chinese",
+      "Russian"
+    ],
+    "targetLanguages": [
+      "English",
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-18T19:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Cold Opens - Whole tournament 6",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-19T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Crunchyroll - Supercuts 1",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English",
+      "Mongolian",
+      "Russian",
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English",
+      "Arabic",
+      "Chinese",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-19T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Moment Breakdown w/ a player 1",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-19T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fun Bumpers 6",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-19T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Club Championship video",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English",
+      "Mongolian",
+      "Russian"
+    ],
+    "targetLanguages": [
+      "English",
+      "French",
+      "Chinese",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-19T08:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Cold Opens - Whole tournament 7",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-20T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Crosscut Quarter FInal 1",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English",
+      "Russian",
+      "Mongolian",
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English",
+      "French",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-20T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Crunchyroll - Supercuts 2",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English",
+      "Mongolian",
+      "Russian",
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English",
+      "Arabic",
+      "Chinese",
+      "French"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-20T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "SAUDIA - Radio Comms 1",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English",
+      "Mongolian",
+      "Chinese",
+      "Russian"
+    ],
+    "targetLanguages": [
+      "English",
+      "Arabic",
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-20T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Moment Breakdown w/ a player 2",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-20T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fun Bumpers 7",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-20T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "LENOVO - PC Setup",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-20T09:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Cold Opens - Whole tournament 8",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-21T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Crosscut Quarter FInal 2",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English",
+      "Russian",
+      "Mongolian",
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English",
+      "French",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-21T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Crosscut Quarter FInal 3",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English",
+      "Russian",
+      "Mongolian",
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English",
+      "French",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-21T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Crosscut Quarter FInal 4",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English",
+      "Russian",
+      "Mongolian",
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English",
+      "French",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-21T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "SAUDIA - Radio Comms 2",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English",
+      "Mongolian",
+      "Chinese",
+      "Russian"
+    ],
+    "targetLanguages": [
+      "English",
+      "Arabic",
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-21T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Moment Breakdown w/ a player 3",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-21T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fun Bumpers 8",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-21T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Cold Opens - Whole tournament 9",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-22T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Crosscut Semi Final 1",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English",
+      "Russian",
+      "Mongolian",
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English",
+      "French",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-22T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Crosscut Semi Final 2",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English",
+      "Russian",
+      "Mongolian",
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English",
+      "French",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-22T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "SAUDIA - Radio Comms 3",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English",
+      "Mongolian",
+      "Chinese",
+      "Russian"
+    ],
+    "targetLanguages": [
+      "English",
+      "Arabic",
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-22T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Moment Breakdown w/ a player 4",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-22T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fun Bumpers 9",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-22T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Cold Opens - Whole tournament 10",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "French",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-23T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Crosscut Grand FInal",
+    "contentCategory": "HYPE_PROMO",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English",
+      "Russian",
+      "Mongolian",
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English",
+      "French",
+      "Arabic"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-23T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "SAUDIA - Radio Comms 4",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English",
+      "Mongolian",
+      "Chinese",
+      "Russian"
+    ],
+    "targetLanguages": [
+      "English",
+      "Arabic",
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-23T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "HIGH"
+  },
+  {
+    "type": "broadcast",
+    "title": "Fun Bumpers 10",
+    "contentCategory": "ENGAGEMENT",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English"
+    ],
+    "targetLanguages": [
+      "Arabic",
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-23T00:00:00.000Z",
+    "deadlineHasTime": false,
+    "priority": "MEDIUM"
+  },
+  {
+    "type": "broadcast",
+    "title": "Opening Video",
+    "contentCategory": "OPENER",
+    "tier": 1,
+    "tier1CN": true,
+    "game": "Counter-Strike 2",
+    "sourceLanguages": [
+      "English",
+      "Russian",
+      "Mongolian",
+      "Chinese"
+    ],
+    "targetLanguages": [
+      "English",
+      "Arabic",
+      "French",
+      "Chinese"
+    ],
+    "format": [
+      "SRT",
+      "BURNED_IN"
+    ],
+    "deadline": "2026-08-23T07:00:00.000Z",
+    "deadlineHasTime": true,
+    "priority": "HIGH"
+  }
+]
