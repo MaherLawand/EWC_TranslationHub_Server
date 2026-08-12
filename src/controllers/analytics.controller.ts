@@ -90,7 +90,7 @@ export async function deliveryReport(req: AuthRequest, res: Response) {
       u ? `${u.firstName || ""} ${u.lastName || ""}`.trim() : ""
 
     const rows = await prisma.translationOrder.findMany({
-      where: { event: event as never, isParent: false, status: "COMPLETED" },
+      where: { event: event as never, isParent: false, status: { in: ["IN_PROGRESS", "COMPLETED"] } },
       select: {
         id: true, title: true, type: true, event: true, priority: true, status: true,
         readyAt: true, inProgressAt: true, completedAt: true, notifyPositions: true,
